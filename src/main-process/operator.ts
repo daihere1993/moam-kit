@@ -28,8 +28,8 @@ export function connectToServer$(sshConfig: SSHInfo): BehaviorSubject<boolean> {
 export function getPatchFromPC$(pcDir: string): Subject<boolean> {
   const ret$ = new Subject<boolean>();
   shell.cd(pcDir).exec(`svn di > ${tmpPatchPath}`, (code, stdout, stderr) => {
-    console.log('Program output:', stdout);
     if (code === 0) {
+      console.log('getPatchFromPC: done.');
       ret$.complete();
     } else {
       throw new Error(`Get patch from PC failed: ${stderr}, ${code}.`);
@@ -39,27 +39,45 @@ export function getPatchFromPC$(pcDir: string): Subject<boolean> {
   return ret$;
 }
 
+export function updatePatchToServer$(serverDir: string): Subject<boolean> {
+  const ret$ = new Subject<boolean>();
+  sftpClient
+    .fastPut(path.join(tmpPatchPath), `${serverDir}/${TMP_PATCH_NAME}`)
+    .then(() => {
+      console.log('updatePatchToServer: done.');
+      return ret$.complete();
+    })
+    .catch((err) => {
+      throw new Error(`Update patch to server failed: ${err.message}`);
+    });
+
+  return ret$;
+}
+
 export function applyPatchToServer$(serverDir: string): Subject<boolean> {
   const ret$ = new Subject<boolean>();
   const { client } = sftpClient as any;
-  client.shell((err: any, stream: any) => {
-    if (err) {
-      throw new Error(`Apply patch to server failed: ${err.message}`);
-    }
+  client.exec(
+    `cd ${serverDir} && svn revert -R . && svn patch ${TMP_PATCH_NAME}`,
+    (err, stream) => {
+      if (err) {
+        throw new Error(`Apply patch to server failed: ${err.message}`);
+      }
 
-    stream
-      .on('close', () => {
-        // console.log('Stream :: close');
-        // client.end();
-      })
-      .on('data', (data) => {
-        console.log(`Output: ${data}`);
-        ret$.complete();
-      });
-    stream.end(
-      `cd ${serverDir}\nsvn revert -R .\nsvn patch ${TMP_PATCH_NAME}\n`,
-    );
-  });
+      stream
+        .on('close', () => {
+          console.log('applyPatchToServer: done.');
+          ret$.complete();
+        })
+        .on('data', (data) => {
+          const output = data.toString();
+          console.log(`Output: ${output}`);
+        })
+        .stderr.on('data', (data) => {
+          throw new Error(`Apply patch to server failed: ${data}`);
+        });
+    },
+  );
 
   return ret$;
 }

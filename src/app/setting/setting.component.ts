@@ -4,6 +4,7 @@ import {
   ElementRef,
   ViewChild,
   ChangeDetectorRef,
+  NgZone,
 } from '@angular/core';
 import { ElectronService } from '../core/services';
 import { SettingInfo } from '../../types';
@@ -14,15 +15,15 @@ import { SettingInfo } from '../../types';
   styleUrls: ['./setting.component.scss'],
 })
 export class SettingComponent implements OnInit {
-  public host = '1';
+  public host: string;
 
-  public username = '1';
+  public username: string;
 
-  public password = '1';
+  public password: string;
 
-  public serverDir = '1';
+  public serverDir: string;
 
-  public pcDir = '1';
+  public pcDir: string;
 
   private get settingInfo(): SettingInfo {
     return {
@@ -46,28 +47,18 @@ export class SettingComponent implements OnInit {
 
   constructor(
     private electronService: ElectronService,
-    private ref: ChangeDetectorRef,
+    private zone: NgZone,
   ) {}
 
   public ngOnInit(): void {
     const { ipcRenderer } = this.electronService;
-    // this.settingInfo = {
-    //   host: '1',
-    //   username: '1',
-    //   password: '1',
-    //   serverDir: '1',
-    //   pcDir: '1',
-    // };
     ipcRenderer.send('to-getSetting');
-
     ipcRenderer.on('getSetting-reply', (event, settingInfo: SettingInfo) => {
-      if (settingInfo) {
-        setTimeout(() => {
+      this.zone.run(() => {
+        if (settingInfo) {
           this.settingInfo = settingInfo;
-        }, 0);
-
-        // this.ref.detectChanges();
-      }
+        }
+      });
     });
 
     ipcRenderer.on('selectFolder-reply', (event, arg) => {

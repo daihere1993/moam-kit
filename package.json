@@ -5,6 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "npm-run-all -p ng:serve electron:serve",
+    "start:win": "npm-run-all -p ng:serve electron:serve-win",
     "build": "ng build",
     "test": "npm-run-all -s test:main test:render",
     "test:main": "jest --config ./jest.config-main.json",
@@ -15,6 +16,7 @@
     "test:render-coverage": "jest --config ./jest.config-render.json --coverage",
     "ng:serve": "ng serve --port 1337",
     "electron:serve": "wait-on http-get://localhost:1337/ && npm run electron:serve-tsc && electron . --serve",
+    "electron:serve-win": "wait-on http-get://localhost:1337/ && npm run electron:serve-tsc && node_modules/.bin/electron.cmd . --serve",
     "electron:serve-tsc": "tsc -p tsconfig-serve.json",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "prettier": "prettier --write \"**/*.ts\" \"**/*.json\" \"**/*.js\" \"**/*.html\" \"**/*.scss\""
@@ -31,11 +33,11 @@
     "@angular/platform-browser": "~9.0.0",
     "@angular/platform-browser-dynamic": "~9.0.0",
     "@angular/router": "~9.0.0",
-    "electron": "^8.2.5",
     "rxjs": "~6.5.4",
     "shelljs": "^0.8.4",
     "ssh2-sftp-client": "^5.1.2",
     "tslib": "^1.10.0",
+    "electron": "^8.2.5",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {

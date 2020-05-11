@@ -9,17 +9,17 @@ import { ElectronService } from '../core/services';
 export class HomeComponent implements OnInit {
   constructor(private electronService: ElectronService) {}
 
-  ngOnInit(): void {}
-
-  public toSyncCode(): void {
-    this.electronService.ipcRenderer.send('to-syncCode');
-
-    this.electronService.ipcRenderer.on('syncCode-reply', (event, [ret]) => {
+  ngOnInit(): void {
+    this.electronService.ipcRenderer.on('syncCode-reply', (event, ret) => {
       if (ret === 0) {
         console.log('done');
       } else {
         console.log(ret);
       }
     });
+  }
+
+  public toSyncCode(): void {
+    this.electronService.ipcRenderer.send('to-syncCode');
   }
 }

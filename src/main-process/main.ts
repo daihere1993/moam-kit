@@ -1,12 +1,8 @@
-import { app, BrowserWindow, screen, ipcMain, dialog } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
+import { app, BrowserWindow, screen, ipcMain, dialog } from 'electron';
 import { BehaviorSubject, concat } from 'rxjs';
-import {
-  connectToServer$,
-  getPatchFromPC$,
-  applyPatchToServer$,
-} from './operator';
+import { connectToServer$, getPatchFromPC$, updatePatchToServer$, applyPatchToServer$ } from './operator';
 import { SSHInfo, SettingInfo } from '../types';
 import { Store } from './store';
 
@@ -118,6 +114,7 @@ try {
         if (v) {
           concat(
             getPatchFromPC$(settingInfo.pcDir),
+            updatePatchToServer$(settingInfo.serverDir),
             applyPatchToServer$(settingInfo.serverDir),
           ).subscribe(
             () => {},
