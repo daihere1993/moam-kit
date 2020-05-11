@@ -1,0 +1,47 @@
+<div class="container">
+  <mat-form-field class="field_item">
+    <mat-label>Server host</mat-label>
+    <input matInput placeholder="Server host" [(ngModel)]="host" />
+  </mat-form-field>
+  <mat-form-field class="field_item">
+    <mat-label>Username</mat-label>
+    <input matInput placeholder="Username" [(ngModel)]="username" />
+  </mat-form-field>
+  <mat-form-field class="field_item">
+    <mat-label>Password</mat-label>
+    <input
+      type="password"
+      matInput
+      placeholder="Password"
+      [(ngModel)]="password"
+    />
+  </mat-form-field>
+  <mat-form-field class="field_item">
+    <mat-label>MOAM DIR of server </mat-label>
+    <input matInput placeholder="MOAM DIR of server" [(ngModel)]="serverDir" />
+  </mat-form-field>
+  <mat-form-field class="field_item">
+    <mat-label>MOAM DIR of PC</mat-label>
+    <input
+      #pcDirInput
+      matInput
+      placeholder="MOAM DIR of PC"
+      [(ngModel)]="pcDir"
+    />
+    <mat-icon
+      matSuffix
+      style="cursor: pointer;"
+      (click)="toSelectFolder($event)"
+      >folder</mat-icon
+    >
+  </mat-form-field>
+
+  <button
+    class="field_item"
+    mat-raised-button
+    color="primary"
+    (click)="toSave()"
+  >
+    Save
+  </button>
+</div>
