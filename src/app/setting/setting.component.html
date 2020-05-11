@@ -16,25 +16,6 @@
       [(ngModel)]="password"
     />
   </mat-form-field>
-  <mat-form-field class="field_item">
-    <mat-label>MOAM DIR of server </mat-label>
-    <input matInput placeholder="MOAM DIR of server" [(ngModel)]="serverDir" />
-  </mat-form-field>
-  <mat-form-field class="field_item">
-    <mat-label>MOAM DIR of PC</mat-label>
-    <input
-      #pcDirInput
-      matInput
-      placeholder="MOAM DIR of PC"
-      [(ngModel)]="pcDir"
-    />
-    <mat-icon
-      matSuffix
-      style="cursor: pointer;"
-      (click)="toSelectFolder($event)"
-      >folder</mat-icon
-    >
-  </mat-form-field>
 
   <button
     class="field_item"

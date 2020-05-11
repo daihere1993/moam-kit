@@ -3,11 +3,10 @@ import {
   OnInit,
   ElementRef,
   ViewChild,
-  ChangeDetectorRef,
   NgZone,
 } from '@angular/core';
 import { ElectronService } from '../core/services';
-import { SettingInfo } from '../../types';
+import { SSHInfo } from '../../types';
 
 @Component({
   selector: 'app-setting',
@@ -21,62 +20,36 @@ export class SettingComponent implements OnInit {
 
   public password: string;
 
-  public serverDir: string;
-
-  public pcDir: string;
-
-  private get settingInfo(): SettingInfo {
+  private get sshInfo(): SSHInfo {
     return {
       host: this.host,
       username: this.username,
       password: this.password,
-      serverDir: this.serverDir,
-      pcDir: this.pcDir,
     };
   }
 
-  private set settingInfo(info: SettingInfo) {
+  private set sshInfo(info: SSHInfo) {
     this.host = info.host;
     this.username = info.username;
     this.password = info.password;
-    this.serverDir = info.serverDir;
-    this.pcDir = info.pcDir;
   }
 
-  @ViewChild('pcDirInput') pcDirInput: ElementRef;
-
-  constructor(
-    private electronService: ElectronService,
-    private zone: NgZone,
-  ) {}
+  constructor(private electronService: ElectronService, private zone: NgZone) {}
 
   public ngOnInit(): void {
     const { ipcRenderer } = this.electronService;
     ipcRenderer.send('to-getSetting');
-    ipcRenderer.on('getSetting-reply', (event, settingInfo: SettingInfo) => {
+    ipcRenderer.on('getSetting-reply', (event, sshInfo: SSHInfo) => {
       this.zone.run(() => {
-        if (settingInfo) {
-          this.settingInfo = settingInfo;
+        if (sshInfo) {
+          this.sshInfo = sshInfo;
         }
       });
     });
-
-    ipcRenderer.on('selectFolder-reply', (event, arg) => {
-      if (arg) {
-        [this.pcDir] = arg;
-        this.pcDirInput.nativeElement.focus();
-      }
-    });
-  }
-
-  public toSelectFolder(e: Event): void {
-    const { ipcRenderer } = this.electronService;
-    ipcRenderer.send('to-selectFolder');
-    e.stopPropagation();
   }
 
   public toSave(): void {
     const { ipcRenderer } = this.electronService;
-    ipcRenderer.send('to-storeSetting', this.settingInfo);
+    ipcRenderer.send('to-storeSetting', this.sshInfo);
   }
 }

@@ -2,7 +2,12 @@ import * as path from 'path';
 import * as url from 'url';
 import { app, BrowserWindow, screen, ipcMain, dialog } from 'electron';
 import { BehaviorSubject, concat } from 'rxjs';
-import { connectToServer$, getPatchFromPC$, updatePatchToServer$, applyPatchToServer$ } from './operator';
+import {
+  connectToServer$,
+  getPatchFromPC$,
+  updatePatchToServer$,
+  applyPatchToServer$,
+} from './operator';
 import { SSHInfo, SettingInfo } from '../types';
 import { Store } from './store';
 
@@ -18,8 +23,8 @@ function createWindow(): BrowserWindow {
   win = new BrowserWindow({
     x: 0,
     y: 0,
-    width: size.width,
-    height: size.height,
+    width: 900,
+    height: 680,
     webPreferences: {
       nodeIntegration: true,
       allowRunningInsecureContent: serve,
