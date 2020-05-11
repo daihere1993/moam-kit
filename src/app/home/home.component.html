@@ -1,3 +1,15 @@
 <button mat-raised-button color="primary" (click)="toSyncCode()">
   Sync Code
 </button>
+
+<div class="progress_container">
+  <div class="progress_item">
+    <div class="progress_item_word">Get patch from PC.</div>
+    <div class="progress_item_icon">
+      <mat-spinner *ngIf="!isFinished;else elseBlock" diameter="12" color="accent"></mat-spinner>
+      <ng-template #elseBlock>
+        <mat-icon color="accent">done</mat-icon>
+      </ng-template>
+    </div>
+  </div>
+</div>

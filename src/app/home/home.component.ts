@@ -7,6 +7,8 @@ import { ElectronService } from '../core/services';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
+  isFinished = false;
+
   constructor(private electronService: ElectronService) {}
 
   ngOnInit(): void {
@@ -17,6 +19,10 @@ export class HomeComponent implements OnInit {
         console.log(ret);
       }
     });
+
+    setTimeout(() => {
+      this.isFinished = true;
+    }, 3000);
   }
 
   public toSyncCode(): void {

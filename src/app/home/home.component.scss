@@ -1,0 +1,24 @@
+.progress_container {
+  padding: 40px 0;
+}
+
+.progress_item {
+  display: flex;
+
+  .progress_item_word {
+    margin-right: 4px;
+    line-height: 12px;
+    font-size: 12px;
+  }
+
+  .progress_item_icon {
+    width: 16px;
+    font-size: 12px;
+
+    .mat-icon {
+      width: 14px;
+      height: 14px;
+      font-size: 14px;
+    }
+  }
+}
