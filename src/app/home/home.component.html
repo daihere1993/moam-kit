@@ -18,28 +18,26 @@
       >folder</mat-icon
     >
   </mat-form-field>
-  <button
-    class="sync_button"
-    mat-raised-button
-    color="primary"
-    (click)="toSyncCode()"
-  >
-    Sync Code
-  </button>
 
-  <!-- <div class="progress_container">
-    <div class="progress_item">
-      <div class="progress_item_word">Get patch from PC.</div>
-      <div class="progress_item_icon">
-        <mat-spinner
-          *ngIf="!isFinished; else elseBlock"
-          diameter="14"
-          color="accent"
-        ></mat-spinner>
-        <ng-template #elseBlock>
-          <mat-icon color="accent">done</mat-icon>
-        </ng-template>
-      </div>
+  <div class="foot">
+    <button
+      class="sync_button"
+      mat-raised-button
+      color="primary"
+      (click)="toSyncCode()"
+    >
+      Sync Code
+    </button>
+
+    <div class="progress_container" *ngIf="displayProgress">
+      <mat-spinner
+        *ngIf="!isSyncDone; else elseBlock"
+        diameter="24"
+        color="accent"
+      ></mat-spinner>
+      <ng-template #elseBlock>
+        <mat-icon color="accent">done</mat-icon>
+      </ng-template>
     </div>
-  </div> -->
+  </div>
 </div>

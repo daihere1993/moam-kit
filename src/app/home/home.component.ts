@@ -14,11 +14,13 @@ import { SettingInfo } from '../../types';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
+  public displayProgress = false;
+
+  public isSyncDone = false;
+
   public serverDir: string;
 
   public pcDir: string;
-
-  isFinished = false;
 
   @ViewChild('pcDirInput') pcDirInput: ElementRef;
 
@@ -37,11 +39,13 @@ export class HomeComponent implements OnInit {
     });
 
     ipcRenderer.on('syncCode-reply', (event, ret) => {
-      if (ret === 0) {
-        console.log('done');
-      } else {
-        console.log(ret);
-      }
+      this.zone.run(() => {
+        if (ret === 0) {
+          this.isSyncDone = true;
+        } else {
+          console.log(ret);
+        }
+      });
     });
 
     ipcRenderer.on('selectFolder-reply', (event, arg) => {
@@ -50,10 +54,6 @@ export class HomeComponent implements OnInit {
         this.pcDirInput.nativeElement.focus();
       }
     });
-
-    setTimeout(() => {
-      this.isFinished = true;
-    }, 3000);
   }
 
   public toSelectFolder(e: Event): void {
@@ -63,6 +63,8 @@ export class HomeComponent implements OnInit {
   }
 
   public toSyncCode(): void {
+    this.isSyncDone = false;
+    this.displayProgress = true;
     this.electronService.ipcRenderer.send('to-syncCode');
   }
 }

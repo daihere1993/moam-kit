@@ -1,4 +1,4 @@
-$progress_font-size: 14px;
+$progress_font-size: 24px;
 
 .container {
   height: 100%;
@@ -10,31 +10,18 @@ $progress_font-size: 14px;
   width: 200px;
 }
 
-.progress_container {
-  margin: 20px 0;
-  background-color: #dbe1e3;
-  flex-grow: 1;
-  border-radius: 4px;
-}
-
-.progress_item {
+.foot {
   display: flex;
-  padding: 10px;
 
-  .progress_item_word {
-    margin-right: 6px;
-    line-height: $progress_font-size;
+  .mat-icon {
+    width: $progress_font-size;
+    height: $progress_font-size;
     font-size: $progress_font-size;
   }
 
-  .progress_item_icon {
-    width: 16px;
-    font-size: $progress_font-size;
-
-    .mat-icon {
-      width: $progress_font-size;
-      height: $progress_font-size;
-      font-size: $progress_font-size;
-    }
+  .progress_container {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
   }
 }
