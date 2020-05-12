@@ -1,6 +1,14 @@
 import * as path from 'path';
 import * as url from 'url';
-import { app, BrowserWindow, screen, ipcMain, dialog } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  dialog,
+  Menu,
+  MenuItem,
+  IpcMainEvent,
+} from 'electron';
 import { BehaviorSubject, concat } from 'rxjs';
 import {
   connectToServer$,
@@ -14,11 +22,50 @@ import { Store } from './store';
 let win: BrowserWindow;
 const args = process.argv.slice(1);
 const serve = args.some((val) => val === '--serve');
+const store = new Store();
+let isConnected: BehaviorSubject<boolean>;
+
+function toSyncCode(event: IpcMainEvent): void {
+  const replayKeyword = 'syncCode-reply';
+  const settingInfo = store.data as SettingInfo;
+  
+  if (Object.keys(settingInfo).length === 0 && event) {
+    event.reply(replayKeyword, 'Please setup info first.');
+    return;
+  }
+
+  const sshInfo: SSHInfo = {
+    host: settingInfo.host,
+    username: settingInfo.username,
+    password: settingInfo.password,
+  };
+
+  isConnected = isConnected || connectToServer$(sshInfo);
+  isConnected.subscribe(
+    (v) => {
+      if (v) {
+        concat(
+          getPatchFromPC$(settingInfo.pcDir),
+          updatePatchToServer$(settingInfo.serverDir),
+          applyPatchToServer$(settingInfo.serverDir),
+        ).subscribe(
+          () => {},
+          (err) => {
+            event.reply(replayKeyword, err.message);
+          },
+          () => {
+            event.reply(replayKeyword, 0);
+          },
+        );
+      }
+    },
+    (err) => {
+      event.reply(replayKeyword, err.message);
+    },
+  );
+}
 
 function createWindow(): BrowserWindow {
-  const electronScreen = screen;
-  const size = electronScreen.getPrimaryDisplay().workAreaSize;
-
   // Create the browser window.
   win = new BrowserWindow({
     x: 0,
@@ -69,7 +116,29 @@ try {
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
   // Added 400 ms to fix the black background issue while using transparent window. More detais at https://github.com/electron/electron/issues/15947
-  app.on('ready', () => setTimeout(createWindow, 400));
+  app.on('ready', () =>
+    setTimeout(() => {
+      createWindow();
+
+      // Add shortcuts
+      const menu = new Menu();
+      menu.append(
+        new MenuItem({
+          label: 'Edit',
+          submenu: [
+            {
+              label: 'To Sync Code',
+              accelerator: 'Ctrl+Enter',
+              click: (menuItem, browserWindow) => {
+                browserWindow.webContents.send('to-syncCode-from-main');
+              },
+            },
+          ],
+        }),
+      );
+      Menu.setApplicationMenu(menu);
+    }, 400),
+  );
 
   // Quit when all windows are closed.
   app.on('window-all-closed', () => {
@@ -79,8 +148,6 @@ try {
       app.quit();
     }
   });
-
-  const store = new Store();
 
   ipcMain.on('to-selectFolder', (event) => {
     const dir = dialog.showOpenDialogSync(win, {
@@ -98,45 +165,7 @@ try {
     event.reply('storeSetting-reply', 0);
   });
 
-  let isConnected: BehaviorSubject<boolean>;
-
-  ipcMain.on('to-syncCode', (event) => {
-    const replayKeyword = 'syncCode-reply';
-    const settingInfo = store.data as SettingInfo;
-    if (Object.keys(settingInfo).length === 0) {
-      event.reply(replayKeyword, 'Please setup info first.');
-      return;
-    }
-
-    const sshInfo: SSHInfo = {
-      host: settingInfo.host,
-      username: settingInfo.username,
-      password: settingInfo.password,
-    };
-    isConnected = isConnected || connectToServer$(sshInfo);
-    isConnected.subscribe(
-      (v) => {
-        if (v) {
-          concat(
-            getPatchFromPC$(settingInfo.pcDir),
-            updatePatchToServer$(settingInfo.serverDir),
-            applyPatchToServer$(settingInfo.serverDir),
-          ).subscribe(
-            () => {},
-            (err) => {
-              event.reply(replayKeyword, err.message);
-            },
-            () => {
-              event.reply(replayKeyword, 0);
-            },
-          );
-        }
-      },
-      (err) => {
-        event.reply(replayKeyword, err.message);
-      },
-    );
-  });
+  ipcMain.on('to-syncCode', toSyncCode);
 
   app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the

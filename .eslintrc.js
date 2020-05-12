@@ -54,5 +54,6 @@ module.exports = {
     '@typescript-eslint/no-var-requires': 'off',
     'import/no-dynamic-require': 'off',
     'import/prefer-default-export': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'off',
   },
 };

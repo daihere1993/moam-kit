@@ -54,6 +54,13 @@ export class HomeComponent implements OnInit {
         this.pcDirInput.nativeElement.focus();
       }
     });
+
+    ipcRenderer.on('to-syncCode-from-main', () => {
+      this.zone.run(() => {
+        this._toSyncCode();
+        this.electronService.ipcRenderer.send('to-syncCode');
+      });
+    });
   }
 
   public toSelectFolder(e: Event): void {
@@ -63,8 +70,12 @@ export class HomeComponent implements OnInit {
   }
 
   public toSyncCode(): void {
+    this._toSyncCode();
+    this.electronService.ipcRenderer.send('to-syncCode');
+  }
+
+  private _toSyncCode() {
     this.isSyncDone = false;
     this.displayProgress = true;
-    this.electronService.ipcRenderer.send('to-syncCode');
   }
 }
