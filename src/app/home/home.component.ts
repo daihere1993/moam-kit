@@ -58,7 +58,10 @@ export class HomeComponent implements OnInit {
     ipcRenderer.on('to-syncCode-from-main', () => {
       this.zone.run(() => {
         this._toSyncCode();
-        this.electronService.ipcRenderer.send('to-syncCode');
+        this.electronService.ipcRenderer.send('to-syncCode', {
+          pcDir: this.pcDir,
+          serverDir: this.serverDir,
+        });
       });
     });
   }
@@ -70,8 +73,15 @@ export class HomeComponent implements OnInit {
   }
 
   public toSyncCode(): void {
-    this._toSyncCode();
-    this.electronService.ipcRenderer.send('to-syncCode');
+    if (this.pcDir && this.serverDir) {
+      this._toSyncCode();
+      this.electronService.ipcRenderer.send('to-syncCode', {
+        pcDir: this.pcDir,
+        serverDir: this.serverDir,
+      });
+    } else {
+      console.log(`error: pcDir & serverDir couldn't be empty.`);
+    }
   }
 
   private _toSyncCode() {

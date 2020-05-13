@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as url from 'url';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import {
   app,
   BrowserWindow,
@@ -10,6 +11,7 @@ import {
   IpcMainEvent,
 } from 'electron';
 import { BehaviorSubject, concat } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import {
   connectToServer$,
   getPatchFromPC$,
@@ -25,10 +27,16 @@ const serve = args.some((val) => val === '--serve');
 const store = new Store();
 let isConnected: BehaviorSubject<boolean>;
 
-function toSyncCode(event: IpcMainEvent): void {
+function toSyncCode(event: IpcMainEvent, { pcDir, serverDir }): void {
   const replayKeyword = 'syncCode-reply';
+
+  if (pcDir && serverDir) {
+    store.set('pcDir', pcDir);
+    store.set('serverDir', serverDir);
+  }
+
   const settingInfo = store.data as SettingInfo;
-  
+
   if (Object.keys(settingInfo).length === 0 && event) {
     event.reply(replayKeyword, 'Please setup info first.');
     return;
