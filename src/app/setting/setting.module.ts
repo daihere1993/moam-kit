@@ -2,10 +2,13 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
+import {
+  NbButtonModule,
+  NbInputModule,
+  NbFormFieldModule,
+  NbIconModule,
+  NbSpinnerModule,
+} from '@nebular/theme';
 
 import { SettingComponent } from './setting.component';
 import { SettingRoutingModule } from './setting-routing.module';
@@ -15,10 +18,11 @@ import { SettingRoutingModule } from './setting-routing.module';
   imports: [
     CommonModule,
     FormsModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatButtonModule,
+    NbButtonModule,
+    NbInputModule,
+    NbFormFieldModule,
+    NbIconModule,
+    NbSpinnerModule,
     SettingRoutingModule,
   ],
 })

@@ -1,42 +1,48 @@
 <div class="container">
-  <mat-form-field class="field_item">
-    <mat-label>MOAM DIR of server </mat-label>
-    <input matInput placeholder="MOAM DIR of server" [(ngModel)]="serverDir" />
-  </mat-form-field>
-  <mat-form-field class="field_item">
-    <mat-label>MOAM DIR of PC</mat-label>
+  <nb-form-field class="field_item">
     <input
-      #pcDirInput
-      matInput
+      type="text"
+      nbInput
+      fullWidth
+      placeholder="MOAM DIR of server"
+      [(ngModel)]="serverDir"
+    />
+  </nb-form-field>
+
+  <nb-form-field class="field_item">
+    <input
+      type="text"
+      nbInput
+      fullWidth
       placeholder="MOAM DIR of PC"
       [(ngModel)]="pcDir"
     />
-    <mat-icon
-      matSuffix
+    <nb-icon
+      nbSuffix
+      icon="folder-outline"
       style="cursor: pointer;"
       (click)="toSelectFolder($event)"
-      >folder</mat-icon
-    >
-  </mat-form-field>
+    ></nb-icon>
+  </nb-form-field>
 
   <div class="foot">
     <button
       class="sync_button"
-      mat-raised-button
-      color="primary"
+      nbButton
+      status="primary"
       (click)="toSyncCode()"
     >
       Sync Code
     </button>
-
     <div class="progress_container" *ngIf="displayProgress">
-      <mat-spinner
+      <div
+        class="spinner"
+        [nbSpinner]="true"
+        nbSpinnerStatus="success"
         *ngIf="!isSyncDone; else elseBlock"
-        diameter="24"
-        color="accent"
-      ></mat-spinner>
+      ></div>
       <ng-template #elseBlock>
-        <mat-icon color="accent">done</mat-icon>
+        <nb-icon icon="checkmark-outline" status="success"></nb-icon>
       </ng-template>
     </div>
   </div>

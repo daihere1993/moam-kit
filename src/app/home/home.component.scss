@@ -6,12 +6,31 @@ $progress_font-size: 24px;
   flex-direction: column;
 }
 
+.field_item {
+  margin-bottom: 10px;
+}
+
 .sync_button {
   width: 200px;
 }
 
 .foot {
   display: flex;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+  }
+
+  ::ng-deep .progress_container {
+    nb-spinner {
+      background: none;
+    }
+
+    nb-icon {
+      font-size: 32px;
+    }
+  }
 
   .mat-icon {
     width: $progress_font-size;
