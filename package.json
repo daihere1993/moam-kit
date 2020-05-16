@@ -12,7 +12,7 @@
     "ng": "ng",
     "start": "npm-run-all -p ng:serve electron:serve",
     "start:win": "npm-run-all -p ng:serve electron:serve-win",
-    "build": "ng build",
+    "build": "npm run electron:serve-tsc && ng build --base-href ./",
     "build:prod": "npm run build -- -c production",
     "test": "npm-run-all -s test:main test:render",
     "test:main": "jest --config ./jest.config-main.json",

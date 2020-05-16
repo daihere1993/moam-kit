@@ -99,7 +99,7 @@ function createWindow(): BrowserWindow {
   } else {
     win.loadURL(
       url.format({
-        pathname: path.join(process.cwd(), 'dist/index.html'),
+        pathname: path.join(__dirname, '../render-process/index.html'),
         protocol: 'file:',
         slashes: true,
       }),
