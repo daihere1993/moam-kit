@@ -1,28 +1,33 @@
 <div class="container">
-  <mat-form-field class="field_item">
-    <mat-label>Server host</mat-label>
-    <input matInput placeholder="Server host" [(ngModel)]="host" />
-  </mat-form-field>
-  <mat-form-field class="field_item">
-    <mat-label>Username</mat-label>
-    <input matInput placeholder="Username" [(ngModel)]="username" />
-  </mat-form-field>
-  <mat-form-field class="field_item">
-    <mat-label>Password</mat-label>
+  <nb-form-field class="field_item">
+    <input
+      type="text"
+      nbInput
+      fullWidth
+      placeholder="Server host"
+      [(ngModel)]="host"
+    />
+  </nb-form-field>
+  <nb-form-field class="field_item">
+    <input
+      type="text"
+      nbInput
+      fullWidth
+      placeholder="Username"
+      [(ngModel)]="username"
+    />
+  </nb-form-field>
+  <nb-form-field class="field_item">
     <input
       type="password"
-      matInput
+      nbInput
+      fullWidth
       placeholder="Password"
       [(ngModel)]="password"
     />
-  </mat-form-field>
+  </nb-form-field>
 
-  <button
-    class="field_item"
-    mat-raised-button
-    color="primary"
-    (click)="toSave()"
-  >
+  <button class="button__save" nbButton status="primary" (click)="toSave()">
     Save
   </button>
 </div>

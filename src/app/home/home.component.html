@@ -1,43 +1,143 @@
 <div class="container">
-  <mat-form-field class="field_item">
-    <mat-label>MOAM DIR of server </mat-label>
-    <input matInput placeholder="MOAM DIR of server" [(ngModel)]="serverDir" />
-  </mat-form-field>
-  <mat-form-field class="field_item">
-    <mat-label>MOAM DIR of PC</mat-label>
+  <nb-form-field class="field_item">
     <input
-      #pcDirInput
-      matInput
+      type="text"
+      nbInput
+      fullWidth
+      placeholder="MOAM DIR of server"
+      [(ngModel)]="serverDir"
+    />
+  </nb-form-field>
+
+  <nb-form-field class="field_item">
+    <input
+      type="text"
+      nbInput
+      fullWidth
       placeholder="MOAM DIR of PC"
       [(ngModel)]="pcDir"
     />
-    <mat-icon
-      matSuffix
+    <nb-icon
+      nbSuffix
+      icon="folder-outline"
       style="cursor: pointer;"
       (click)="toSelectFolder($event)"
-      >folder</mat-icon
-    >
-  </mat-form-field>
+    ></nb-icon>
+  </nb-form-field>
 
-  <div class="foot">
+  <div class="sync_containner">
     <button
       class="sync_button"
-      mat-raised-button
-      color="primary"
+      nbButton
+      status="primary"
       (click)="toSyncCode()"
     >
       Sync Code
     </button>
-
-    <div class="progress_container" *ngIf="displayProgress">
-      <mat-spinner
-        *ngIf="!isSyncDone; else elseBlock"
-        diameter="24"
-        color="accent"
-      ></mat-spinner>
-      <ng-template #elseBlock>
-        <mat-icon color="accent">done</mat-icon>
-      </ng-template>
+    <div class="progress_container" *ngIf="syncStatus">
+      <div
+        class="spinner"
+        [nbSpinner]="isSyncOnGoing"
+        nbSpinnerStatus="success"
+      >
+        <nb-icon
+          *ngIf="isSyncDone"
+          icon="checkmark-outline"
+          status="success"
+        ></nb-icon>
+        <nb-icon
+          *ngIf="isSyncFailed"
+          icon="close-outline"
+          status="danger"
+        ></nb-icon>
+      </div>
     </div>
   </div>
+
+  <nb-card class="log_containner" *ngIf="syncStatus">
+    <nb-card-body>
+      <ul>
+        <li class="log_item">
+          Connect to server:
+          <div
+            class="spinner item__status"
+            *ngIf="connecToServerStatus"
+            [nbSpinner]="isConnectionOnGoing"
+            nbSpinnerSize="tiny"
+          >
+            <nb-icon
+              *ngIf="isConnectionDone"
+              icon="checkmark-outline"
+              status="success"
+            ></nb-icon>
+            <nb-icon
+              *ngIf="isConnectionFailed"
+              icon="close-outline"
+              status="danger"
+            ></nb-icon>
+          </div>
+        </li>
+        <li class="log_item">
+          Create patch:
+          <div
+            class="spinner item__status"
+            *ngIf="createPatchStatus"
+            [nbSpinner]="isCreatePatchOnGoing"
+            nbSpinnerSize="tiny"
+          >
+            <nb-icon
+              *ngIf="isCreatePatchDone"
+              icon="checkmark-outline"
+              status="success"
+            ></nb-icon>
+            <nb-icon
+              *ngIf="isCreatePatchFailed"
+              icon="close-outline"
+              status="danger"
+            ></nb-icon>
+          </div>
+        </li>
+        <li class="log_item">
+          Upload patch:
+          <div
+            class="spinner item__status"
+            *ngIf="uploadPatchStatus"
+            [nbSpinner]="isUploadPatchOnGoing"
+            nbSpinnerSize="tiny"
+          >
+            <nb-icon
+              *ngIf="isUploadPatchDone"
+              icon="checkmark-outline"
+              status="success"
+            ></nb-icon>
+            <nb-icon
+              *ngIf="isUploadPatchFailed"
+              icon="close-outline"
+              status="danger"
+            ></nb-icon>
+          </div>
+        </li>
+        <li class="log_item">
+          Apply patch:
+          <div
+            class="spinner item__status"
+            *ngIf="applyPatchStatus"
+            [nbSpinner]="isApplyPatchOnGoing"
+            nbSpinnerSize="tiny"
+          >
+            <nb-icon
+              *ngIf="isApplyPatchDone"
+              icon="checkmark-outline"
+              status="success"
+            ></nb-icon>
+            <nb-icon
+              *ngIf="isApplyPatchFailed"
+              icon="close-outline"
+              status="danger"
+            ></nb-icon>
+          </div>
+        </li>
+      </ul>
+    </nb-card-body>
+  </nb-card>
 </div>

@@ -1,77 +1,12 @@
 import * as path from 'path';
 import * as url from 'url';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import {
-  app,
-  BrowserWindow,
-  ipcMain,
-  dialog,
-  Menu,
-  MenuItem,
-  IpcMainEvent,
-} from 'electron';
-import { BehaviorSubject, concat } from 'rxjs';
-import { finalize } from 'rxjs/operators';
-import {
-  connectToServer$,
-  getPatchFromPC$,
-  updatePatchToServer$,
-  applyPatchToServer$,
-} from './operator';
-import { SSHInfo, SettingInfo } from '../types';
-import { Store } from './store';
+import { app, BrowserWindow, Menu, MenuItem } from 'electron';
+import { TO_SYNC_CODE_FROM_MAIN } from '../common/message';
+import { Sync } from './sync';
 
 let win: BrowserWindow;
 const args = process.argv.slice(1);
 const serve = args.some((val) => val === '--serve');
-const store = new Store();
-let isConnected: BehaviorSubject<boolean>;
-
-function toSyncCode(event: IpcMainEvent, { pcDir, serverDir }): void {
-  const replayKeyword = 'syncCode-reply';
-
-  if (pcDir && serverDir) {
-    store.set('pcDir', pcDir);
-    store.set('serverDir', serverDir);
-  }
-
-  const settingInfo = store.data as SettingInfo;
-
-  if (Object.keys(settingInfo).length === 0 && event) {
-    event.reply(replayKeyword, 'Please setup info first.');
-    return;
-  }
-
-  const sshInfo: SSHInfo = {
-    host: settingInfo.host,
-    username: settingInfo.username,
-    password: settingInfo.password,
-  };
-
-  isConnected = isConnected || connectToServer$(sshInfo);
-  isConnected.subscribe(
-    (v) => {
-      if (v) {
-        concat(
-          getPatchFromPC$(settingInfo.pcDir),
-          updatePatchToServer$(settingInfo.serverDir),
-          applyPatchToServer$(settingInfo.serverDir),
-        ).subscribe(
-          () => {},
-          (err) => {
-            event.reply(replayKeyword, err.message);
-          },
-          () => {
-            event.reply(replayKeyword, 0);
-          },
-        );
-      }
-    },
-    (err) => {
-      event.reply(replayKeyword, err.message);
-    },
-  );
-}
 
 function createWindow(): BrowserWindow {
   // Create the browser window.
@@ -87,11 +22,9 @@ function createWindow(): BrowserWindow {
   });
 
   if (serve) {
-    // eslint-disable-next-line import/no-extraneous-dependencies
     require('devtron').install();
     win.webContents.openDevTools();
 
-    // eslint-disable-next-line import/no-extraneous-dependencies
     require('electron-reload')(process.cwd(), {
       electron: require(`${process.cwd()}/node_modules/electron`),
     });
@@ -124,7 +57,10 @@ try {
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
   // Added 400 ms to fix the black background issue while using transparent window. More detais at https://github.com/electron/electron/issues/15947
-  app.on('ready', () =>
+  app.on('ready', () => {
+    const sync = new Sync({ win });
+    sync.startup();
+
     setTimeout(() => {
       createWindow();
 
@@ -138,15 +74,15 @@ try {
               label: 'To Sync Code',
               accelerator: 'Ctrl+Enter',
               click: (menuItem, browserWindow) => {
-                browserWindow.webContents.send('to-syncCode-from-main');
+                browserWindow.webContents.send(TO_SYNC_CODE_FROM_MAIN);
               },
             },
           ],
         }),
       );
       Menu.setApplicationMenu(menu);
-    }, 400),
-  );
+    }, 400);
+  });
 
   // Quit when all windows are closed.
   app.on('window-all-closed', () => {
@@ -156,24 +92,6 @@ try {
       app.quit();
     }
   });
-
-  ipcMain.on('to-selectFolder', (event) => {
-    const dir = dialog.showOpenDialogSync(win, {
-      properties: ['openDirectory'],
-    });
-    event.reply('selectFolder-reply', dir);
-  });
-
-  ipcMain.on('to-getSetting', (event) => {
-    event.reply('getSetting-reply', store.data);
-  });
-
-  ipcMain.on('to-storeSetting', (event, settingInfo: SettingInfo) => {
-    store.setAll(settingInfo);
-    event.reply('storeSetting-reply', 0);
-  });
-
-  ipcMain.on('to-syncCode', toSyncCode);
 
   app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the

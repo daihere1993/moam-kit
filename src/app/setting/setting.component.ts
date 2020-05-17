@@ -1,12 +1,12 @@
+import { Component, OnInit, NgZone } from '@angular/core';
+import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
 import {
-  Component,
-  OnInit,
-  ElementRef,
-  ViewChild,
-  NgZone,
-} from '@angular/core';
+  TO_GET_SETTING,
+  REPLY_GET_SETTING,
+  TO_STORE_SETTING,
+} from 'src/common/message';
 import { ElectronService } from '../core/services';
-import { SSHInfo } from '../../types';
+import { SSHInfo } from '../../common/types';
 
 @Component({
   selector: 'app-setting',
@@ -34,12 +34,16 @@ export class SettingComponent implements OnInit {
     this.password = info.password;
   }
 
-  constructor(private electronService: ElectronService, private zone: NgZone) {}
+  constructor(
+    private electronService: ElectronService,
+    private zone: NgZone,
+    private toastrService: NbToastrService,
+  ) {}
 
   public ngOnInit(): void {
     const { ipcRenderer } = this.electronService;
-    ipcRenderer.send('to-getSetting');
-    ipcRenderer.on('getSetting-reply', (event, sshInfo: SSHInfo) => {
+    ipcRenderer.send(TO_GET_SETTING);
+    ipcRenderer.on(REPLY_GET_SETTING, (event, sshInfo: SSHInfo) => {
       this.zone.run(() => {
         if (sshInfo) {
           this.sshInfo = sshInfo;
@@ -50,6 +54,7 @@ export class SettingComponent implements OnInit {
 
   public toSave(): void {
     const { ipcRenderer } = this.electronService;
-    ipcRenderer.send('to-storeSetting', this.sshInfo);
+    ipcRenderer.send(TO_STORE_SETTING, this.sshInfo);
+    this.toastrService.show('Success', 'Setting', { position: NbGlobalPhysicalPosition.BOTTOM_RIGHT, duration: 800 });
   }
 }

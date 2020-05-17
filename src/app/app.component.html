@@ -1,7 +1,15 @@
-<div class="container">
-  <app-navbar class="navbar"></app-navbar>
+<nb-layout>
+  <nb-layout-header fixed>
+    <app-navbar class="navbar"></app-navbar>
+    <!-- Insert header here -->
+  </nb-layout-header>
 
-  <div class="content_container">
-    <router-outlet></router-outlet>
-  </div>
-</div>
+  <nb-layout-column>
+    <div class="content_container">
+      <router-outlet></router-outlet>
+    </div>
+  </nb-layout-column>
+
+  <!-- <nb-layout-footer fixed>
+  </nb-layout-footer> -->
+</nb-layout>
