@@ -5,6 +5,7 @@ import {
   ElementRef,
   NgZone,
 } from '@angular/core';
+import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
 import {
   TO_SELECT_FOLDER,
   TO_GET_SETTING,
@@ -24,7 +25,7 @@ import { ElectronService } from '../core/services';
 enum Status {
   ON_GOING = 'on going',
   DONE = 'done',
-  FAILED = 'failed'
+  FAILED = 'failed',
 }
 
 @Component({
@@ -122,7 +123,11 @@ export class HomeComponent implements OnInit {
 
   @ViewChild('pcDirInput') pcDirInput: ElementRef;
 
-  constructor(private electronService: ElectronService, private zone: NgZone) {}
+  constructor(
+    private electronService: ElectronService,
+    private zone: NgZone,
+    private toastrService: NbToastrService,
+  ) {}
 
   ngOnInit(): void {
     const { ipcRenderer } = this.electronService;
@@ -137,10 +142,12 @@ export class HomeComponent implements OnInit {
     });
 
     ipcRenderer.on(REPLY_SELECT_FOLDER, (event, ret) => {
-      if (ret) {
-        [this.pcDir] = ret;
-        this.pcDirInput.nativeElement.focus();
-      }
+      this.zone.run(() => {
+        if (ret) {
+          [this.pcDir] = ret;
+          this.pcDirInput.nativeElement.focus();
+        }
+      });
     });
 
     ipcRenderer.on(TO_SYNC_CODE_FROM_MAIN, () => {
@@ -155,11 +162,10 @@ export class HomeComponent implements OnInit {
 
     ipcRenderer.on(REPLY_SYNC_CODE, (event, ret: TaskRes) => {
       this.zone.run(() => {
-        
         if (ret.isSuccessed) {
-          this.syncStatus = Status.DONE
+          this.syncStatus = Status.DONE;
         } else {
-          this.syncStatus = Status.FAILED
+          this.syncStatus = Status.FAILED;
           const { error } = ret;
           switch (error.name) {
             case CONNECT_TO_SERVER_DONE:
@@ -181,6 +187,7 @@ export class HomeComponent implements OnInit {
             default:
               break;
           }
+          this.alterErrorMsg(`${error.name}: ${error.message}`);
         }
       });
     });
@@ -190,7 +197,7 @@ export class HomeComponent implements OnInit {
         if (ret.isSuccessed) {
           this.connecToServerStatus = Status.DONE;
         } else {
-          console.log(`Unexpected response: ${CONNECT_TO_SERVER_DONE}`);
+          this.alterErrorMsg(`Unexpected response: ${CONNECT_TO_SERVER_DONE}`);
         }
       });
     });
@@ -200,7 +207,7 @@ export class HomeComponent implements OnInit {
         if (ret.isSuccessed) {
           this.createPatchStatus = Status.DONE;
         } else {
-          console.log(`Unexpected response: ${CREATE_PATCH_DONE}`);
+          this.alterErrorMsg(`Unexpected response: ${CREATE_PATCH_DONE}`);
         }
       });
     });
@@ -210,7 +217,9 @@ export class HomeComponent implements OnInit {
         if (ret.isSuccessed) {
           this.uploadPatchStatus = Status.DONE;
         } else {
-          console.log(`Unexpected response: ${UPLOAD_PATCH_TO_SERVER_DONE}`);
+          this.alterErrorMsg(
+            `Unexpected response: ${UPLOAD_PATCH_TO_SERVER_DONE}`,
+          );
         }
       });
     });
@@ -220,7 +229,9 @@ export class HomeComponent implements OnInit {
         if (ret.isSuccessed) {
           this.applyPatchStatus = Status.DONE;
         } else {
-          console.log(`Unexpected response: ${APPLY_PATCH_TO_SERVER_DONE}`);
+          this.alterErrorMsg(
+            `Unexpected response: ${APPLY_PATCH_TO_SERVER_DONE}`,
+          );
         }
       });
     });
@@ -240,7 +251,7 @@ export class HomeComponent implements OnInit {
         serverDir: this.serverDir,
       });
     } else {
-      console.log(`error: pcDir & serverDir couldn't be empty.`);
+      this.alterErrorMsg(`error: pcDir & serverDir couldn't be empty.`);
     }
   }
 
@@ -255,5 +266,13 @@ export class HomeComponent implements OnInit {
     this.createPatchFailedMsg = '';
     this.uploadPatchFailedMsg = '';
     this.applyPatchFailedMsg = '';
+  }
+
+  private alterErrorMsg(msg: string): void {
+    this.toastrService.show(msg, 'Error', {
+      position: NbGlobalPhysicalPosition.BOTTOM_RIGHT,
+      status: 'danger',
+      duration: 2000,
+    });
   }
 }
