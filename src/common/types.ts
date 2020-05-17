@@ -1,3 +1,11 @@
+export interface TaskRes {
+  isSuccessed: boolean;
+  error?: {
+    name: string;
+    message: string;
+  }
+}
+
 export interface SSHInfo {
   host: string;
   username: string;

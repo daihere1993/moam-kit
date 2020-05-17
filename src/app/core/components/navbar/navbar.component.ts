@@ -11,10 +11,12 @@ export class NavbarComponent {
     {
       title: 'Home',
       link: '/home',
+      icon: 'home-outline',
     },
     {
       title: 'Setting',
       link: '/setting',
+      icon: 'settings-outline',
     },
   ];
 }

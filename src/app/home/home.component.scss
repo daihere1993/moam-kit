@@ -4,6 +4,12 @@ $progress_font-size: 24px;
   height: 100%;
   display: flex;
   flex-direction: column;
+
+  ::ng-deep .spinner {
+    nb-spinner {
+      background: none;
+    }
+  }
 }
 
 .field_item {
@@ -14,8 +20,9 @@ $progress_font-size: 24px;
   width: 200px;
 }
 
-.foot {
+.sync_containner {
   display: flex;
+  margin-bottom: 10px;
 
   .spinner {
     width: 40px;
@@ -23,10 +30,6 @@ $progress_font-size: 24px;
   }
 
   ::ng-deep .progress_container {
-    nb-spinner {
-      background: none;
-    }
-
     nb-icon {
       font-size: 32px;
     }
@@ -42,5 +45,20 @@ $progress_font-size: 24px;
     display: flex;
     align-items: center;
     margin-left: 10px;
+  }
+}
+
+.log_containner {
+  ul {
+    padding: 0;
+  }
+  .log_item {
+    display: flex;
+    align-items: center;
+    .item__status {
+      width: 16px;
+      height: 16px;
+      margin-left: 6px;
+    }
   }
 }

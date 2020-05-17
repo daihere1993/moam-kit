@@ -8,6 +8,7 @@ import {
   NbFormFieldModule,
   NbIconModule,
   NbSpinnerModule,
+  NbCardModule,
 } from '@nebular/theme';
 
 import { HomeComponent } from './home.component';
@@ -24,6 +25,7 @@ import { HomeRoutingModule } from './home-routing.module';
     NbFormFieldModule,
     NbIconModule,
     NbSpinnerModule,
+    NbCardModule,
   ],
 })
 export class HomeModule {}
