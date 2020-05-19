@@ -156,7 +156,10 @@ export class Sync {
           username: this.setting.username,
           password: this.setting.password,
         })
-        .then(() => subscriber.next(true))
+        .then(() => {
+          RECONNECT_TIME = 0;
+          return subscriber.next(true);
+        })
         .catch((err) => {
           const error = new Error(`Connect to server failed: ${err.message}`);
           subscriber.error(error);
