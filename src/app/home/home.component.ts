@@ -26,6 +26,7 @@ enum Status {
   ON_GOING = 'on going',
   DONE = 'done',
   FAILED = 'failed',
+  TIMEOUT = 'timeout',
 }
 
 @Component({
@@ -49,6 +50,12 @@ export class HomeComponent implements OnInit {
     return this.syncStatus === Status.FAILED;
   }
 
+  public get isSyncTimeout(): boolean {
+    return this.syncStatus === Status.TIMEOUT;
+  }
+
+  public snycErrorMsg: string;
+
   /** Server connection status */
   public connecToServerStatus: Status;
 
@@ -64,6 +71,10 @@ export class HomeComponent implements OnInit {
 
   public get isConnectionFailed(): boolean {
     return this.connecToServerStatus === Status.FAILED;
+  }
+
+  public get isConnectionTimeout(): boolean {
+    return this.connecToServerStatus === Status.TIMEOUT;
   }
 
   /** Create patch status */
@@ -83,6 +94,10 @@ export class HomeComponent implements OnInit {
     return this.createPatchStatus === Status.FAILED;
   }
 
+  public get isCreatePatchTimeout(): boolean {
+    return this.createPatchStatus === Status.TIMEOUT;
+  }
+
   /** Upload patch status */
   public uploadPatchStatus: Status;
 
@@ -100,6 +115,10 @@ export class HomeComponent implements OnInit {
     return this.uploadPatchStatus === Status.FAILED;
   }
 
+  public get isUploadPatchTimeout(): boolean {
+    return this.uploadPatchStatus === Status.TIMEOUT;
+  }
+
   /** Apply patch status */
   public applyPatchStatus: Status;
 
@@ -115,6 +134,10 @@ export class HomeComponent implements OnInit {
 
   public get isApplyPatchFailed(): boolean {
     return this.applyPatchStatus === Status.FAILED;
+  }
+
+  public get isApplyPatchTimeout(): boolean {
+    return this.applyPatchStatus === Status.TIMEOUT;
   }
 
   public serverDir: string;
@@ -171,14 +194,20 @@ export class HomeComponent implements OnInit {
             case CONNECT_TO_SERVER_DONE:
               this.connecToServerStatus = Status.FAILED;
               this.connecToServerFailedMsg = error.message;
+              this.createPatchStatus = Status.TIMEOUT;
+              this.uploadPatchStatus = Status.TIMEOUT;
+              this.applyPatchStatus = Status.TIMEOUT;
               break;
             case CREATE_PATCH_DONE:
               this.createPatchStatus = Status.FAILED;
               this.createPatchFailedMsg = error.message;
+              this.uploadPatchStatus = Status.TIMEOUT;
+              this.applyPatchStatus = Status.TIMEOUT;
               break;
             case UPLOAD_PATCH_TO_SERVER_DONE:
               this.uploadPatchStatus = Status.FAILED;
               this.uploadPatchFailedMsg = error.message;
+              this.applyPatchStatus = Status.TIMEOUT;
               break;
             case APPLY_PATCH_TO_SERVER_DONE:
               this.applyPatchStatus = Status.FAILED;
@@ -187,6 +216,7 @@ export class HomeComponent implements OnInit {
             default:
               break;
           }
+          this.snycErrorMsg = error.message;
           this.alterErrorMsg(`${error.name}: ${error.message}`);
         }
       });
@@ -266,13 +296,15 @@ export class HomeComponent implements OnInit {
     this.createPatchFailedMsg = '';
     this.uploadPatchFailedMsg = '';
     this.applyPatchFailedMsg = '';
+
+    this.snycErrorMsg = '';
   }
 
   private alterErrorMsg(msg: string): void {
     this.toastrService.show(msg, 'Error', {
       position: NbGlobalPhysicalPosition.BOTTOM_RIGHT,
       status: 'danger',
-      duration: 2000,
+      duration: 10000,
     });
   }
 }

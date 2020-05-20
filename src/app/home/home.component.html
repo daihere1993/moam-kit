@@ -75,6 +75,11 @@
               icon="close-outline"
               status="danger"
             ></nb-icon>
+            <nb-icon
+              *ngIf="isConnectionTimeout"
+              icon="minus-circle-outline"
+              status="warning"
+            ></nb-icon>
           </div>
         </li>
         <li class="log_item">
@@ -94,6 +99,11 @@
               *ngIf="isCreatePatchFailed"
               icon="close-outline"
               status="danger"
+            ></nb-icon>
+            <nb-icon
+              *ngIf="isCreatePatchTimeout"
+              icon="minus-circle-outline"
+              status="warning"
             ></nb-icon>
           </div>
         </li>
@@ -115,6 +125,11 @@
               icon="close-outline"
               status="danger"
             ></nb-icon>
+            <nb-icon
+              *ngIf="isUploadPatchTimeout"
+              icon="minus-circle-outline"
+              status="warning"
+            ></nb-icon>
           </div>
         </li>
         <li class="log_item">
@@ -134,6 +149,11 @@
               *ngIf="isApplyPatchFailed"
               icon="close-outline"
               status="danger"
+            ></nb-icon>
+            <nb-icon
+              *ngIf="isApplyPatchTimeout"
+              icon="minus-circle-outline"
+              status="warning"
             ></nb-icon>
           </div>
         </li>

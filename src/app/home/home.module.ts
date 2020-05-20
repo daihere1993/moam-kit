@@ -9,6 +9,7 @@ import {
   NbIconModule,
   NbSpinnerModule,
   NbCardModule,
+  NbAlertModule,
 } from '@nebular/theme';
 
 import { HomeComponent } from './home.component';
@@ -26,6 +27,7 @@ import { HomeRoutingModule } from './home-routing.module';
     NbIconModule,
     NbSpinnerModule,
     NbCardModule,
+    NbAlertModule,
   ],
 })
 export class HomeModule {}
