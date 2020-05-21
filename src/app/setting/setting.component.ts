@@ -55,6 +55,9 @@ export class SettingComponent implements OnInit {
   public toSave(): void {
     const { ipcRenderer } = this.electronService;
     ipcRenderer.send(TO_STORE_SETTING, this.sshInfo);
-    this.toastrService.show('Success', 'Setting', { position: NbGlobalPhysicalPosition.BOTTOM_RIGHT, duration: 800 });
+    this.toastrService.show('Success', 'Setting', {
+      position: NbGlobalPhysicalPosition.BOTTOM_RIGHT,
+      duration: 800,
+    });
   }
 }

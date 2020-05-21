@@ -67,7 +67,9 @@ export class Sync {
     });
 
     ipcMain.on(TO_STORE_SETTING, (event, setting: SettingInfo) => {
-      this.store.setAll(setting);
+      Object.entries(setting).forEach(([key, value]) => {
+        this.store.set(key, value);
+      });
       event.reply(REPLY_STORE_SETTING, 0);
     });
 
@@ -121,7 +123,7 @@ export class Sync {
         },
         (err) => {
           console.log(`${err.name} failed: ${err.message}`);
-          event.reply(CONNECT_TO_SERVER_DONE, {
+          event.reply(REPLY_SYNC_CODE, {
             isSuccessed: false,
             error: {
               name: CONNECT_TO_SERVER_DONE,
@@ -161,6 +163,7 @@ export class Sync {
           return subscriber.next(true);
         })
         .catch((err) => {
+          RECONNECT_TIME = 0;
           const error = new Error(`Connect to server failed: ${err.message}`);
           subscriber.error(error);
         });

@@ -207,6 +207,7 @@ export class HomeComponent implements OnInit {
             case UPLOAD_PATCH_TO_SERVER_DONE:
               this.uploadPatchStatus = Status.FAILED;
               this.uploadPatchFailedMsg = error.message;
+              this.uploadPatchStatus = Status.TIMEOUT;
               this.applyPatchStatus = Status.TIMEOUT;
               break;
             case APPLY_PATCH_TO_SERVER_DONE:
