@@ -1,8 +1,6 @@
 import {
   Component,
   OnInit,
-  ViewChild,
-  ElementRef,
   NgZone,
 } from '@angular/core';
 import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
@@ -144,8 +142,6 @@ export class HomeComponent implements OnInit {
 
   public pcDir: string;
 
-  @ViewChild('pcDirInput') pcDirInput: ElementRef;
-
   constructor(
     private electronService: ElectronService,
     private zone: NgZone,
@@ -168,7 +164,6 @@ export class HomeComponent implements OnInit {
       this.zone.run(() => {
         if (ret) {
           [this.pcDir] = ret;
-          this.pcDirInput.nativeElement.focus();
         }
       });
     });
