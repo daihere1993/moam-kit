@@ -13,6 +13,11 @@ export interface SSHInfo {
 }
 
 export interface SettingInfo extends SSHInfo {
+  branches: BranchInfo[];
+}
+
+export interface BranchInfo {
+  name: string;
   pcDir: string;
   serverDir: string;
 }

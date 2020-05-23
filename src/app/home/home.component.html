@@ -1,55 +1,33 @@
 <div class="container">
-  <nb-form-field class="field_item">
-    <input
-      type="text"
-      nbInput
-      fullWidth
-      placeholder="MOAM DIR of server"
-      [(ngModel)]="serverDir"
-    />
-  </nb-form-field>
+  <div class="sync_form">
+    <branch-selector [branches]="branches"></branch-selector>
 
-  <nb-form-field class="field_item">
-    <input
-      type="text"
-      nbInput
-      fullWidth
-      placeholder="MOAM DIR of PC"
-      [(ngModel)]="pcDir"
-    />
-    <nb-icon
-      nbSuffix
-      icon="folder-outline"
-      style="cursor: pointer;"
-      (click)="toSelectFolder($event)"
-    ></nb-icon>
-  </nb-form-field>
-
-  <div class="sync_containner">
-    <button
-      class="sync_button"
-      nbButton
-      status="primary"
-      (click)="toSyncCode()"
-    >
-      Sync Code
-    </button>
-    <div class="progress_container" *ngIf="syncStatus">
-      <div
-        class="spinner"
-        [nbSpinner]="isSyncOnGoing"
-        nbSpinnerStatus="success"
+    <div class="sync_containner">
+      <button
+        class="sync_button"
+        nbButton
+        status="primary"
+        (click)="toSyncCode()"
       >
-        <nb-icon
-          *ngIf="isSyncDone"
-          icon="checkmark-outline"
-          status="success"
-        ></nb-icon>
-        <nb-icon
-          *ngIf="isSyncFailed"
-          icon="close-outline"
-          status="danger"
-        ></nb-icon>
+        Sync Code
+      </button>
+      <div class="progress_container" *ngIf="syncStatus">
+        <div
+          class="spinner"
+          [nbSpinner]="isSyncOnGoing"
+          nbSpinnerStatus="success"
+        >
+          <nb-icon
+            *ngIf="isSyncDone"
+            icon="checkmark-outline"
+            status="success"
+          ></nb-icon>
+          <nb-icon
+            *ngIf="isSyncFailed"
+            icon="close-outline"
+            status="danger"
+          ></nb-icon>
+        </div>
       </div>
     </div>
   </div>

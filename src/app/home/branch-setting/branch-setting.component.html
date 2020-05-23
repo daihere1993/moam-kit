@@ -1,0 +1,74 @@
+<div class="container">
+  <nb-card>
+    <nb-card-body>
+      <nb-form-field class="field_item">
+        <input
+          #name="ngModel"
+          nbInput
+          fullWidth
+          required
+          placeholder="Branch Name"
+          [(ngModel)]="branch.name"
+        />
+      </nb-form-field>
+      <nb-alert
+        *ngIf="name.invalid && (name.dirty || name.touched)"
+        status="danger"
+        >Name couldn't be empty.</nb-alert
+      >
+
+      <nb-form-field class="field_item">
+        <input
+          #serverDir="ngModel"
+          nbInput
+          fullWidth
+          required
+          placeholder="MOAM DIR of server"
+          [(ngModel)]="branch.serverDir"
+        />
+      </nb-form-field>
+      <nb-alert
+        *ngIf="serverDir.invalid && (serverDir.dirty || serverDir.touched)"
+        status="danger"
+        >Server dir couldn't be empty.</nb-alert
+      >
+
+      <nb-form-field class="field_item">
+        <input
+          #pcDir="ngModel"
+          nbInput
+          fullWidth
+          required
+          placeholder="MOAM DIR of PC"
+          [(ngModel)]="branch.pcDir"
+        />
+        <nb-icon
+          nbSuffix
+          icon="folder-outline"
+          style="cursor: pointer;"
+          (click)="toSelectFolder($event)"
+        ></nb-icon>
+      </nb-form-field>
+      <nb-alert
+        *ngIf="pcDir.invalid && (pcDir.dirty || pcDir.touched)"
+        status="danger"
+        >PC dir couldn't be empty.</nb-alert
+      >
+    </nb-card-body>
+    <nb-card-footer>
+      <button nbButton class="dialog_btn" [disabled]="name.invalid || serverDir.invalid || pcDir.invalid" status="primary" (click)="toSave()">
+        Save
+      </button>
+      <button
+        nbButton
+        class="dialog_btn"
+        *ngIf="isEdit"
+        status="danger"
+        (click)="toDelete()"
+      >
+        Delete
+      </button>
+      <button nbButton class="dialog_btn" (click)="toClose()">Close</button>
+    </nb-card-footer>
+  </nb-card>
+</div>

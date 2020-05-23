@@ -25,7 +25,7 @@ import {
   CREATE_PATCH_DONE,
   APPLY_PATCH_TO_SERVER_DONE,
 } from '../common/message';
-import { SettingInfo } from '../common/types';
+import { SettingInfo, BranchInfo } from '../common/types';
 import { Store } from './store';
 
 let RECONNECT_TIME = 0;
@@ -43,6 +43,8 @@ export class Sync {
   private get setting(): SettingInfo {
     return this.store.data as SettingInfo;
   }
+
+  private branch: BranchInfo;
 
   constructor({ win }: { win: BrowserWindow }) {
     this.store = new Store();
@@ -78,19 +80,9 @@ export class Sync {
 
   private toSyncCode(
     event: IpcMainEvent,
-    args?: { pcDir: string; serverDir: string },
+    branch: BranchInfo,
   ): void {
-    if (args && args.pcDir && args.serverDir) {
-      this.store.set('pcDir', args.pcDir);
-      this.store.set('serverDir', args.serverDir);
-    }
-
-    const setting = this.setting as SettingInfo;
-    if (Object.keys(setting).length === 0 && event) {
-      event.reply(REPLY_SYNC_CODE, 'Please setup info first.');
-      return;
-    }
-
+    this.branch = branch;
     this.hasServerConnected()
       .pipe(
         switchMap((isConnected) => {
@@ -174,7 +166,7 @@ export class Sync {
     return new Observable<void>((subscriber) => {
       console.log('createPatch: start.');
       shell
-        .cd(this.setting.pcDir)
+        .cd(this.branch.pcDir)
         .exec(`svn di > ${tmpPatchPath}`, (code, stdout, stderr) => {
           if (code === 0) {
             console.log('createPatch: done.');
@@ -195,7 +187,7 @@ export class Sync {
       this.sftpClient
         .fastPut(
           path.join(tmpPatchPath),
-          `${this.setting.serverDir}/${TMP_PATCH_NAME}`,
+          `${this.branch.serverDir}/${TMP_PATCH_NAME}`,
         )
         .then(() => {
           console.log('uploadPatchToServer: done.');
@@ -217,7 +209,7 @@ export class Sync {
       console.log('applyPatchToServer: start.');
       const { client } = this.sftpClient as any;
       client.exec(
-        `cd ${this.setting.serverDir} && svn revert -R . && svn patch ${TMP_PATCH_NAME}`,
+        `cd ${this.branch.serverDir} && svn revert -R . && svn patch ${TMP_PATCH_NAME}`,
         (err, stream) => {
           if (err) {
             const error = new Error(

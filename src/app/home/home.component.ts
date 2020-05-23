@@ -2,14 +2,13 @@ import {
   Component,
   OnInit,
   NgZone,
+  ViewChild,
 } from '@angular/core';
 import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
 import {
-  TO_SELECT_FOLDER,
   TO_GET_SETTING,
   REPLY_GET_SETTING,
   REPLY_SYNC_CODE,
-  REPLY_SELECT_FOLDER,
   TO_SYNC_CODE_FROM_MAIN,
   TO_SYNC_CODE,
   CONNECT_TO_SERVER_DONE,
@@ -17,8 +16,9 @@ import {
   UPLOAD_PATCH_TO_SERVER_DONE,
   APPLY_PATCH_TO_SERVER_DONE,
 } from 'src/common/message';
-import { SettingInfo, TaskRes } from 'src/common/types';
+import { SettingInfo, TaskRes, BranchInfo } from 'src/common/types';
 import { ElectronService } from '../core/services';
+import { BranchSelectorComponent } from './branch-selector/branch-selector.component';
 
 enum Status {
   ON_GOING = 'on going',
@@ -33,6 +33,14 @@ enum Status {
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
+  @ViewChild(BranchSelectorComponent) branchSelectorRef: BranchSelectorComponent;
+
+  public branches: BranchInfo[];
+
+  private get branch(): BranchInfo {
+    return this.branchSelectorRef.selectedBranch;
+  }
+
   /** Sync status */
   public syncStatus: Status;
 
@@ -138,10 +146,6 @@ export class HomeComponent implements OnInit {
     return this.applyPatchStatus === Status.TIMEOUT;
   }
 
-  public serverDir: string;
-
-  public pcDir: string;
-
   constructor(
     private electronService: ElectronService,
     private zone: NgZone,
@@ -154,28 +158,13 @@ export class HomeComponent implements OnInit {
     ipcRenderer.on(REPLY_GET_SETTING, (event, settingInfo: SettingInfo) => {
       this.zone.run(() => {
         if (settingInfo) {
-          this.pcDir = settingInfo.pcDir;
-          this.serverDir = settingInfo.serverDir;
-        }
-      });
-    });
-
-    ipcRenderer.on(REPLY_SELECT_FOLDER, (event, ret) => {
-      this.zone.run(() => {
-        if (ret) {
-          [this.pcDir] = ret;
+          this.branches = settingInfo.branches || [];
         }
       });
     });
 
     ipcRenderer.on(TO_SYNC_CODE_FROM_MAIN, () => {
-      this.zone.run(() => {
-        this._toSyncCode();
-        this.electronService.ipcRenderer.send(TO_SYNC_CODE, {
-          pcDir: this.pcDir,
-          serverDir: this.serverDir,
-        });
-      });
+      this.toSyncCode();
     });
 
     ipcRenderer.on(REPLY_SYNC_CODE, (event, ret: TaskRes) => {
@@ -263,22 +252,9 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  public toSelectFolder(e: Event): void {
-    const { ipcRenderer } = this.electronService;
-    ipcRenderer.send(TO_SELECT_FOLDER);
-    e.stopPropagation();
-  }
-
   public toSyncCode(): void {
-    if (this.pcDir && this.serverDir) {
-      this._toSyncCode();
-      this.electronService.ipcRenderer.send(TO_SYNC_CODE, {
-        pcDir: this.pcDir,
-        serverDir: this.serverDir,
-      });
-    } else {
-      this.alterErrorMsg(`error: pcDir & serverDir couldn't be empty.`);
-    }
+    this._toSyncCode();
+    this.electronService.ipcRenderer.send(TO_SYNC_CODE, this.branch);
   }
 
   private _toSyncCode() {

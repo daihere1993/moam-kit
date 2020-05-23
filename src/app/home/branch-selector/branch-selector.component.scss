@@ -1,0 +1,14 @@
+.container {
+  display: flex;
+}
+
+.option_container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+nb-icon {
+  color: #8f9bb3;
+}

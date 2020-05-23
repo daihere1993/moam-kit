@@ -1,0 +1,13 @@
+<div class="container">
+  <nb-select placeholder="Select Branch" [selected]="selectedBranch" (selectedChange)="onSelectChange($event)">
+    <nb-option *ngFor="let branch of branches" [value]="branch">
+      <div class="option_container">
+        <span>{{ branch.name }}</span>
+        <nb-icon nbSuffix (click)="toEditBranch($event, branch)" icon="edit-2-outline"></nb-icon>
+      </div>
+    </nb-option>
+  </nb-select>
+  <button class="add_btn" nbButton ghost (click)="toAddBranch()">
+    <nb-icon icon="plus-circle-outline"></nb-icon>
+  </button>
+</div>
