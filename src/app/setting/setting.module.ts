@@ -8,6 +8,7 @@ import {
   NbFormFieldModule,
   NbIconModule,
   NbSpinnerModule,
+  NbAlertModule,
 } from '@nebular/theme';
 
 import { SettingComponent } from './setting.component';
@@ -23,6 +24,7 @@ import { SettingRoutingModule } from './setting-routing.module';
     NbFormFieldModule,
     NbIconModule,
     NbSpinnerModule,
+    NbAlertModule,
     SettingRoutingModule,
   ],
 })
