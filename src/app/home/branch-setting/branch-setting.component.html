@@ -11,11 +11,6 @@
           [(ngModel)]="branch.name"
         />
       </nb-form-field>
-      <nb-alert
-        *ngIf="name.invalid && (name.dirty || name.touched)"
-        status="danger"
-        >Name couldn't be empty.</nb-alert
-      >
 
       <nb-form-field class="field_item">
         <input
@@ -27,11 +22,6 @@
           [(ngModel)]="branch.serverDir"
         />
       </nb-form-field>
-      <nb-alert
-        *ngIf="serverDir.invalid && (serverDir.dirty || serverDir.touched)"
-        status="danger"
-        >Server dir couldn't be empty.</nb-alert
-      >
 
       <nb-form-field class="field_item">
         <input
@@ -49,14 +39,15 @@
           (click)="toSelectFolder($event)"
         ></nb-icon>
       </nb-form-field>
-      <nb-alert
-        *ngIf="pcDir.invalid && (pcDir.dirty || pcDir.touched)"
-        status="danger"
-        >PC dir couldn't be empty.</nb-alert
-      >
     </nb-card-body>
     <nb-card-footer>
-      <button nbButton class="dialog_btn" [disabled]="name.invalid || serverDir.invalid || pcDir.invalid" status="primary" (click)="toSave()">
+      <button
+        nbButton
+        class="dialog_btn"
+        [disabled]="name.invalid || serverDir.invalid || pcDir.invalid"
+        status="primary"
+        (click)="toSave()"
+      >
         Save
       </button>
       <button
