@@ -209,7 +209,7 @@ export class Sync {
       console.log('applyPatchToServer: start.');
       const { client } = this.sftpClient as any;
       client.exec(
-        `cd ${this.branch.serverDir} && svn revert -R . && svn patch ${TMP_PATCH_NAME}`,
+        `cd ${this.branch.serverDir} && svn revert -R . && patch -p0 < ${TMP_PATCH_NAME}`,
         (err, stream) => {
           if (err) {
             const error = new Error(
