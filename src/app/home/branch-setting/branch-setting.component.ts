@@ -71,6 +71,7 @@ export class BranchSettingPage implements OnInit {
   public toDelete(): void {
     this.dialogRef.close({
       action: DialogAction.DELETE,
+      content: this.branch,
     });
   }
 

@@ -3,7 +3,11 @@ import { NbDialogService } from '@nebular/theme';
 import { BranchInfo } from 'src/common/types';
 import { ElectronService } from 'src/app/core/services';
 import { TO_STORE_SETTING } from 'src/common/message';
-import { BranchSettingPage, DialogRes, DialogAction } from '../branch-setting/branch-setting.component';
+import {
+  BranchSettingPage,
+  DialogRes,
+  DialogAction,
+} from '../branch-setting/branch-setting.component';
 
 @Component({
   selector: 'branch-selector',
@@ -32,6 +36,9 @@ export class BranchSelectorComponent implements OnChanges {
       .onClose.subscribe((res: DialogRes) => {
         if (res && res.action === DialogAction.SAVE) {
           this.branches.push(res.content);
+          setTimeout(() => {
+            this.selectedBranch = res.content;
+          }, 0);
           this.electronService.ipcRenderer.send(TO_STORE_SETTING, {
             branches: this.branches,
           });
@@ -49,7 +56,12 @@ export class BranchSelectorComponent implements OnChanges {
             branches: this.branches,
           });
         } else if (res && res.action === DialogAction.DELETE) {
-          const index = this.branches.findIndex((item) => item.name === branch.name);
+          const index = this.branches.findIndex(
+            (item) => item.name === branch.name,
+          );
+          if (this.selectedBranch.name === res.content.name) {
+            [this.selectedBranch] = this.branches;
+          }
           this.branches.splice(index, 1);
           this.electronService.ipcRenderer.send(TO_STORE_SETTING, {
             branches: this.branches,
