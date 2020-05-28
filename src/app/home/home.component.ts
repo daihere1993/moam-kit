@@ -1,9 +1,4 @@
-import {
-  Component,
-  OnInit,
-  NgZone,
-  ViewChild,
-} from '@angular/core';
+import { Component, OnInit, NgZone, ViewChild } from '@angular/core';
 import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
 import {
   TO_GET_SETTING,
@@ -33,7 +28,8 @@ enum Status {
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-  @ViewChild(BranchSelectorComponent) branchSelectorRef: BranchSelectorComponent;
+  @ViewChild(BranchSelectorComponent)
+  branchSelectorRef: BranchSelectorComponent;
 
   public branches: BranchInfo[];
 
@@ -253,8 +249,15 @@ export class HomeComponent implements OnInit {
   }
 
   public toSyncCode(): void {
-    this._toSyncCode();
-    this.electronService.ipcRenderer.send(TO_SYNC_CODE, this.branch);
+    if (
+      this.connecToServerStatus !== Status.ON_GOING &&
+      this.createPatchStatus !== Status.ON_GOING &&
+      this.uploadPatchStatus !== Status.ON_GOING &&
+      this.applyPatchStatus !== Status.ON_GOING
+    ) {
+      this._toSyncCode();
+      this.electronService.ipcRenderer.send(TO_SYNC_CODE, this.branch);
+    }
   }
 
   private _toSyncCode() {
