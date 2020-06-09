@@ -66,8 +66,10 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.electronService.appData$.subscribe(({ lastAutoCommitInfo }) => {
-      this.autoCommitInfo = lastAutoCommitInfo;
-      this.lastAutoCommitInfo = lastAutoCommitInfo;
+      if (lastAutoCommitInfo) {
+        this.autoCommitInfo = lastAutoCommitInfo;
+        this.lastAutoCommitInfo = lastAutoCommitInfo;
+      }
     });
 
     this.ipcService.on(IPCMessage.REPLY_AUTO_COMMIT_REQ, (event, res: IPCResponse) => {
