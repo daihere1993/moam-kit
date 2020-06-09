@@ -1,88 +1,46 @@
 import * as path from 'path';
 import * as shell from 'shelljs';
-import * as SftpClient from 'ssh2-sftp-client';
-import {
-  app,
-  remote,
-  BrowserWindow,
-  ipcMain,
-  dialog,
-  IpcMainEvent,
-} from 'electron';
+import SftpClient from 'ssh2-sftp-client';
+import { config } from 'node-config-ts';
+import { ipcMain, IpcMainEvent } from 'electron';
 import { Observable, concat, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import {
-  TO_SELECT_FOLDER,
-  REPLY_SELECT_FOLDER,
-  TO_GET_SETTING,
-  REPLY_GET_SETTING,
-  TO_STORE_SETTING,
-  REPLY_STORE_SETTING,
-  TO_SYNC_CODE,
-  REPLY_SYNC_CODE,
-  CONNECT_TO_SERVER_DONE,
-  UPLOAD_PATCH_TO_SERVER_DONE,
-  CREATE_PATCH_DONE,
-  APPLY_PATCH_TO_SERVER_DONE,
-} from '../common/message';
-import { SettingInfo, BranchInfo } from '../common/types';
+import { BranchInfo, IPCMessage, SSHData, IPCRequest } from '../common/types';
 import { Store } from './store';
+import * as utils from '../common/utils';
 
 let RECONNECT_TIME = 0;
-const TMP_PATCH_NAME = 'moam-kit.patch';
-const userDataPath = (app || remote.app).getPath('userData');
-const tmpPatchPath = path.join(userDataPath, TMP_PATCH_NAME);
+const _config = config.Sync;
+const userDataPath = utils.getUserDataPath()
+const tmpPatchPath = path.join(userDataPath, _config.PATH_NAME);
 
 export class Sync {
   private store: Store;
 
-  private win: BrowserWindow;
-
   private sftpClient: SftpClient;
 
-  private get setting(): SettingInfo {
-    return this.store.data as SettingInfo;
+  private get setting(): SSHData {
+    return this.store.data.ssh;
   }
 
   private branch: BranchInfo;
 
-  constructor({ win }: { win: BrowserWindow }) {
-    this.store = new Store();
-    this.win = win;
+  constructor({ store }: { store: Store }) {
+    this.store = store;
     this.sftpClient = new (SftpClient as any)();
+
+    ipcMain.on(IPCMessage.TO_SYNC_CODE, this.toSyncCode.bind(this));
   }
 
   public startup(): void {
     this.messageListening();
   }
 
-  private messageListening() {
-    ipcMain.on(TO_SELECT_FOLDER, (event) => {
-      const dir = dialog.showOpenDialogSync(this.win, {
-        properties: ['openDirectory'],
-      });
-      event.reply(REPLY_SELECT_FOLDER, dir);
-    });
+  private messageListening() {}
 
-    ipcMain.on(TO_GET_SETTING, (event) => {
-      event.reply(REPLY_GET_SETTING, this.setting);
-    });
-
-    ipcMain.on(TO_STORE_SETTING, (event, setting: SettingInfo) => {
-      Object.entries(setting).forEach(([key, value]) => {
-        this.store.set(key, value);
-      });
-      event.reply(REPLY_STORE_SETTING, 0);
-    });
-
-    ipcMain.on(TO_SYNC_CODE, this.toSyncCode.bind(this));
-  }
-
-  private toSyncCode(
-    event: IpcMainEvent,
-    branch: BranchInfo,
-  ): void {
-    this.branch = branch;
+  private toSyncCode(event: IpcMainEvent, { data }: IPCRequest<BranchInfo>): void {
+    RECONNECT_TIME = 0;
+    this.branch = data;
     this.hasServerConnected()
       .pipe(
         switchMap((isConnected) => {
@@ -92,7 +50,7 @@ export class Sync {
       .subscribe(
         (isConnected: boolean) => {
           if (isConnected) {
-            event.reply(CONNECT_TO_SERVER_DONE, { isSuccessed: true });
+            event.reply(IPCMessage.CONNECT_TO_SERVER_DONE, { isSuccessed: true });
 
             concat(
               this.createPatch(event),
@@ -102,23 +60,23 @@ export class Sync {
               () => {},
               (err) => {
                 console.log(`${err.name} failed: ${err.message}`);
-                event.reply(REPLY_SYNC_CODE, {
+                event.reply(IPCMessage.REPLY_SYNC_CODE, {
                   isSuccessed: false,
                   error: { name: err.name, message: err.message },
                 });
               },
               () => {
-                event.reply(REPLY_SYNC_CODE, { isSuccessed: true });
+                event.reply(IPCMessage.REPLY_SYNC_CODE, { isSuccessed: true });
               },
             );
           }
         },
         (err) => {
           console.log(`${err.name} failed: ${err.message}`);
-          event.reply(REPLY_SYNC_CODE, {
+          event.reply(IPCMessage.REPLY_SYNC_CODE, {
             isSuccessed: false,
             error: {
-              name: CONNECT_TO_SERVER_DONE,
+              name: IPCMessage.CONNECT_TO_SERVER_DONE,
               message: `Connect to server failed: ${err.message}`,
             },
           });
@@ -165,19 +123,17 @@ export class Sync {
   private createPatch(event: IpcMainEvent): Observable<void> {
     return new Observable<void>((subscriber) => {
       console.log('createPatch: start.');
-      shell
-        .cd(this.branch.pcDir)
-        .exec(`svn di > ${tmpPatchPath}`, (code, stdout, stderr) => {
-          if (code === 0) {
-            console.log('createPatch: done.');
-            event.reply(CREATE_PATCH_DONE, { isSuccessed: true });
-            subscriber.complete();
-          } else {
-            const error = new Error(`Create patch failed: ${stderr}, ${code}.`);
-            error.name = CREATE_PATCH_DONE;
-            subscriber.error(error);
-          }
-        });
+      shell.cd(this.branch.pcDir).exec(`svn di > ${tmpPatchPath}`, (code, stdout, stderr) => {
+        if (code === 0) {
+          console.log('createPatch: done.');
+          event.reply(IPCMessage.CREATE_PATCH_DONE, { isSuccessed: true });
+          subscriber.complete();
+        } else {
+          const error = new Error(`Create patch failed: ${stderr}, ${code}.`);
+          error.name = IPCMessage.CREATE_PATCH_DONE;
+          subscriber.error(error);
+        }
+      });
     });
   }
 
@@ -185,20 +141,15 @@ export class Sync {
     return new Observable<void>((subscriber) => {
       console.log('uploadPatchToServer: start.');
       this.sftpClient
-        .fastPut(
-          path.join(tmpPatchPath),
-          `${this.branch.serverDir}/${TMP_PATCH_NAME}`,
-        )
+        .fastPut(path.join(tmpPatchPath), `${this.branch.serverDir}/${_config.PATH_NAME}`)
         .then(() => {
           console.log('uploadPatchToServer: done.');
-          event.reply(UPLOAD_PATCH_TO_SERVER_DONE, { isSuccessed: true });
+          event.reply(IPCMessage.UPLOAD_PATCH_TO_SERVER_DONE, { isSuccessed: true });
           return subscriber.complete();
         })
         .catch((err) => {
-          const error = new Error(
-            `Upload patch to server failed: ${err.message}`,
-          );
-          error.name = UPLOAD_PATCH_TO_SERVER_DONE;
+          const error = new Error(`Upload patch to server failed: ${err.message}`);
+          error.name = IPCMessage.UPLOAD_PATCH_TO_SERVER_DONE;
           subscriber.error(error);
         });
     });
@@ -209,20 +160,19 @@ export class Sync {
       console.log('applyPatchToServer: start.');
       const { client } = this.sftpClient as any;
       client.exec(
-        `cd ${this.branch.serverDir} && svn revert -R . && patch -p0 < ${TMP_PATCH_NAME}`,
+        // `cd ${this.branch.serverDir} && svn revert -R . && patch -p0 < ${_config.PATH_NAME}`,
+        `cd ${this.branch.serverDir} && svn revert -R . && svn patch ${_config.PATH_NAME}`,
         (err, stream) => {
           if (err) {
-            const error = new Error(
-              `Apply patch to server failed: ${err.message}`,
-            );
-            error.name = APPLY_PATCH_TO_SERVER_DONE;
+            const error = new Error(`Apply patch to server failed: ${err.message}`);
+            error.name = IPCMessage.APPLY_PATCH_TO_SERVER_DONE;
             subscriber.error(error);
           }
 
           stream
             .on('close', () => {
               console.log('applyPatchToServer: done.');
-              event.reply(APPLY_PATCH_TO_SERVER_DONE, { isSuccessed: true });
+              event.reply(IPCMessage.APPLY_PATCH_TO_SERVER_DONE, { isSuccessed: true });
               subscriber.complete();
             })
             .on('data', (data) => {
@@ -231,7 +181,7 @@ export class Sync {
             })
             .stderr.on('data', (data) => {
               const error = new Error(`Apply patch to server failed: ${data}`);
-              error.name = APPLY_PATCH_TO_SERVER_DONE;
+              error.name = IPCMessage.APPLY_PATCH_TO_SERVER_DONE;
               subscriber.error(error);
             });
         },

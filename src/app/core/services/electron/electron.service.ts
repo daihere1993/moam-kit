@@ -5,6 +5,11 @@ import { Injectable } from '@angular/core';
 import { ipcRenderer, webFrame, remote } from 'electron';
 import * as childProcess from 'child_process';
 import * as fs from 'fs';
+import seedrandom from 'seedrandom';
+
+import { IPCMessage, APPData, IPCResponse } from 'src/common/types';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -20,6 +25,10 @@ export class ElectronService {
 
   fs: typeof fs;
 
+  appData$: Observable<APPData>;
+
+  seedrandom: { int32: () => number };
+
   get isElectron(): boolean {
     return !!(window && window.process && window.process.type);
   }
@@ -27,12 +36,22 @@ export class ElectronService {
   constructor() {
     // Conditional imports
     if (this.isElectron) {
+      this.seedrandom = seedrandom('IPCEventSeed');
       this.ipcRenderer = window.require('electron').ipcRenderer;
       this.webFrame = window.require('electron').webFrame;
       this.remote = window.require('electron').remote;
 
       this.childProcess = window.require('child_process');
       this.fs = window.require('fs');
+
+      const subject = new BehaviorSubject<APPData>(undefined);
+      this.appData$ = subject.pipe(filter((data) => !!data));
+      this.ipcRenderer.send(IPCMessage.GET_APP_DATA_REQ);
+      this.ipcRenderer.on(IPCMessage.GET_APP_DATA_RES, (event, res: IPCResponse) => {
+        if (res.isSuccessed) {
+          subject.next(res.data);
+        }
+      });
     }
   }
 }

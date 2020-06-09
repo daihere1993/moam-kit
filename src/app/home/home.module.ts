@@ -10,17 +10,15 @@ import {
   NbSpinnerModule,
   NbCardModule,
   NbAlertModule,
-  NbSelectModule,
-  NbDialogModule,
 } from '@nebular/theme';
+
+import { BranchSelectorModule } from '../core/components/branch-selector';
 
 import { HomeComponent } from './home.component';
 import { HomeRoutingModule } from './home-routing.module';
-import { BranchSelectorComponent } from './branch-selector/branch-selector.component';
-import { BranchSettingPage } from './branch-setting/branch-setting.component';
 
 @NgModule({
-  declarations: [HomeComponent, BranchSelectorComponent, BranchSettingPage],
+  declarations: [HomeComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -32,9 +30,7 @@ import { BranchSettingPage } from './branch-setting/branch-setting.component';
     NbSpinnerModule,
     NbCardModule,
     NbAlertModule,
-    NbSelectModule,
-    NbAlertModule,
-    NbDialogModule.forChild({ closeOnBackdropClick: false }),
+    BranchSelectorModule,
   ],
 })
 export class HomeModule {}

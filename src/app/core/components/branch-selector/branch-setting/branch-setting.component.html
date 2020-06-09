@@ -23,40 +23,19 @@
         />
       </nb-form-field>
 
-      <nb-form-field class="field_item">
-        <input
-          #pcDir="ngModel"
-          nbInput
-          fullWidth
-          required
-          placeholder="MOAM DIR of PC"
-          [(ngModel)]="branch.pcDir"
-        />
-        <nb-icon
-          nbSuffix
-          icon="folder-outline"
-          style="cursor: pointer;"
-          (click)="toSelectFolder($event)"
-        ></nb-icon>
-      </nb-form-field>
+      <path-field placeholder="MOAM DIR of PC" [(value)]="branch.pcDir"></path-field>
     </nb-card-body>
     <nb-card-footer>
       <button
         nbButton
         class="dialog_btn"
-        [disabled]="name.invalid || serverDir.invalid || pcDir.invalid"
+        [disabled]="name.invalid || serverDir.invalid"
         status="primary"
         (click)="toSave()"
       >
         Save
       </button>
-      <button
-        nbButton
-        class="dialog_btn"
-        *ngIf="isEdit"
-        status="danger"
-        (click)="toDelete()"
-      >
+      <button nbButton class="dialog_btn" *ngIf="isEdit" status="danger" (click)="toDelete()">
         Delete
       </button>
       <button nbButton class="dialog_btn" (click)="toClose()">Close</button>

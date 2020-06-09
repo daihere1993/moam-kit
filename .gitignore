@@ -5,6 +5,8 @@
 /tmp
 /out-tsc
 /release
+/config/*.d.ts
+/src/main-process/test/tmp
 # Only exists if Bazel was run
 /bazel-out
 

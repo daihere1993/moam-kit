@@ -1,0 +1,10 @@
+<nb-form-field class="field_item">
+  <input nbInput fullWidth [placeholder]="placeholder" [value]="value" (ngModelChange)="value = $event"/>
+  <nb-icon
+    nbSuffix
+    icon="folder-outline"
+    style="cursor: pointer;"
+    (click)="toSelectPath($event)"
+  ></nb-icon>
+</nb-form-field>
+

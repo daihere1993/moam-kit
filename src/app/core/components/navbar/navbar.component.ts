@@ -14,6 +14,11 @@ export class NavbarComponent {
       icon: 'home-outline',
     },
     {
+      title: 'Auto Commit',
+      link: '/auto-commit',
+      icon: 'cloud-upload-outline',
+    },
+    {
       title: 'Setting',
       link: '/setting',
       icon: 'settings-outline',

@@ -1,17 +1,14 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
-import {
-  TO_GET_SETTING,
-  REPLY_GET_SETTING,
-  TO_STORE_SETTING,
-} from 'src/common/message';
+import { SSHData, IPCMessage, IPCResponse } from '../../common/types';
+import { IpcService } from '../core/services/electron/ipc.service';
 import { ElectronService } from '../core/services';
-import { SSHInfo } from '../../common/types';
 
 @Component({
   selector: 'app-setting',
   templateUrl: './setting.component.html',
   styleUrls: ['./setting.component.scss'],
+  providers: [IpcService],
 })
 export class SettingComponent implements OnInit {
   public host: string;
@@ -20,7 +17,7 @@ export class SettingComponent implements OnInit {
 
   public password: string;
 
-  private get sshInfo(): SSHInfo {
+  private get sshInfo(): SSHData {
     return {
       host: this.host,
       username: this.username,
@@ -28,33 +25,28 @@ export class SettingComponent implements OnInit {
     };
   }
 
-  private set sshInfo(info: SSHInfo) {
+  private set sshInfo(info: SSHData) {
     this.host = info.host;
     this.username = info.username;
     this.password = info.password;
   }
 
   constructor(
-    private electronService: ElectronService,
-    private zone: NgZone,
     private toastrService: NbToastrService,
+    private ipcService: IpcService,
+    private electronService: ElectronService,
   ) {}
 
   public ngOnInit(): void {
-    const { ipcRenderer } = this.electronService;
-    ipcRenderer.send(TO_GET_SETTING);
-    ipcRenderer.on(REPLY_GET_SETTING, (event, sshInfo: SSHInfo) => {
-      this.zone.run(() => {
-        if (sshInfo) {
-          this.sshInfo = sshInfo;
-        }
-      });
+    this.electronService.appData$.subscribe((data) => {
+      this.sshInfo = data.ssh;
     });
   }
 
   public toSave(): void {
-    const { ipcRenderer } = this.electronService;
-    ipcRenderer.send(TO_STORE_SETTING, this.sshInfo);
+    this.ipcService.send<{ key: string; value: SSHData }>(IPCMessage.STORE_DATA_REQ, {
+      data: { key: 'ssh', value: this.sshInfo },
+    });
     this.toastrService.show('Success', 'Setting', {
       position: NbGlobalPhysicalPosition.BOTTOM_RIGHT,
       duration: 800,

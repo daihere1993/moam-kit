@@ -1,6 +1,5 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { ElectronService } from 'src/app/core/services';
-import { TO_SELECT_FOLDER, REPLY_SELECT_FOLDER } from 'src/common/message';
 import { BranchInfo } from 'src/common/types';
 import {
   NbDialogRef,
@@ -24,7 +23,7 @@ export interface DialogRes {
   templateUrl: 'branch-setting.component.html',
   styleUrls: ['branch-setting.component.scss'],
 })
-export class BranchSettingPage implements OnInit {
+export class BranchSettingPage {
   public branch: BranchInfo = {
     name: '',
     pcDir: '',
@@ -35,27 +34,8 @@ export class BranchSettingPage implements OnInit {
 
   constructor(
     private dialogRef: NbDialogRef<BranchSettingPage>,
-    private electronService: ElectronService,
-    private zone: NgZone,
     private toastrService: NbToastrService,
   ) {}
-
-  ngOnInit(): void {
-    const { ipcRenderer } = this.electronService;
-    ipcRenderer.on(REPLY_SELECT_FOLDER, (event, ret) => {
-      this.zone.run(() => {
-        if (ret) {
-          [this.branch.pcDir] = ret;
-        }
-      });
-    });
-  }
-
-  public toSelectFolder(e: Event): void {
-    const { ipcRenderer } = this.electronService;
-    ipcRenderer.send(TO_SELECT_FOLDER);
-    e.stopPropagation();
-  }
 
   public toSave(): void {
     this.dialogRef.close({

@@ -1,11 +1,5 @@
 module.exports = {
-  plugins: [
-    '@typescript-eslint',
-    'eslint-comments',
-    'jest',
-    'promise',
-    'unicorn',
-  ],
+  plugins: ['@typescript-eslint', 'eslint-comments', 'jest', 'promise', 'unicorn'],
   extends: [
     'airbnb-typescript/base',
     'plugin:@typescript-eslint/recommended',
@@ -28,10 +22,7 @@ module.exports = {
     // Too restrictive, writing ugly code to defend against a very unlikely scenario: https://eslint.org/docs/rules/no-prototype-builtins
     'no-prototype-builtins': 'off',
     // Use function hoisting to improve code readability
-    'no-use-before-define': [
-      'error',
-      { functions: false, classes: true, variables: true },
-    ],
+    'no-use-before-define': ['error', { functions: false, classes: true, variables: true }],
     // Makes no sense to allow type inferrence for expression parameters, but require typing the response
     '@typescript-eslint/explicit-function-return-type': [
       'error',
@@ -56,5 +47,10 @@ module.exports = {
     'import/prefer-default-export': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     'import/no-extraneous-dependencies': 'off',
+    'jest/no-test-callback': 'off',
+    'no-plusplus': 'off',
+    'unicorn/no-for-loop': 'off',
+    'unicorn/prefer-spread': 'off',
+    '@typescript-eslint/interface-name-prefix': 'off',
   },
 };

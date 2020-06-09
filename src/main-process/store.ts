@@ -1,20 +1,20 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import * as path from 'path';
 import * as fs from 'fs';
-import * as electron from 'electron';
-import { SettingInfo } from '../common/types';
+import { config } from 'node-config-ts';
+import { APPData } from '../common/types';
+import * as utils from '../common/utils';
+
+const _config = config.Common;
 
 export class Store {
-  public data: SettingInfo | {};
+  public data: APPData;
 
   public path: string;
 
   constructor() {
-    const userDataPath = (electron.app || electron.remote.app).getPath(
-      'userData',
-    );
-    this.path = path.join(userDataPath, 'setting.json');
-    this.data = fs.existsSync(this.path) ? parseDataFile(this.path) : {};
+    this.path = path.join(utils.getUserDataPath(), _config.STORAGE_NAME);
+    this.data = fs.existsSync(this.path) ? parseDataFile(this.path) : {} as APPData;
   }
 
   public get(key: string): any {
@@ -26,12 +26,12 @@ export class Store {
     fs.writeFileSync(this.path, JSON.stringify(this.data));
   }
 
-  public setAll(data: SettingInfo): void {
+  public setAll(data: APPData): void {
     this.data = data;
     fs.writeFileSync(this.path, JSON.stringify(this.data));
   }
 }
 
-function parseDataFile(filePath: string): SettingInfo {
+function parseDataFile(filePath: string): APPData {
   return JSON.parse(fs.readFileSync(filePath).toString());
 }

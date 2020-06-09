@@ -1,19 +1,10 @@
-import { Component, OnInit, NgZone, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
-import {
-  TO_GET_SETTING,
-  REPLY_GET_SETTING,
-  REPLY_SYNC_CODE,
-  TO_SYNC_CODE_FROM_MAIN,
-  TO_SYNC_CODE,
-  CONNECT_TO_SERVER_DONE,
-  CREATE_PATCH_DONE,
-  UPLOAD_PATCH_TO_SERVER_DONE,
-  APPLY_PATCH_TO_SERVER_DONE,
-} from 'src/common/message';
-import { SettingInfo, TaskRes, BranchInfo } from 'src/common/types';
+import { IPCResponse, BranchInfo, IPCMessage } from 'src/common/types';
+import { IpcService } from '../core/services/electron/ipc.service';
 import { ElectronService } from '../core/services';
-import { BranchSelectorComponent } from './branch-selector/branch-selector.component';
 
 enum Status {
   ON_GOING = 'on going',
@@ -26,16 +17,18 @@ enum Status {
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
+  providers: [IpcService],
 })
-export class HomeComponent implements OnInit {
-  @ViewChild(BranchSelectorComponent)
-  branchSelectorRef: BranchSelectorComponent;
-
-  public branches: BranchInfo[];
-
-  private get branch(): BranchInfo {
-    return this.branchSelectorRef.selectedBranch;
+export class HomeComponent implements OnInit, OnDestroy {
+  public get branches$(): Observable<BranchInfo[]> {
+    return this.electronService.appData$.pipe(
+      map((data) => {
+        return data.branches;
+      }),
+    );
   }
+
+  public branch: BranchInfo;
 
   /** Sync status */
   public syncStatus: Status;
@@ -143,109 +136,89 @@ export class HomeComponent implements OnInit {
   }
 
   constructor(
+    private ipcService: IpcService,
     private electronService: ElectronService,
-    private zone: NgZone,
     private toastrService: NbToastrService,
   ) {}
 
   ngOnInit(): void {
-    const { ipcRenderer } = this.electronService;
-    ipcRenderer.send(TO_GET_SETTING);
-    ipcRenderer.on(REPLY_GET_SETTING, (event, settingInfo: SettingInfo) => {
-      this.zone.run(() => {
-        if (settingInfo) {
-          this.branches = settingInfo.branches || [];
-        }
-      });
-    });
-
-    ipcRenderer.on(TO_SYNC_CODE_FROM_MAIN, () => {
+    this.ipcService.on(IPCMessage.TO_SYNC_CODE_FROM_MAIN, () => {
       this.toSyncCode();
     });
 
-    ipcRenderer.on(REPLY_SYNC_CODE, (event, ret: TaskRes) => {
-      this.zone.run(() => {
-        if (ret.isSuccessed) {
-          this.syncStatus = Status.DONE;
-        } else {
-          this.syncStatus = Status.FAILED;
-          const { error } = ret;
-          switch (error.name) {
-            case CONNECT_TO_SERVER_DONE:
-              this.connecToServerStatus = Status.FAILED;
-              this.connecToServerFailedMsg = error.message;
-              this.createPatchStatus = Status.TIMEOUT;
-              this.uploadPatchStatus = Status.TIMEOUT;
-              this.applyPatchStatus = Status.TIMEOUT;
-              break;
-            case CREATE_PATCH_DONE:
-              this.createPatchStatus = Status.FAILED;
-              this.createPatchFailedMsg = error.message;
-              this.uploadPatchStatus = Status.TIMEOUT;
-              this.applyPatchStatus = Status.TIMEOUT;
-              break;
-            case UPLOAD_PATCH_TO_SERVER_DONE:
-              this.uploadPatchStatus = Status.FAILED;
-              this.uploadPatchFailedMsg = error.message;
-              this.uploadPatchStatus = Status.TIMEOUT;
-              this.applyPatchStatus = Status.TIMEOUT;
-              break;
-            case APPLY_PATCH_TO_SERVER_DONE:
-              this.applyPatchStatus = Status.FAILED;
-              this.applyPatchFailedMsg = error.message;
-              break;
-            default:
-              break;
-          }
-          this.snycErrorMsg = error.message;
-          this.alterErrorMsg(`${error.name}: ${error.message}`);
+    this.ipcService.on(IPCMessage.REPLY_SYNC_CODE, (event, res: IPCResponse) => {
+      if (res.isSuccessed) {
+        this.syncStatus = Status.DONE;
+      } else {
+        this.syncStatus = Status.FAILED;
+        const { error } = res;
+        switch (error.name) {
+          case IPCMessage.CONNECT_TO_SERVER_DONE:
+            this.connecToServerStatus = Status.FAILED;
+            this.connecToServerFailedMsg = error.message;
+            this.createPatchStatus = Status.TIMEOUT;
+            this.uploadPatchStatus = Status.TIMEOUT;
+            this.applyPatchStatus = Status.TIMEOUT;
+            break;
+          case IPCMessage.CREATE_PATCH_DONE:
+            this.createPatchStatus = Status.FAILED;
+            this.createPatchFailedMsg = error.message;
+            this.uploadPatchStatus = Status.TIMEOUT;
+            this.applyPatchStatus = Status.TIMEOUT;
+            break;
+          case IPCMessage.UPLOAD_PATCH_TO_SERVER_DONE:
+            this.uploadPatchStatus = Status.FAILED;
+            this.uploadPatchFailedMsg = error.message;
+            this.uploadPatchStatus = Status.TIMEOUT;
+            this.applyPatchStatus = Status.TIMEOUT;
+            break;
+          case IPCMessage.APPLY_PATCH_TO_SERVER_DONE:
+            this.applyPatchStatus = Status.FAILED;
+            this.applyPatchFailedMsg = error.message;
+            break;
+          default:
+            break;
         }
-      });
+        this.snycErrorMsg = error.message;
+        this.alterErrorMsg(`${error.name}: ${error.message}`);
+      }
     });
 
-    ipcRenderer.on(CONNECT_TO_SERVER_DONE, (event, ret: TaskRes) => {
-      this.zone.run(() => {
-        if (ret.isSuccessed) {
-          this.connecToServerStatus = Status.DONE;
-        } else {
-          this.alterErrorMsg(`Unexpected response: ${CONNECT_TO_SERVER_DONE}`);
-        }
-      });
+    this.ipcService.on(IPCMessage.CONNECT_TO_SERVER_DONE, (event, ret: IPCResponse) => {
+      if (ret.isSuccessed) {
+        this.connecToServerStatus = Status.DONE;
+      } else {
+        this.alterErrorMsg(`Unexpected response: ${IPCMessage.CONNECT_TO_SERVER_DONE}`);
+      }
     });
 
-    ipcRenderer.on(CREATE_PATCH_DONE, (event, ret: TaskRes) => {
-      this.zone.run(() => {
-        if (ret.isSuccessed) {
-          this.createPatchStatus = Status.DONE;
-        } else {
-          this.alterErrorMsg(`Unexpected response: ${CREATE_PATCH_DONE}`);
-        }
-      });
+    this.ipcService.on(IPCMessage.CREATE_PATCH_DONE, (event, ret: IPCResponse) => {
+      if (ret.isSuccessed) {
+        this.createPatchStatus = Status.DONE;
+      } else {
+        this.alterErrorMsg(`Unexpected response: ${IPCMessage.CREATE_PATCH_DONE}`);
+      }
     });
 
-    ipcRenderer.on(UPLOAD_PATCH_TO_SERVER_DONE, (event, ret: TaskRes) => {
-      this.zone.run(() => {
-        if (ret.isSuccessed) {
-          this.uploadPatchStatus = Status.DONE;
-        } else {
-          this.alterErrorMsg(
-            `Unexpected response: ${UPLOAD_PATCH_TO_SERVER_DONE}`,
-          );
-        }
-      });
+    this.ipcService.on(IPCMessage.UPLOAD_PATCH_TO_SERVER_DONE, (event, ret: IPCResponse) => {
+      if (ret.isSuccessed) {
+        this.uploadPatchStatus = Status.DONE;
+      } else {
+        this.alterErrorMsg(`Unexpected response: ${IPCMessage.UPLOAD_PATCH_TO_SERVER_DONE}`);
+      }
     });
 
-    ipcRenderer.on(APPLY_PATCH_TO_SERVER_DONE, (event, ret: TaskRes) => {
-      this.zone.run(() => {
-        if (ret.isSuccessed) {
-          this.applyPatchStatus = Status.DONE;
-        } else {
-          this.alterErrorMsg(
-            `Unexpected response: ${APPLY_PATCH_TO_SERVER_DONE}`,
-          );
-        }
-      });
+    this.ipcService.on(IPCMessage.APPLY_PATCH_TO_SERVER_DONE, (event, ret: IPCResponse) => {
+      if (ret.isSuccessed) {
+        this.applyPatchStatus = Status.DONE;
+      } else {
+        this.alterErrorMsg(`Unexpected response: ${IPCMessage.APPLY_PATCH_TO_SERVER_DONE}`);
+      }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.ipcService.destroy();
   }
 
   public toSyncCode(): void {
@@ -256,7 +229,9 @@ export class HomeComponent implements OnInit {
       this.applyPatchStatus !== Status.ON_GOING
     ) {
       this._toSyncCode();
-      this.electronService.ipcRenderer.send(TO_SYNC_CODE, this.branch);
+      this.ipcService.send(IPCMessage.TO_SYNC_CODE, {
+        data: this.branch,
+      });
     }
   }
 

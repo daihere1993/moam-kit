@@ -1,0 +1,74 @@
+<div class="container">
+  <div class="field_wrap">
+    <branch-selector
+      class="field_item"
+      [(value)]="autoCommitInfo.branch"
+      [branches]="branches$ | async"
+    ></branch-selector>
+
+    <nb-form-field class="field_item">
+      <input
+        #fPRTitle="ngModel"
+        required
+        nbInput
+        fullWidth
+        placeholder="Pronto Title"
+        [(ngModel)]="autoCommitInfo.prontoTitle"
+      />
+    </nb-form-field>
+    <nb-form-field class="field_item">
+      <input
+        #fDesc="ngModel"
+        required
+        nbInput
+        fullWidth
+        placeholder="Correction Description"
+        [(ngModel)]="autoCommitInfo.description"
+      />
+    </nb-form-field>
+    <nb-form-field class="field_item">
+      <input
+        #fRBId="ngModel"
+        required
+        nbInput
+        fullWidth
+        placeholder="Review Board ID"
+        [(ngModel)]="autoCommitInfo.reviewBoardID"
+      />
+    </nb-form-field>
+
+    <path-field
+      class="field_item"
+      placeholder="Specific Diff"
+      [(value)]="autoCommitInfo.specificDiff"
+      type="file"
+    ></path-field>
+
+    <div class="action_container">
+      <button
+        nbButton
+        [disabled]="fPRTitle.invalid || fDesc.invalid || fRBId.invalid"
+        [status]="isOnGoing ? 'basic' : 'primary'"
+        (click)="toAutoCommit()"
+      >
+        {{ isOnGoing ? 'Stop' : 'DO IT' }}
+      </button>
+      <div class="progress_container" *ngIf="commitStatus">
+        <div class="spinner" [nbSpinner]="isOnGoing" nbSpinnerStatus="success">
+          <nb-icon *ngIf="isSuccess" icon="checkmark-outline" status="success"></nb-icon>
+          <nb-icon *ngIf="isFailed" icon="close-outline" status="danger"></nb-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="log_wrap">
+    <div
+      class="commit_status"
+      *ngIf="isSuccess || isFailed"
+      [ngClass]="isSuccess ? 'success' : 'failed'"
+    >
+      {{ isSuccess ? 'success' : 'failed' }}
+    </div>
+    <p *ngFor="let log of logs">{{ log }}</p>
+  </div>
+</div>

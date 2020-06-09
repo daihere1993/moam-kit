@@ -10,6 +10,7 @@ export class CacheRouteReuseStrategy implements RouteReuseStrategy {
   allowRetriveCache = {
     home: true,
     setting: true,
+    'auto-commit': true,
   };
 
   shouldReuseRoute(

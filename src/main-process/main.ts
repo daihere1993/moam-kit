@@ -1,8 +1,10 @@
 import * as path from 'path';
 import * as url from 'url';
-import { app, BrowserWindow, Menu, MenuItem } from 'electron';
-import { TO_SYNC_CODE_FROM_MAIN } from '../common/message';
+import { app, BrowserWindow, Menu, MenuItem, ipcMain, dialog } from 'electron';
 import { Sync } from './sync';
+import { AutoCommit } from './auto-commit';
+import { Store } from './store';
+import { IPCMessage, IPCRequest, IPCResponse, SSHData } from '../common/types';
 
 let win: BrowserWindow;
 const args = process.argv.slice(1);
@@ -50,6 +52,48 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
+function createMenu(): void {
+  // Add shortcuts
+  const menu = new Menu();
+  menu.append(
+    new MenuItem({
+      label: 'Edit',
+      submenu: [
+        {
+          label: 'To Sync Code',
+          accelerator: 'Ctrl+Enter',
+          click: (menuItem, browserWindow) => {
+            browserWindow.webContents.send(IPCMessage.TO_SYNC_CODE_FROM_MAIN);
+          },
+        },
+      ],
+    }),
+  );
+  Menu.setApplicationMenu(menu);
+}
+
+function subscribeIPCEvent(store: Store): void {
+  ipcMain.on(IPCMessage.GET_APP_DATA_REQ, (event) => {
+    const res: IPCResponse = { isSuccessed: true, data: store.data };
+    event.reply(IPCMessage.GET_APP_DATA_RES, res);
+  });
+
+  ipcMain.on(IPCMessage.STORE_DATA_REQ, (event, { data, seed }: IPCRequest<{ key: string, value: SSHData }>) => {
+    const res: IPCResponse = { isSuccessed: true, seed, data: store.data };
+    store.set(data.key, data.value);
+    event.reply(IPCMessage.STORE_DATA_RES, res);
+    event.reply(IPCMessage.GET_APP_DATA_RES, res);
+  });
+
+  ipcMain.on(IPCMessage.SELECT_PATH_REQ, (event, { data, seed }: IPCRequest<{ isDirectory: boolean }>) => {
+    const targetPath = dialog.showOpenDialogSync(win, {
+      properties: [data.isDirectory ? 'openDirectory' : 'openFile'],
+    });
+    const res: IPCResponse = { isSuccessed: !!targetPath, data: targetPath, seed };
+    event.reply(IPCMessage.SELECT_PATH_RES, res);
+  });
+}
+
 try {
   app.allowRendererProcessReuse = true;
 
@@ -58,29 +102,20 @@ try {
   // Some APIs can only be used after this event occurs.
   // Added 400 ms to fix the black background issue while using transparent window. More detais at https://github.com/electron/electron/issues/15947
   app.on('ready', () => {
-    const sync = new Sync({ win });
+    // To fix 'Unable to verify leaf signature' when send request to get SVN status
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+    const store = new Store();
+    const sync = new Sync({ store });
     sync.startup();
+    const autoCommit = new AutoCommit();
+    autoCommit.startup();
+
+    subscribeIPCEvent(store);
 
     setTimeout(() => {
       createWindow();
-
-      // Add shortcuts
-      const menu = new Menu();
-      menu.append(
-        new MenuItem({
-          label: 'Edit',
-          submenu: [
-            {
-              label: 'To Sync Code',
-              accelerator: 'Ctrl+Enter',
-              click: (menuItem, browserWindow) => {
-                browserWindow.webContents.send(TO_SYNC_CODE_FROM_MAIN);
-              },
-            },
-          ],
-        }),
-      );
-      Menu.setApplicationMenu(menu);
+      createMenu();
     }, 400);
   });
 

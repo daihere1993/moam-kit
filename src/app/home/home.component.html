@@ -1,32 +1,15 @@
 <div class="container">
   <div class="sync_form">
-    <branch-selector [branches]="branches"></branch-selector>
+    <branch-selector [(value)]="branch" [branches]="branches$ | async"></branch-selector>
 
     <div class="sync_containner">
-      <button
-        class="sync_button"
-        nbButton
-        status="primary"
-        (click)="toSyncCode()"
-      >
+      <button class="sync_button" nbButton status="primary" (click)="toSyncCode()">
         Sync Code
       </button>
       <div class="progress_container" *ngIf="syncStatus">
-        <div
-          class="spinner"
-          [nbSpinner]="isSyncOnGoing"
-          nbSpinnerStatus="success"
-        >
-          <nb-icon
-            *ngIf="isSyncDone"
-            icon="checkmark-outline"
-            status="success"
-          ></nb-icon>
-          <nb-icon
-            *ngIf="isSyncFailed"
-            icon="close-outline"
-            status="danger"
-          ></nb-icon>
+        <div class="spinner" [nbSpinner]="isSyncOnGoing" nbSpinnerStatus="success">
+          <nb-icon *ngIf="isSyncDone" icon="checkmark-outline" status="success"></nb-icon>
+          <nb-icon *ngIf="isSyncFailed" icon="close-outline" status="danger"></nb-icon>
         </div>
       </div>
     </div>
@@ -43,16 +26,8 @@
             [nbSpinner]="isConnectionOnGoing"
             nbSpinnerSize="tiny"
           >
-            <nb-icon
-              *ngIf="isConnectionDone"
-              icon="checkmark-outline"
-              status="success"
-            ></nb-icon>
-            <nb-icon
-              *ngIf="isConnectionFailed"
-              icon="close-outline"
-              status="danger"
-            ></nb-icon>
+            <nb-icon *ngIf="isConnectionDone" icon="checkmark-outline" status="success"></nb-icon>
+            <nb-icon *ngIf="isConnectionFailed" icon="close-outline" status="danger"></nb-icon>
             <nb-icon
               *ngIf="isConnectionTimeout"
               icon="minus-circle-outline"
@@ -68,16 +43,8 @@
             [nbSpinner]="isCreatePatchOnGoing"
             nbSpinnerSize="tiny"
           >
-            <nb-icon
-              *ngIf="isCreatePatchDone"
-              icon="checkmark-outline"
-              status="success"
-            ></nb-icon>
-            <nb-icon
-              *ngIf="isCreatePatchFailed"
-              icon="close-outline"
-              status="danger"
-            ></nb-icon>
+            <nb-icon *ngIf="isCreatePatchDone" icon="checkmark-outline" status="success"></nb-icon>
+            <nb-icon *ngIf="isCreatePatchFailed" icon="close-outline" status="danger"></nb-icon>
             <nb-icon
               *ngIf="isCreatePatchTimeout"
               icon="minus-circle-outline"
@@ -93,16 +60,8 @@
             [nbSpinner]="isUploadPatchOnGoing"
             nbSpinnerSize="tiny"
           >
-            <nb-icon
-              *ngIf="isUploadPatchDone"
-              icon="checkmark-outline"
-              status="success"
-            ></nb-icon>
-            <nb-icon
-              *ngIf="isUploadPatchFailed"
-              icon="close-outline"
-              status="danger"
-            ></nb-icon>
+            <nb-icon *ngIf="isUploadPatchDone" icon="checkmark-outline" status="success"></nb-icon>
+            <nb-icon *ngIf="isUploadPatchFailed" icon="close-outline" status="danger"></nb-icon>
             <nb-icon
               *ngIf="isUploadPatchTimeout"
               icon="minus-circle-outline"
@@ -118,16 +77,8 @@
             [nbSpinner]="isApplyPatchOnGoing"
             nbSpinnerSize="tiny"
           >
-            <nb-icon
-              *ngIf="isApplyPatchDone"
-              icon="checkmark-outline"
-              status="success"
-            ></nb-icon>
-            <nb-icon
-              *ngIf="isApplyPatchFailed"
-              icon="close-outline"
-              status="danger"
-            ></nb-icon>
+            <nb-icon *ngIf="isApplyPatchDone" icon="checkmark-outline" status="success"></nb-icon>
+            <nb-icon *ngIf="isApplyPatchFailed" icon="close-outline" status="danger"></nb-icon>
             <nb-icon
               *ngIf="isApplyPatchTimeout"
               icon="minus-circle-outline"

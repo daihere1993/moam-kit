@@ -9,6 +9,7 @@ import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { HomeModule } from './home/home.module';
 import { SettingModule } from './setting/setting.module';
+import { AutoCommitModule } from './auto-commit/auto-commit.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -22,6 +23,7 @@ import { SettingModule } from './setting/setting.module';
     CoreModule,
     HomeModule,
     SettingModule,
+    AutoCommitModule,
     NbLayoutModule,
     NbEvaIconsModule,
   ],
