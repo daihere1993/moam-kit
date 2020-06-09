@@ -1,6 +1,14 @@
-import { Component, OnInit, Input, NgZone, OnDestroy, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  Input,
+  OnDestroy,
+  Output,
+  EventEmitter,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { IPCResponse, IPCMessage } from 'src/common/types';
-import { ElectronService } from '../../services';
 import { IpcService } from '../../services/electron/ipc.service';
 
 enum Type {
@@ -14,12 +22,26 @@ enum Type {
   styleUrls: ['./path-field.component.scss'],
   providers: [IpcService],
 })
-export class PathInputComponent implements OnInit, OnDestroy {
+export class PathInputComponent implements OnInit, OnDestroy, OnChanges {
   @Output() valueChange: EventEmitter<string> = new EventEmitter();
 
   @Input() placeholder: string;
 
-  @Input() value = '';
+  private _value: string;
+
+  @Input('value')
+  get value(): string {
+    if (this._value) {
+      return this._value;
+    }
+    return '';
+  }
+
+  set value(v: string) {
+    if (v) {
+      this._value = v;
+    }
+  }
 
   @Input() type: Type = Type.DIR;
 
@@ -27,7 +49,11 @@ export class PathInputComponent implements OnInit, OnDestroy {
     return this.type === Type.DIR;
   }
 
-  constructor(private zone: NgZone, private ipcService: IpcService) {}
+  constructor(private ipcService: IpcService) {}
+
+  ngOnChanges(changes: SimpleChanges) {
+    console.log(changes);
+  }
 
   ngOnInit(): void {
     this.ipcService.on(IPCMessage.SELECT_PATH_RES, (event, res: IPCResponse) => {
