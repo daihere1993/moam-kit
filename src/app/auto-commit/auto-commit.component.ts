@@ -18,27 +18,6 @@ enum CommitStatus {
   FAILED = 'failed',
 }
 
-function isObject(obj: any): boolean {
-  return typeof obj === 'object' && obj !== null;
-}
-
-function isEmptyObj(obj: { [key: string]: any }): boolean {
-  if (!isObject(obj)) {
-    throw new Error('Argument must be a Object.');
-  }
-
-  if (!obj) {
-    return true;
-  }
-
-  for (const [, value] of Object.entries(obj)) {
-    if (value) {
-      return false;
-    }
-  }
-  return true;
-}
-
 @Component({
   selector: 'app-auto-commit',
   templateUrl: './auto-commit.component.html',
@@ -49,10 +28,6 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
   public get branches$(): Observable<BranchInfo[]> {
     return this.electronService.appData$.pipe(
       map((data) => {
-        if (isEmptyObj(this.autoCommitInfo.branch) && data.branches && data.branches.length > 0) {
-          [this.branch] = data.branches;
-          return data.branches;
-        }
         return data.branches || [];
       }),
     );
@@ -74,7 +49,7 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
       reviewBoardID: this.reviewBoardID,
       branch: this.branch,
       specificDiff: this.specificDiff,
-    }
+    };
   }
 
   /** Commit status */

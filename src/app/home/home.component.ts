@@ -23,16 +23,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   public get branches$(): Observable<BranchInfo[]> {
     return this.electronService.appData$.pipe(
       map((data) => {
-        if (!this.branch && data.branches && data.branches.length > 0) {
-          [this.branch] = data.branches;
-          return data.branches;
-        }
         return data.branches || [];
       }),
     );
   }
 
-  public branch: BranchInfo
+  public branch: BranchInfo;
 
   /** Sync status */
   public syncStatus: Status;
