@@ -58,17 +58,24 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
     );
   }
 
+  /** Form fields */
+  public prontoTitle: string;
+  public description: string;
+  public reviewBoardID: number;
   public branch: BranchInfo;
+  public specificDiff: string;
 
   private lastAutoCommitInfo: AutoCommitInfo;
 
-  public autoCommitInfo: AutoCommitInfo = {
-    prontoTitle: undefined,
-    description: undefined,
-    reviewBoardID: undefined,
-    branch: { name: undefined, pcDir: undefined, serverDir: undefined },
-    specificDiff: undefined,
-  };
+  private get autoCommitInfo(): AutoCommitInfo {
+    return {
+      prontoTitle: this.prontoTitle,
+      description: this.description,
+      reviewBoardID: this.reviewBoardID,
+      branch: this.branch,
+      specificDiff: this.specificDiff,
+    }
+  }
 
   /** Commit status */
   public commitStatus: CommitStatus;
@@ -94,7 +101,10 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
       if (lastAutoCommitInfo) {
         this.branch =
           branches && branches.find((item) => item.name === lastAutoCommitInfo.branch.name);
-        this.autoCommitInfo = lastAutoCommitInfo;
+        this.prontoTitle = lastAutoCommitInfo.prontoTitle;
+        this.description = lastAutoCommitInfo.description;
+        this.reviewBoardID = lastAutoCommitInfo.reviewBoardID;
+        this.specificDiff = lastAutoCommitInfo.specificDiff;
         this.lastAutoCommitInfo = lastAutoCommitInfo;
       }
     });

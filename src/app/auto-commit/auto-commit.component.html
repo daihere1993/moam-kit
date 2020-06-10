@@ -13,7 +13,7 @@
         nbInput
         fullWidth
         placeholder="Pronto Title"
-        [(ngModel)]="autoCommitInfo.prontoTitle"
+        [(ngModel)]="prontoTitle"
       />
     </nb-form-field>
     <nb-form-field class="field_item">
@@ -23,7 +23,7 @@
         nbInput
         fullWidth
         placeholder="Correction Description"
-        [(ngModel)]="autoCommitInfo.description"
+        [(ngModel)]="description"
       />
     </nb-form-field>
     <nb-form-field class="field_item">
@@ -33,14 +33,14 @@
         nbInput
         fullWidth
         placeholder="Review Board ID"
-        [(ngModel)]="autoCommitInfo.reviewBoardID"
+        [(ngModel)]="reviewBoardID"
       />
     </nb-form-field>
 
     <path-field
       class="field_item"
       placeholder="Specific Diff"
-      [(value)]="autoCommitInfo.specificDiff"
+      [(value)]="specificDiff"
       type="file"
     ></path-field>
 
