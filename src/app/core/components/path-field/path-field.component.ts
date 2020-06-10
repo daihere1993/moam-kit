@@ -1,13 +1,4 @@
-import {
-  Component,
-  OnInit,
-  Input,
-  OnDestroy,
-  Output,
-  EventEmitter,
-  OnChanges,
-  SimpleChanges,
-} from '@angular/core';
+import { Component, OnInit, Input, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { IPCResponse, IPCMessage } from 'src/common/types';
 import { IpcService } from '../../services/electron/ipc.service';
 
@@ -22,7 +13,7 @@ enum Type {
   styleUrls: ['./path-field.component.scss'],
   providers: [IpcService],
 })
-export class PathInputComponent implements OnInit, OnDestroy, OnChanges {
+export class PathInputComponent implements OnInit, OnDestroy {
   @Output() valueChange: EventEmitter<string> = new EventEmitter();
 
   @Input() placeholder: string;
@@ -31,15 +22,16 @@ export class PathInputComponent implements OnInit, OnDestroy, OnChanges {
 
   @Input('value')
   get value(): string {
-    if (this._value) {
-      return this._value;
-    }
-    return '';
+    return this._value;
   }
 
   set value(v: string) {
     if (v) {
       this._value = v;
+      this.valueChange.emit(v);
+    } else {
+      this._value = '';
+      this.valueChange.emit('');
     }
   }
 
@@ -51,15 +43,10 @@ export class PathInputComponent implements OnInit, OnDestroy, OnChanges {
 
   constructor(private ipcService: IpcService) {}
 
-  ngOnChanges(changes: SimpleChanges) {
-    console.log(changes);
-  }
-
   ngOnInit(): void {
     this.ipcService.on(IPCMessage.SELECT_PATH_RES, (event, res: IPCResponse) => {
       if (res.isSuccessed) {
         this.value = res.data[0] as string;
-        this.valueChange.emit(this.value);
       }
     });
   }

@@ -11,7 +11,7 @@ import * as utils from '../common/utils';
 
 let RECONNECT_TIME = 0;
 const _config = config.Sync;
-const userDataPath = utils.getUserDataPath()
+const userDataPath = utils.getUserDataPath();
 const tmpPatchPath = path.join(userDataPath, _config.PATH_NAME);
 
 export class Sync {
@@ -28,15 +28,11 @@ export class Sync {
   constructor({ store }: { store: Store }) {
     this.store = store;
     this.sftpClient = new (SftpClient as any)();
-
-    ipcMain.on(IPCMessage.TO_SYNC_CODE, this.toSyncCode.bind(this));
   }
 
   public startup(): void {
-    this.messageListening();
+    ipcMain.on(IPCMessage.SYNC_CODE_REQ, this.toSyncCode.bind(this));
   }
-
-  private messageListening() {}
 
   private toSyncCode(event: IpcMainEvent, { data }: IPCRequest<BranchInfo>): void {
     RECONNECT_TIME = 0;
@@ -60,20 +56,20 @@ export class Sync {
               () => {},
               (err) => {
                 console.log(`${err.name} failed: ${err.message}`);
-                event.reply(IPCMessage.REPLY_SYNC_CODE, {
+                event.reply(IPCMessage.SYNC_CODE_RES, {
                   isSuccessed: false,
                   error: { name: err.name, message: err.message },
                 });
               },
               () => {
-                event.reply(IPCMessage.REPLY_SYNC_CODE, { isSuccessed: true });
+                event.reply(IPCMessage.SYNC_CODE_RES, { isSuccessed: true });
               },
             );
           }
         },
         (err) => {
           console.log(`${err.name} failed: ${err.message}`);
-          event.reply(IPCMessage.REPLY_SYNC_CODE, {
+          event.reply(IPCMessage.SYNC_CODE_RES, {
             isSuccessed: false,
             error: {
               name: IPCMessage.CONNECT_TO_SERVER_DONE,

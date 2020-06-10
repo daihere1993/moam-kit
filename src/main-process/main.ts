@@ -63,7 +63,7 @@ function createMenu(): void {
           label: 'To Sync Code',
           accelerator: 'Ctrl+Enter',
           click: (menuItem, browserWindow) => {
-            browserWindow.webContents.send(IPCMessage.TO_SYNC_CODE_FROM_MAIN);
+            browserWindow.webContents.send(IPCMessage.SYNC_CODE_FROM_MAIN_REQ);
           },
         },
       ],
@@ -78,20 +78,26 @@ function subscribeIPCEvent(store: Store): void {
     event.reply(IPCMessage.GET_APP_DATA_RES, res);
   });
 
-  ipcMain.on(IPCMessage.STORE_DATA_REQ, (event, { data, seed }: IPCRequest<{ key: string, value: SSHData }>) => {
-    const res: IPCResponse = { isSuccessed: true, seed, data: store.data };
-    store.set(data.key, data.value);
-    event.reply(IPCMessage.STORE_DATA_RES, res);
-    event.reply(IPCMessage.GET_APP_DATA_RES, res);
-  });
+  ipcMain.on(
+    IPCMessage.STORE_DATA_REQ,
+    (event, { data, seed }: IPCRequest<{ key: string; value: SSHData }>) => {
+      const res: IPCResponse = { isSuccessed: true, seed, data: store.data };
+      store.set(data.key, data.value);
+      event.reply(IPCMessage.STORE_DATA_RES, res);
+      event.reply(IPCMessage.GET_APP_DATA_RES, res);
+    },
+  );
 
-  ipcMain.on(IPCMessage.SELECT_PATH_REQ, (event, { data, seed }: IPCRequest<{ isDirectory: boolean }>) => {
-    const targetPath = dialog.showOpenDialogSync(win, {
-      properties: [data.isDirectory ? 'openDirectory' : 'openFile'],
-    });
-    const res: IPCResponse = { isSuccessed: !!targetPath, data: targetPath, seed };
-    event.reply(IPCMessage.SELECT_PATH_RES, res);
-  });
+  ipcMain.on(
+    IPCMessage.SELECT_PATH_REQ,
+    (event, { data, seed }: IPCRequest<{ isDirectory: boolean }>) => {
+      const targetPath = dialog.showOpenDialogSync(win, {
+        properties: [data.isDirectory ? 'openDirectory' : 'openFile'],
+      });
+      const res: IPCResponse = { isSuccessed: !!targetPath, data: targetPath, seed };
+      event.reply(IPCMessage.SELECT_PATH_RES, res);
+    },
+  );
 }
 
 try {

@@ -1,11 +1,6 @@
-import { Component, NgZone } from '@angular/core';
-import { ElectronService } from 'src/app/core/services';
+import { Component } from '@angular/core';
 import { BranchInfo } from 'src/common/types';
-import {
-  NbDialogRef,
-  NbToastrService,
-  NbGlobalPhysicalPosition,
-} from '@nebular/theme';
+import { NbDialogRef, NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
 
 export enum DialogAction {
   CANCEL = 'cancel',

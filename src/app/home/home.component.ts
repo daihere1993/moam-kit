@@ -23,7 +23,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public get branches$(): Observable<BranchInfo[]> {
     return this.electronService.appData$.pipe(
       map((data) => {
-        return data.branches;
+        return data.branches || [];
       }),
     );
   }
@@ -142,11 +142,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.ipcService.on(IPCMessage.TO_SYNC_CODE_FROM_MAIN, () => {
+    this.ipcService.on(IPCMessage.SYNC_CODE_FROM_MAIN_REQ, () => {
       this.toSyncCode();
     });
 
-    this.ipcService.on(IPCMessage.REPLY_SYNC_CODE, (event, res: IPCResponse) => {
+    this.ipcService.on(IPCMessage.SYNC_CODE_RES, (event, res: IPCResponse) => {
       if (res.isSuccessed) {
         this.syncStatus = Status.DONE;
       } else {
@@ -228,26 +228,22 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.uploadPatchStatus !== Status.ON_GOING &&
       this.applyPatchStatus !== Status.ON_GOING
     ) {
-      this._toSyncCode();
-      this.ipcService.send(IPCMessage.TO_SYNC_CODE, {
+      this.syncStatus = Status.ON_GOING;
+      this.connecToServerStatus = Status.ON_GOING;
+      this.createPatchStatus = Status.ON_GOING;
+      this.uploadPatchStatus = Status.ON_GOING;
+      this.applyPatchStatus = Status.ON_GOING;
+
+      this.connecToServerFailedMsg = '';
+      this.createPatchFailedMsg = '';
+      this.uploadPatchFailedMsg = '';
+      this.applyPatchFailedMsg = '';
+      this.snycErrorMsg = '';
+
+      this.ipcService.send(IPCMessage.SYNC_CODE_REQ, {
         data: this.branch,
       });
     }
-  }
-
-  private _toSyncCode() {
-    this.syncStatus = Status.ON_GOING;
-    this.connecToServerStatus = Status.ON_GOING;
-    this.createPatchStatus = Status.ON_GOING;
-    this.uploadPatchStatus = Status.ON_GOING;
-    this.applyPatchStatus = Status.ON_GOING;
-
-    this.connecToServerFailedMsg = '';
-    this.createPatchFailedMsg = '';
-    this.uploadPatchFailedMsg = '';
-    this.applyPatchFailedMsg = '';
-
-    this.snycErrorMsg = '';
   }
 
   private alterErrorMsg(msg: string): void {

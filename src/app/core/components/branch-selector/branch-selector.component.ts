@@ -60,10 +60,10 @@ export class BranchSelectorComponent {
           });
         } else if (res && res.action === DialogAction.DELETE) {
           const index = this.branches.findIndex((item) => item.name === branch.name);
-          if (this.selectedBranch.name === res.content.name) {
+          this.branches.splice(index, 1);
+          if (this.selectedBranch && this.selectedBranch.name === res.content.name) {
             [this.selectedBranch] = this.branches;
           }
-          this.branches.splice(index, 1);
           this.ipcService.send<{ key: string; value: BranchInfo[] }>(IPCMessage.STORE_DATA_REQ, {
             data: { key: 'branches', value: this.branches },
           });
