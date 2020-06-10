@@ -238,7 +238,7 @@ export class AutoCommit {
             const res: IPCResponse = {};
             if (code === 0 && stdout.includes('Committed revision ')) {
               pInfo.status = ProcessStatus.DONE;
-              pInfo.additionalData = stdout;
+              pInfo.additionalData = stdout.split('\n').pop();
               res.isSuccessed = true;
               res.data = stdout;
             } else if (code === null) {
