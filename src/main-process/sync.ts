@@ -1,13 +1,13 @@
 import * as path from 'path';
 import * as shell from 'shelljs';
 import SftpClient from 'ssh2-sftp-client';
-import { config } from 'node-config-ts';
 import { ipcMain, IpcMainEvent } from 'electron';
 import { Observable, concat, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { BranchInfo, IPCMessage, SSHData, IPCRequest } from '../common/types';
 import { Store } from './store';
-import * as utils from '../common/utils';
+import config from './config';
+import * as utils from './utils';
 
 let RECONNECT_TIME = 0;
 const _config = config.Sync;

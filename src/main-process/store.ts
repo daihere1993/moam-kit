@@ -1,9 +1,9 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import * as path from 'path';
 import * as fs from 'fs';
-import { config } from 'node-config-ts';
+import config from './config';
 import { APPData } from '../common/types';
-import * as utils from '../common/utils';
+import * as utils from './utils';
 
 const _config = config.Common;
 

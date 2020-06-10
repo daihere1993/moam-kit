@@ -1,6 +1,6 @@
 import * as path from 'path';
 import { app, remote } from "electron";
-import { config } from 'node-config-ts';
+import config from './config';
 
 export function getUserDataPath(): string {
   if (app || remote) {

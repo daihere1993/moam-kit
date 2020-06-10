@@ -1,7 +1,6 @@
 import { ipcMain } from 'electron';
 import axios, { AxiosResponse } from 'axios';
 import moment from 'moment';
-import { config } from 'node-config-ts';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as shell from 'shelljs';
@@ -9,7 +8,8 @@ import * as cheerio from 'cheerio';
 import { ChildProcess } from 'child_process';
 import { interval, Observable, forkJoin, from, Subject, of } from 'rxjs';
 import { mergeMap, takeUntil, catchError, map } from 'rxjs/operators';
-import * as utils from '../common/utils';
+import * as utils from './utils';
+import config from './config';
 import {
   AutoCommitInfo,
   IPCResponse,
