@@ -52,5 +52,9 @@ module.exports = {
     'unicorn/no-for-loop': 'off',
     'unicorn/prefer-spread': 'off',
     '@typescript-eslint/interface-name-prefix': 'off',
+    'no-unneeded-ternary': 'off',
+    '@typescript-eslint/no-unused-expressions': 'off',
+    'lines-between-class-members': 'off',
+    'no-restricted-syntax': 'off',
   },
 };

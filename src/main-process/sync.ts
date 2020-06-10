@@ -14,6 +14,8 @@ const _config = config.Sync;
 const userDataPath = utils.getUserDataPath();
 const tmpPatchPath = path.join(userDataPath, _config.PATH_NAME);
 
+console.debug(`User data path: ${userDataPath}`);
+
 export class Sync {
   private store: Store;
 

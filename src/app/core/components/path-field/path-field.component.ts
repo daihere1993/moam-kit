@@ -31,7 +31,6 @@ export class PathInputComponent implements OnInit, OnDestroy {
       this.valueChange.emit(v);
     } else {
       this._value = '';
-      this.valueChange.emit('');
     }
   }
 

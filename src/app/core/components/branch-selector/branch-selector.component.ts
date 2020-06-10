@@ -17,21 +17,18 @@ import { IpcService } from '../../services/electron/ipc.service';
 export class BranchSelectorComponent {
   @Output() valueChange = new EventEmitter();
 
-  @Input() value: BranchInfo;
+  private _value: BranchInfo;
+  @Input()
+  public get value(): BranchInfo {
+    return this._value ? this._value : this.branches && this.branches[0];
+  }
+
+  public set value(value: BranchInfo) {
+    this.valueChange.emit(value);
+    this._value = value;
+  }
 
   @Input() branches: BranchInfo[] = [];
-
-  public get selectedBranch(): BranchInfo {
-    if (this.value && this.branches && this.branches.length > 0) {
-      return this.branches.find((branch) => branch.name === this.value.name);
-    }
-    return this.branches && this.branches.length > 0 ? this.branches[0] : undefined;
-  }
-
-  public set selectedBranch(value: BranchInfo) {
-    this.valueChange.emit(value);
-    this.value = value;
-  }
 
   constructor(private dialogService: NbDialogService, private ipcService: IpcService) {}
 
@@ -40,7 +37,7 @@ export class BranchSelectorComponent {
       if (res && res.action === DialogAction.SAVE) {
         this.branches.push(res.content);
         setTimeout(() => {
-          this.selectedBranch = res.content;
+          this.value = res.content;
         }, 0);
         this.ipcService.send<{ key: string; value: BranchInfo[] }>(IPCMessage.STORE_DATA_REQ, {
           data: { key: 'branches', value: this.branches },
@@ -61,8 +58,8 @@ export class BranchSelectorComponent {
         } else if (res && res.action === DialogAction.DELETE) {
           const index = this.branches.findIndex((item) => item.name === branch.name);
           this.branches.splice(index, 1);
-          if (this.selectedBranch && this.selectedBranch.name === res.content.name) {
-            [this.selectedBranch] = this.branches;
+          if (this.value && this.value.name === res.content.name) {
+            [this.value] = this.branches;
           }
           this.ipcService.send<{ key: string; value: BranchInfo[] }>(IPCMessage.STORE_DATA_REQ, {
             data: { key: 'branches', value: this.branches },
@@ -70,9 +67,5 @@ export class BranchSelectorComponent {
         }
       });
     e.stopPropagation();
-  }
-
-  public onSelectChange(selected: BranchInfo): void {
-    this.selectedBranch = selected;
   }
 }

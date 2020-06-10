@@ -1,8 +1,7 @@
 <div class="container">
   <nb-select
     placeholder="Select Branch"
-    [selected]="selectedBranch"
-    (selectedChange)="onSelectChange($event)"
+    [(selected)]="value"
   >
     <nb-option *ngFor="let branch of branches" [value]="branch">
       <div class="option_container">

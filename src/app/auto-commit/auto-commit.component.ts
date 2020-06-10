@@ -18,6 +18,27 @@ enum CommitStatus {
   FAILED = 'failed',
 }
 
+function isObject(obj: any): boolean {
+  return typeof obj === 'object' && obj !== null;
+}
+
+function isEmptyObj(obj: { [key: string]: any }): boolean {
+  if (!isObject(obj)) {
+    throw new Error('Argument must be a Object.');
+  }
+
+  if (!obj) {
+    return true;
+  }
+
+  for (const [, value] of Object.entries(obj)) {
+    if (value) {
+      return false;
+    }
+  }
+  return true;
+}
+
 @Component({
   selector: 'app-auto-commit',
   templateUrl: './auto-commit.component.html',
@@ -28,14 +49,18 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
   public get branches$(): Observable<BranchInfo[]> {
     return this.electronService.appData$.pipe(
       map((data) => {
-        return data.branches;
+        if (isEmptyObj(this.autoCommitInfo.branch) && data.branches && data.branches.length > 0) {
+          [this.branch] = data.branches;
+          return data.branches;
+        }
+        return data.branches || [];
       }),
     );
   }
 
-  private lastAutoCommitInfo: AutoCommitInfo;
-
   public branch: BranchInfo;
+
+  private lastAutoCommitInfo: AutoCommitInfo;
 
   public autoCommitInfo: AutoCommitInfo = {
     prontoTitle: undefined,
@@ -65,8 +90,10 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
   constructor(private ipcService: IpcService, private electronService: ElectronService) {}
 
   ngOnInit(): void {
-    this.electronService.appData$.subscribe(({ lastAutoCommitInfo }) => {
+    this.electronService.appData$.subscribe(({ branches, lastAutoCommitInfo }) => {
       if (lastAutoCommitInfo) {
+        this.branch =
+          branches && branches.find((item) => item.name === lastAutoCommitInfo.branch.name);
         this.autoCommitInfo = lastAutoCommitInfo;
         this.lastAutoCommitInfo = lastAutoCommitInfo;
       }
