@@ -18,21 +18,7 @@ export class PathInputComponent implements OnInit, OnDestroy {
 
   @Input() placeholder: string;
 
-  private _value: string;
-
-  @Input('value')
-  get value(): string {
-    return this._value;
-  }
-
-  set value(v: string) {
-    if (v) {
-      this._value = v;
-      this.valueChange.emit(v);
-    } else {
-      this._value = '';
-    }
-  }
+  @Input('value') value: string;
 
   @Input() type: Type = Type.DIR;
 
@@ -40,12 +26,18 @@ export class PathInputComponent implements OnInit, OnDestroy {
     return this.type === Type.DIR;
   }
 
+  public setValue(value: string) {
+    this.value = value;
+    this.valueChange.emit(value);
+  }
+
   constructor(private ipcService: IpcService) {}
 
   ngOnInit(): void {
     this.ipcService.on(IPCMessage.SELECT_PATH_RES, (event, res: IPCResponse) => {
       if (res.isSuccessed) {
-        this.value = res.data[0] as string;
+        const value = res.data[0];
+        this.setValue(value);
       }
     });
   }
