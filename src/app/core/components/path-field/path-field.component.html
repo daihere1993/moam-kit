@@ -1,5 +1,11 @@
 <nb-form-field class="field_item">
-  <input nbInput fullWidth [placeholder]="placeholder" [(ngModel)]="value" />
+  <input
+    nbInput
+    fullWidth
+    [placeholder]="placeholder"
+    [ngModel]="value"
+    (ngModelChange)="onChange($event)"
+  />
   <nb-icon
     nbSuffix
     icon="folder-outline"

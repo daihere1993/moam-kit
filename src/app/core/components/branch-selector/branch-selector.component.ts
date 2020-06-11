@@ -17,16 +17,7 @@ import { IpcService } from '../../services/electron/ipc.service';
 export class BranchSelectorComponent {
   @Output() valueChange = new EventEmitter();
 
-  private _value: BranchInfo;
-  @Input()
-  public get value(): BranchInfo {
-    return this._value ? this._value : this.branches && this.branches[0];
-  }
-
-  public set value(value: BranchInfo) {
-    this.valueChange.emit(value);
-    this._value = value;
-  }
+  @Input() value: BranchInfo;
 
   @Input() branches: BranchInfo[] = [];
 
@@ -38,6 +29,7 @@ export class BranchSelectorComponent {
         this.branches.push(res.content);
         setTimeout(() => {
           this.value = res.content;
+          this.valueChange.emit(this.value);
         }, 0);
         this.ipcService.send<{ key: string; value: BranchInfo[] }>(IPCMessage.STORE_DATA_REQ, {
           data: { key: 'branches', value: this.branches },
@@ -60,6 +52,7 @@ export class BranchSelectorComponent {
           this.branches.splice(index, 1);
           if (this.value && this.value.name === res.content.name) {
             [this.value] = this.branches;
+            this.valueChange.emit(this.value);
           }
           this.ipcService.send<{ key: string; value: BranchInfo[] }>(IPCMessage.STORE_DATA_REQ, {
             data: { key: 'branches', value: this.branches },
@@ -67,5 +60,10 @@ export class BranchSelectorComponent {
         }
       });
     e.stopPropagation();
+  }
+
+  public onSelectChange(value: BranchInfo): void {
+    this.value = value;
+    this.valueChange.emit(this.value);
   }
 }

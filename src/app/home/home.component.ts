@@ -20,13 +20,7 @@ enum Status {
   providers: [IpcService],
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  public get branches$(): Observable<BranchInfo[]> {
-    return this.electronService.appData$.pipe(
-      map((data) => {
-        return data.branches || [];
-      }),
-    );
-  }
+  public branches$: Observable<BranchInfo[]>;
 
   public branch: BranchInfo;
 
@@ -142,6 +136,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.branches$ = this.electronService.appData$.pipe(
+      map((data) => {
+        if (!this.branch && data.branches) {
+          [this.branch] = data.branches;
+        }
+        return data.branches || [];
+      }),
+    );
+
     this.ipcService.on(IPCMessage.SYNC_CODE_FROM_MAIN_REQ, () => {
       this.toSyncCode();
     });
