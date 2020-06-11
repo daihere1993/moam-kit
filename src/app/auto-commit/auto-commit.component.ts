@@ -25,7 +25,13 @@ enum CommitStatus {
   providers: [IpcService],
 })
 export class AutoCommitComponent implements OnInit, OnDestroy {
-  public branches$: Observable<BranchInfo[]>;
+  public get branches$(): Observable<BranchInfo[]> {
+    return this.electronService.appData$.pipe(
+      map((data) => {
+        return data.branches || [];
+      }),
+    );
+  }
 
   /** Form fields */
   public prontoTitle: string;
@@ -66,23 +72,17 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
   constructor(private ipcService: IpcService, private electronService: ElectronService) {}
 
   ngOnInit(): void {
-    this.branches$ = this.electronService.appData$.pipe(
-      map(({ branches, lastAutoCommitInfo }) => {
-        if (!this.branch && branches) {
-          [this.branch] = branches;
-        }
-        if (lastAutoCommitInfo) {
-          console.log(this.branch === branches[0]);
-          this.branch = branches.find((item) => item.name === lastAutoCommitInfo.branch.name);
-          this.prontoTitle = lastAutoCommitInfo.prontoTitle;
-          this.description = lastAutoCommitInfo.description;
-          this.reviewBoardID = lastAutoCommitInfo.reviewBoardID;
-          this.specificDiff = lastAutoCommitInfo.specificDiff;
-          this.lastAutoCommitInfo = lastAutoCommitInfo;
-        }
-        return branches || [];
-      }),
-    );
+    this.electronService.appData$.subscribe(({ branches, lastAutoCommitInfo }) => {
+      if (lastAutoCommitInfo) {
+        this.branch =
+          branches && branches.find((item) => item.name === lastAutoCommitInfo.branch.name);
+        this.prontoTitle = lastAutoCommitInfo.prontoTitle;
+        this.description = lastAutoCommitInfo.description;
+        this.reviewBoardID = lastAutoCommitInfo.reviewBoardID;
+        this.specificDiff = lastAutoCommitInfo.specificDiff;
+        this.lastAutoCommitInfo = lastAutoCommitInfo;
+      }
+    });
 
     this.ipcService.on(IPCMessage.REPLY_AUTO_COMMIT_REQ, (event, res: IPCResponse) => {
       if (res.isSuccessed) {

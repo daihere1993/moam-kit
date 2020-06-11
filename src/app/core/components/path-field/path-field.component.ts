@@ -24,8 +24,14 @@ export class PathInputComponent implements OnInit, OnDestroy {
   get value(): string {
     return this._value;
   }
-  set value(value: string) {
-    this._value = value ? value : '';
+
+  set value(v: string) {
+    if (v) {
+      this._value = v;
+      this.valueChange.emit(v);
+    } else {
+      this._value = '';
+    }
   }
 
   @Input() type: Type = Type.DIR;
@@ -40,7 +46,6 @@ export class PathInputComponent implements OnInit, OnDestroy {
     this.ipcService.on(IPCMessage.SELECT_PATH_RES, (event, res: IPCResponse) => {
       if (res.isSuccessed) {
         this.value = res.data[0] as string;
-        this.valueChange.emit(this.value);
       }
     });
   }
@@ -54,10 +59,5 @@ export class PathInputComponent implements OnInit, OnDestroy {
       data: { isDirectory: this.isDirectory },
     });
     e.stopPropagation();
-  }
-
-  public onChange(value: string): void {
-    this.value = value;
-    this.valueChange.emit(value);
   }
 }
