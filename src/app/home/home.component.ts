@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
 import { IPCResponse, BranchInfo, IPCMessage } from 'src/common/types';
 import { IpcService } from '../core/services/electron/ipc.service';
@@ -20,13 +20,7 @@ enum Status {
   providers: [IpcService],
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  public get branches$(): Observable<BranchInfo[]> {
-    return this.electronService.appData$.pipe(
-      map((data) => {
-        return data.branches || [];
-      }),
-    );
-  }
+  public branches$: Observable<BranchInfo[]>;
 
   public branch: BranchInfo;
 
@@ -142,6 +136,17 @@ export class HomeComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.branches$ = this.electronService.appData$.pipe(
+      tap(({ branches }) => {
+        if (!this.branch && branches && branches.length > 0) {
+          [this.branch] = branches;
+        }
+      }),
+      map((data) => {
+        return data.branches || [];
+      }),
+    );
+
     this.ipcService.on(IPCMessage.SYNC_CODE_FROM_MAIN_REQ, () => {
       this.toSyncCode();
     });
