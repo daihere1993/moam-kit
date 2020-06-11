@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
-import { SSHData, IPCMessage, IPCResponse } from '../../common/types';
+import { SSHData, IPCMessage } from '../../common/types';
 import { IpcService } from '../core/services/electron/ipc.service';
 import { ElectronService } from '../core/services';
 
@@ -26,20 +26,24 @@ export class SettingComponent implements OnInit {
   }
 
   private set sshInfo(info: SSHData) {
-    this.host = info.host;
-    this.username = info.username;
-    this.password = info.password;
+    if (info) {
+      this.host = info.host;
+      this.username = info.username;
+      this.password = info.password;
+    }
   }
 
   constructor(
     private toastrService: NbToastrService,
     private ipcService: IpcService,
     private electronService: ElectronService,
+    private changeDetectorRef: ChangeDetectorRef,
   ) {}
 
   public ngOnInit(): void {
     this.electronService.appData$.subscribe((data) => {
       this.sshInfo = data.ssh;
+      this.changeDetectorRef.detectChanges();
     });
   }
 

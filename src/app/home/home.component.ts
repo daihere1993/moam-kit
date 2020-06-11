@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
@@ -133,6 +133,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private ipcService: IpcService,
     private electronService: ElectronService,
     private toastrService: NbToastrService,
+    private changeDetectorRef: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -140,6 +141,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       tap(({ branches }) => {
         if (!this.branch && branches && branches.length > 0) {
           [this.branch] = branches;
+          this.changeDetectorRef.detectChanges();
         }
       }),
       map((data) => {

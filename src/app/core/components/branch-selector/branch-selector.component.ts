@@ -21,7 +21,7 @@ export class BranchSelectorComponent {
 
   @Input() branches: BranchInfo[] = [];
 
-  private setSelection(value: BranchInfo) {
+  public setSelection(value: BranchInfo) {
     this.value = value;
     this.valueChange.emit(value);
   }

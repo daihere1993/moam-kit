@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import moment from 'moment';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import {
   BranchInfo,
   AutoCommitInfo,
@@ -25,13 +25,7 @@ enum CommitStatus {
   providers: [IpcService],
 })
 export class AutoCommitComponent implements OnInit, OnDestroy {
-  public get branches$(): Observable<BranchInfo[]> {
-    return this.electronService.appData$.pipe(
-      map((data) => {
-        return data.branches || [];
-      }),
-    );
-  }
+  public branches$: Observable<BranchInfo[]>;
 
   /** Form fields */
   public prontoTitle: string;
@@ -69,20 +63,38 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
 
   public logs: string[] = [];
 
-  constructor(private ipcService: IpcService, private electronService: ElectronService) {}
+  constructor(
+    private ipcService: IpcService,
+    private electronService: ElectronService,
+    private changeDetectorRef: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
-    this.electronService.appData$.subscribe(({ branches, lastAutoCommitInfo }) => {
-      if (lastAutoCommitInfo) {
-        this.branch =
-          branches && branches.find((item) => item.name === lastAutoCommitInfo.branch.name);
-        this.prontoTitle = lastAutoCommitInfo.prontoTitle;
-        this.description = lastAutoCommitInfo.description;
-        this.reviewBoardID = lastAutoCommitInfo.reviewBoardID;
-        this.specificDiff = lastAutoCommitInfo.specificDiff;
-        this.lastAutoCommitInfo = lastAutoCommitInfo;
-      }
-    });
+    let a;
+    this.branches$ = this.electronService.appData$.pipe(
+      tap(({ branches, lastAutoCommitInfo }) => {
+        if (a) {
+          console.log(a === branches);
+        } else {
+          a = branches;
+        }
+        if (!this.branch && branches && branches.length > 0) {
+          [this.branch] = branches;
+        }
+        if (lastAutoCommitInfo) {
+          this.branch = branches.find((item) => item.name === lastAutoCommitInfo.branch.name);
+          this.prontoTitle = lastAutoCommitInfo.prontoTitle;
+          this.description = lastAutoCommitInfo.description;
+          this.reviewBoardID = lastAutoCommitInfo.reviewBoardID;
+          this.specificDiff = lastAutoCommitInfo.specificDiff;
+          this.lastAutoCommitInfo = lastAutoCommitInfo;
+        }
+        this.changeDetectorRef.detectChanges();
+      }),
+      map((data) => {
+        return data.branches || [];
+      }),
+    );
 
     this.ipcService.on(IPCMessage.REPLY_AUTO_COMMIT_REQ, (event, res: IPCResponse) => {
       if (res.isSuccessed) {
