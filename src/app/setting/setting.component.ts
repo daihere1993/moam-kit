@@ -3,6 +3,7 @@ import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
 import { SSHData, IPCMessage } from '../../common/types';
 import { IpcService } from '../core/services/electron/ipc.service';
 import { ElectronService } from '../core/services';
+import { StoreService } from '../core/services/electron/store.service';
 
 @Component({
   selector: 'app-setting',
@@ -36,12 +37,12 @@ export class SettingComponent implements OnInit {
   constructor(
     private toastrService: NbToastrService,
     private ipcService: IpcService,
-    private electronService: ElectronService,
+    private store: StoreService,
     private changeDetectorRef: ChangeDetectorRef,
   ) {}
 
   public ngOnInit(): void {
-    this.electronService.appData$.subscribe((data) => {
+    this.store.getData().subscribe((data) => {
       this.sshInfo = data.ssh;
       this.changeDetectorRef.detectChanges();
     });

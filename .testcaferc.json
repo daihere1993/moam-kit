@@ -1,0 +1,7 @@
+{
+  "src": "./e2e/src/**/*.e2e-spec.ts",
+  "browsers": "chrome",
+  "selectorTimeout": 3000,
+  "tsConfigPath": "./e2e/tsconfig.json",
+  "color": true
+}

@@ -10,7 +10,7 @@ import {
   IPCRequest,
 } from '../../common/types';
 import { IpcService } from '../core/services/electron/ipc.service';
-import { ElectronService } from '../core/services';
+import { StoreService } from '../core/services/electron/store.service';
 
 enum CommitStatus {
   ON_GOING = 'on going',
@@ -65,19 +65,13 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
 
   constructor(
     private ipcService: IpcService,
-    private electronService: ElectronService,
+    private store: StoreService,
     private changeDetectorRef: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
-    let a;
-    this.branches$ = this.electronService.appData$.pipe(
+    this.branches$ = this.store.getData().pipe(
       tap(({ branches, lastAutoCommitInfo }) => {
-        if (a) {
-          console.log(a === branches);
-        } else {
-          a = branches;
-        }
         if (!this.branch && branches && branches.length > 0) {
           [this.branch] = branches;
         }

@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../out-tsc/e2e",
+    "module": "commonjs",
+    "sourceMap": false,
+    "types": ["node"],
+    "paths": {
+      "@root/*": ["./src/*"]
+    }
+  }
+}

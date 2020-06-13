@@ -18,27 +18,33 @@ export class IpcService {
   ipcRenderer: typeof ipcRenderer;
 
   constructor(private electronService: ElectronService, private zone: NgZone) {
-    this.ipcRenderer = this.electronService.ipcRenderer;
-    this.seed = this.electronService.seedrandom.int32();
+    if (this.electronService.isElectron) {
+      this.ipcRenderer = this.electronService.ipcRenderer;
+      this.seed = this.electronService.seedrandom.int32();
+    }
   }
 
   public send<T>(message: IPCMessage, req?: IPCRequest<T>): void {
-    if (req) {
-      req.seed = this.seed;
+    if (this.electronService.isElectron) {
+      if (req) {
+        req.seed = this.seed;
+      }
     }
     this.ipcRenderer.send(message, req || { seed: this.seed });
   }
 
   public on(message: IPCMessage, cb: (event: any, res: IPCResponse) => void): void {
-    const listener = (event: any, res: IPCResponse) => {
-      if (!res.seed || res.seed === this.seed) {
-        this.zone.run(() => {
-          cb(event, res);
-        });
+    if (this.electronService.isElectron) {
+      const listener = (event: any, res: IPCResponse) => {
+        if (!res.seed || res.seed === this.seed) {
+          this.zone.run(() => {
+            cb(event, res);
+          });
+        }
       }
+      this.messages.push({ name: message, listener });
+      this.ipcRenderer.on(message, listener);
     }
-    this.messages.push({ name: message, listener });
-    this.ipcRenderer.on(message, listener);
   }
 
   public destroy() {

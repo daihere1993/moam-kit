@@ -4,7 +4,7 @@ import { map, tap } from 'rxjs/operators';
 import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
 import { IPCResponse, BranchInfo, IPCMessage } from 'src/common/types';
 import { IpcService } from '../core/services/electron/ipc.service';
-import { ElectronService } from '../core/services';
+import { StoreService } from '../core/services/electron/store.service';
 
 enum Status {
   ON_GOING = 'on going',
@@ -131,13 +131,13 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   constructor(
     private ipcService: IpcService,
-    private electronService: ElectronService,
+    private store: StoreService,
     private toastrService: NbToastrService,
     private changeDetectorRef: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
-    this.branches$ = this.electronService.appData$.pipe(
+    this.branches$ = this.store.getData().pipe(
       tap(({ branches }) => {
         if (!this.branch && branches && branches.length > 0) {
           [this.branch] = branches;
