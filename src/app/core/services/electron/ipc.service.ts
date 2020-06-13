@@ -36,7 +36,7 @@ export class IpcService {
   public on(message: IPCMessage, cb: (event: any, res: IPCResponse) => void): void {
     if (this.electronService.isElectron) {
       const listener = (event: any, res: IPCResponse) => {
-        if (!res.seed || res.seed === this.seed) {
+        if (!res || !res.seed || res.seed === this.seed) {
           this.zone.run(() => {
             cb(event, res);
           });

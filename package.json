@@ -10,7 +10,7 @@
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
     "start": "run-p \"ng:serve --port 1337\" electron:serve",
-    "dev": "run-p electron:serve-tsc-dev ng:serve",
+    "dev": "run-p \"ng:serve --port 1337\" electron:serve-tsc-dev",
     "ng:serve": "ng serve",
     "testcafe": "wait-on http-get://localhost:3200/ && testcafe",
     "build": "npm run electron:serve-tsc && ng build --base-href ./",
