@@ -9,8 +9,8 @@
   "description": "moam-kit from luke",
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
-    "ng": "ng",
     "start": "npm-run-all -p ng:serve electron:serve",
+    "dev": "npm-run-all -p electron:serve-tsc-dev ng:serve",
     "build": "npm run electron:serve-tsc && ng build --base-href ./",
     "build:prod": "npm run build -- -c production",
     "test": "npm-run-all -s test:main test:render",
@@ -85,7 +85,6 @@
     "jest-preset-angular": "^8.2.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.0.5",
-    "protractor": "~5.4.3",
     "ts-jest": "^26.1.0",
     "ts-node": "~8.3.0",
     "typescript": "~3.7.5",
