@@ -12,7 +12,6 @@ import { IpcService } from '../../services/electron/ipc.service';
   selector: 'branch-selector',
   templateUrl: 'branch-selector.component.html',
   styleUrls: ['branch-selector.component.scss'],
-  providers: [IpcService],
 })
 export class BranchSelectorComponent {
   @Output() valueChange = new EventEmitter();

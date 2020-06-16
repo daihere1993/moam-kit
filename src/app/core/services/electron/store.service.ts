@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { isMatch, merge } from 'lodash';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { IPCMessage, APPData, IPCResponse } from 'src/common/types';
 import { ElectronService } from './electron.service';
-import { HttpClient } from '@angular/common/http';
 
 // Don't change the data reference
 const memorize = (() => {

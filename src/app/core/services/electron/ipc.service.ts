@@ -3,9 +3,7 @@ import { IPCMessage, IPCRequest, IPCResponse } from 'src/common/types';
 import { ipcRenderer } from 'electron';
 import { ElectronService } from './electron.service';
 
-@Injectable({
-  providedIn: 'any',
-})
+@Injectable()
 export class IpcService {
   messages: {
     name: IPCMessage;

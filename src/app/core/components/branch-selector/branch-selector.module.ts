@@ -13,6 +13,7 @@ import {
 import { BranchSelectorComponent } from './branch-selector.component';
 import { BranchSettingPage } from './branch-setting/branch-setting.component';
 import { PathInputModule } from '../path-field/path-field.module';
+import { IpcService } from '../../services/electron/ipc.service';
 
 @NgModule({
   declarations: [BranchSelectorComponent, BranchSettingPage],
@@ -28,6 +29,7 @@ import { PathInputModule } from '../path-field/path-field.module';
     NbCardModule,
     NbDialogModule.forChild({ closeOnBackdropClick: false }),
   ],
+  providers: [IpcService],
   exports: [BranchSelectorComponent],
 })
 export class BranchSelectorModule {}
