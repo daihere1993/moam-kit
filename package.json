@@ -18,6 +18,7 @@
     "e2e": "run-p \"ng:serve --port 3200\" testcafe",
     "e2e-dev": "run-p \"ng:serve --port 3200\" \"testcafe --live\"",
     "test:app": "jest --config ./jest.config-render.json",
+    "test:app-dev": "run-s \"test:app --watch\"",
     "test:main": "jest --config ./jest.config-main.json",
     "test:main-dev": "run-s \"test:main --watch\"",
     "electron:serve": "wait-on http-get://localhost:1337/ && npm run electron:serve-tsc && electron . --serve",
