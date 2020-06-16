@@ -1,44 +1,43 @@
 <div class="container">
-  <nb-card>
-    <nb-card-body>
-      <nb-form-field class="field_item">
-        <input
-          #name="ngModel"
-          nbInput
-          fullWidth
-          required
-          placeholder="Branch Name"
-          [(ngModel)]="branch.name"
-        />
-      </nb-form-field>
+  <form nz-from>
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="branch_name">Branch Name</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <input nz-input name="branch_name" [(ngModel)]="branch.name" />
+      </nz-form-control>
+    </nz-form-item>
 
-      <nb-form-field class="field_item">
-        <input
-          #serverDir="ngModel"
-          nbInput
-          fullWidth
-          required
-          placeholder="MOAM DIR of server"
-          [(ngModel)]="branch.serverDir"
-        />
-      </nb-form-field>
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="server_dir">MOAM DIR of server</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <input nz-input name="server_dir" [(ngModel)]="branch.serverDir" />
+      </nz-form-control>
+    </nz-form-item>
 
-      <path-field placeholder="MOAM DIR of PC" [(value)]="branch.pcDir"></path-field>
-    </nb-card-body>
-    <nb-card-footer>
-      <button
-        nbButton
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="server_dir">MOAM DIR of PC</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <nz-input-group nzSuffixIcon="folder">
+          <input nz-input name="server_dir" [(ngModel)]="branch.pcDir" />
+        </nz-input-group>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+
+  
+
+  <div *nzModalFooter>
+    <button
+        nz-button
         class="dialog_btn"
-        [disabled]="name.invalid || serverDir.invalid"
-        status="primary"
+        nzType="primary"
         (click)="toSave()"
       >
         Save
       </button>
-      <button nbButton class="dialog_btn" *ngIf="isEdit" status="danger" (click)="toDelete()">
+      <button nz-button class="dialog_btn" *ngIf="isEdit" nzType="danger" (click)="toDelete()">
         Delete
       </button>
-      <button nbButton class="dialog_btn" (click)="toClose()">Close</button>
-    </nb-card-footer>
-  </nb-card>
+      <button nz-button class="dialog_btn" (click)="toClose()">Close</button>
+  </div>
 </div>

@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { NbDialogService } from '@nebular/theme';
+import { NzModalService } from 'ng-zorro-antd';
 import { BranchInfo, IPCMessage } from 'src/common/types';
 import {
   BranchSettingPage,
@@ -25,26 +25,28 @@ export class BranchSelectorComponent {
     this.valueChange.emit(value);
   }
 
-  constructor(private dialogService: NbDialogService, private ipcService: IpcService) {}
+  constructor(private modalService: NzModalService, private ipcService: IpcService) {}
 
   public toAddBranch(): void {
-    this.dialogService.open(BranchSettingPage).onClose.subscribe((res: DialogRes) => {
-      if (res && res.action === DialogAction.SAVE) {
-        this.branches.push(res.content);
-        setTimeout(() => {
-          this.setSelection(res.content);
-        }, 0);
-        this.ipcService.send<{ key: string; value: BranchInfo[] }>(IPCMessage.STORE_DATA_REQ, {
-          data: { key: 'branches', value: this.branches },
-        });
-      }
-    });
+    this.modalService
+      .create({ nzContent: BranchSettingPage })
+      .afterClose.subscribe((res: DialogRes) => {
+        if (res && res.action === DialogAction.SAVE) {
+          this.branches.push(res.content);
+          setTimeout(() => {
+            this.setSelection(res.content);
+          }, 0);
+          this.ipcService.send<{ key: string; value: BranchInfo[] }>(IPCMessage.STORE_DATA_REQ, {
+            data: { key: 'branches', value: this.branches },
+          });
+        }
+      });
   }
 
   public toEditBranch(e: Event, branch: BranchInfo): void {
-    this.dialogService
-      .open(BranchSettingPage, { context: { branch, isEdit: true } })
-      .onClose.subscribe((res: DialogRes) => {
+    this.modalService
+      .create({ nzContent: BranchSettingPage, nzComponentParams: { branch, isEdit: true } })
+      .afterClose.subscribe((res: DialogRes) => {
         if (res && res.action === DialogAction.SAVE) {
           Object.assign(branch, res.content);
           this.ipcService.send<{ key: string; value: BranchInfo[] }>(IPCMessage.STORE_DATA_REQ, {

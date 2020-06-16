@@ -58,5 +58,6 @@ module.exports = {
     'no-restricted-syntax': 'off',
     'jest/expect-expect': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/camelcase': 'off',
   },
 };

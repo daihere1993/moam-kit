@@ -1,10 +1,12 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzInputModule } from 'ng-zorro-antd/input';
 import {
   NbSelectModule,
-  NbFormFieldModule,
-  NbInputModule,
   NbDialogModule,
   NbButtonModule,
   NbIconModule,
@@ -21,8 +23,10 @@ import { IpcService } from '../../services/electron/ipc.service';
     CommonModule,
     FormsModule,
     PathInputModule,
-    NbInputModule,
-    NbFormFieldModule,
+    NzButtonModule,
+    NzModalModule,
+    NzFormModule,
+    NzInputModule,
     NbButtonModule,
     NbIconModule,
     NbSelectModule,

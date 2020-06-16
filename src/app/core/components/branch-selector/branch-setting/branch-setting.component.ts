@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { BranchInfo } from 'src/common/types';
-import { NbDialogRef, NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
+import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
+import { NzModalRef } from 'ng-zorro-antd';
 
 export enum DialogAction {
   CANCEL = 'cancel',
@@ -28,12 +29,12 @@ export class BranchSettingPage {
   public isEdit: boolean;
 
   constructor(
-    private dialogRef: NbDialogRef<BranchSettingPage>,
+    private modal: NzModalRef,
     private toastrService: NbToastrService,
   ) {}
 
   public toSave(): void {
-    this.dialogRef.close({
+    this.modal.close({
       action: DialogAction.SAVE,
       content: this.branch,
     });
@@ -44,14 +45,14 @@ export class BranchSettingPage {
   }
 
   public toDelete(): void {
-    this.dialogRef.close({
+    this.modal.close({
       action: DialogAction.DELETE,
       content: this.branch,
     });
   }
 
   public toClose(): void {
-    this.dialogRef.close({
+    this.modal.close({
       action: DialogAction.CANCEL,
     });
   }

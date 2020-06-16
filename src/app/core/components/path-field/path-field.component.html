@@ -1,15 +1,16 @@
-<nb-form-field class="field_item">
+<div class="field_item">
   <input
-    nbInput
+    nz-input
     fullWidth
     [placeholder]="placeholder"
     [ngModel]="value"
     (ngModelChange)="setValue($event)"
   />
-  <nb-icon
-    nbSuffix
-    icon="folder-outline"
+  <i
+    nz-icon
+    nzType="folder"
+    nzTheme="twotone"
     style="cursor: pointer;"
     (click)="toSelectPath($event)"
-  ></nb-icon>
-</nb-form-field>
+  ></i>
+</div>
