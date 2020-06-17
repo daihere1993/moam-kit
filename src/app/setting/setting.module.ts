@@ -1,15 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import {
-  NbButtonModule,
-  NbInputModule,
-  NbFormFieldModule,
-  NbIconModule,
-  NbSpinnerModule,
-  NbAlertModule,
-} from '@nebular/theme';
+import { NzNotificationServiceModule, NzFormModule, NzInputModule, NzButtonModule } from 'ng-zorro-antd';
 
 import { SettingComponent } from './setting.component';
 import { SettingRoutingModule } from './setting-routing.module';
@@ -19,13 +12,12 @@ import { SettingRoutingModule } from './setting-routing.module';
   imports: [
     CommonModule,
     FormsModule,
-    NbButtonModule,
-    NbInputModule,
-    NbFormFieldModule,
-    NbIconModule,
-    NbSpinnerModule,
-    NbAlertModule,
+    ReactiveFormsModule,
     SettingRoutingModule,
+    NzFormModule,
+    NzInputModule,
+    NzButtonModule,
+    NzNotificationServiceModule,
   ],
 })
 export class SettingModule {}

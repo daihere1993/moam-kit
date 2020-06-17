@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
+import { NzNotificationService } from 'ng-zorro-antd';
 import { IPCResponse, BranchInfo, IPCMessage } from 'src/common/types';
 import { IpcService } from '../core/services/electron/ipc.service';
 import { StoreService } from '../core/services/electron/store.service';
@@ -129,10 +129,16 @@ export class HomeComponent implements OnInit, OnDestroy {
     return this.applyPatchStatus === Status.TIMEOUT;
   }
 
+  public set alertMessage(message: string) {
+    if (message) {
+      this.notification.create('error', 'Error', message, { nzPlacement: 'bottomRight' });
+    }
+  }
+
   constructor(
     private ipcService: IpcService,
     private store: StoreService,
-    private toastrService: NbToastrService,
+    private notification: NzNotificationService,
     private changeDetectorRef: ChangeDetectorRef,
   ) {}
 
@@ -187,7 +193,7 @@ export class HomeComponent implements OnInit, OnDestroy {
             break;
         }
         this.snycErrorMsg = error.message;
-        this.alterErrorMsg(`${error.name}: ${error.message}`);
+        this.alertMessage = `${error.name}: ${error.message}`;
       }
     });
 
@@ -195,7 +201,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       if (ret.isSuccessed) {
         this.connecToServerStatus = Status.DONE;
       } else {
-        this.alterErrorMsg(`Unexpected response: ${IPCMessage.CONNECT_TO_SERVER_DONE}`);
+        this.alertMessage = `Unexpected response: ${IPCMessage.CONNECT_TO_SERVER_DONE}`;
       }
     });
 
@@ -203,7 +209,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       if (ret.isSuccessed) {
         this.createPatchStatus = Status.DONE;
       } else {
-        this.alterErrorMsg(`Unexpected response: ${IPCMessage.CREATE_PATCH_DONE}`);
+        this.alertMessage = `Unexpected response: ${IPCMessage.CREATE_PATCH_DONE}`;
       }
     });
 
@@ -211,7 +217,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       if (ret.isSuccessed) {
         this.uploadPatchStatus = Status.DONE;
       } else {
-        this.alterErrorMsg(`Unexpected response: ${IPCMessage.UPLOAD_PATCH_TO_SERVER_DONE}`);
+        this.alertMessage = `Unexpected response: ${IPCMessage.UPLOAD_PATCH_TO_SERVER_DONE}`;
       }
     });
 
@@ -219,7 +225,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       if (ret.isSuccessed) {
         this.applyPatchStatus = Status.DONE;
       } else {
-        this.alterErrorMsg(`Unexpected response: ${IPCMessage.APPLY_PATCH_TO_SERVER_DONE}`);
+        this.alertMessage = `Unexpected response: ${IPCMessage.APPLY_PATCH_TO_SERVER_DONE}`;
       }
     });
   }
@@ -251,13 +257,5 @@ export class HomeComponent implements OnInit, OnDestroy {
         data: this.branch,
       });
     }
-  }
-
-  private alterErrorMsg(msg: string): void {
-    this.toastrService.show(msg, 'Error', {
-      position: NbGlobalPhysicalPosition.BOTTOM_RIGHT,
-      status: 'danger',
-      duration: 10000,
-    });
   }
 }

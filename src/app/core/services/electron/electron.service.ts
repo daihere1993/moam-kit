@@ -7,10 +7,6 @@ import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import seedrandom from 'seedrandom';
 
-import { APPData } from 'src/common/types';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
-
 @Injectable({
   providedIn: 'root',
 })

@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { BranchInfo } from 'src/common/types';
-import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
-import { NzModalRef } from 'ng-zorro-antd';
+import { NzModalRef, NzNotificationService } from 'ng-zorro-antd';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 export enum DialogAction {
   CANCEL = 'cancel',
@@ -19,7 +19,9 @@ export interface DialogRes {
   templateUrl: 'branch-setting.component.html',
   styleUrls: ['branch-setting.component.scss'],
 })
-export class BranchSettingPage {
+export class BranchSettingPage implements OnInit {
+  public validateForm: FormGroup;
+
   public branch: BranchInfo = {
     name: '',
     pcDir: '',
@@ -30,18 +32,24 @@ export class BranchSettingPage {
 
   constructor(
     private modal: NzModalRef,
-    private toastrService: NbToastrService,
+    private fb: FormBuilder,
+    private notification: NzNotificationService,
   ) {}
+
+  ngOnInit(): void {
+    this.validateForm = this.fb.group({
+      branchName: [null, [Validators.required]],
+      serverDir: [null, [Validators.required]],
+      pcDir: [null, [Validators.required]],
+    });
+  }
 
   public toSave(): void {
     this.modal.close({
       action: DialogAction.SAVE,
       content: this.branch,
     });
-    this.toastrService.show('Success', 'Save', {
-      position: NbGlobalPhysicalPosition.BOTTOM_RIGHT,
-      duration: 8000,
-    });
+    this.notification.create('success', 'Success', '');
   }
 
   public toDelete(): void {

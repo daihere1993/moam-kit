@@ -1,8 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { NzNotificationService } from 'ng-zorro-antd';
 import { SSHData, IPCMessage } from '../../common/types';
 import { IpcService } from '../core/services/electron/ipc.service';
-import { ElectronService } from '../core/services';
 import { StoreService } from '../core/services/electron/store.service';
 
 @Component({
@@ -12,6 +12,8 @@ import { StoreService } from '../core/services/electron/store.service';
   providers: [IpcService],
 })
 export class SettingComponent implements OnInit {
+  public validateForm: FormGroup;
+
   public host: string;
 
   public username: string;
@@ -35,13 +37,20 @@ export class SettingComponent implements OnInit {
   }
 
   constructor(
-    private toastrService: NbToastrService,
+    private notification: NzNotificationService,
     private ipcService: IpcService,
     private store: StoreService,
+    private fb: FormBuilder,
     private changeDetectorRef: ChangeDetectorRef,
   ) {}
 
   public ngOnInit(): void {
+    this.validateForm = this.fb.group({
+      host: [null, [Validators.required]],
+      username: [null, [Validators.required]],
+      password: [null, [Validators.required]],
+    });
+
     this.store.getData().subscribe((data) => {
       this.sshInfo = data.ssh;
       this.changeDetectorRef.detectChanges();
@@ -52,9 +61,6 @@ export class SettingComponent implements OnInit {
     this.ipcService.send<{ key: string; value: SSHData }>(IPCMessage.STORE_DATA_REQ, {
       data: { key: 'ssh', value: this.sshInfo },
     });
-    this.toastrService.show('Success', 'Setting', {
-      position: NbGlobalPhysicalPosition.BOTTOM_RIGHT,
-      duration: 800,
-    });
+    this.notification.create('success', 'Success', '', { nzPlacement: 'bottomRight' });
   }
 }

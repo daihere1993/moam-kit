@@ -1,13 +1,13 @@
 <div class="container">
-  <nb-select placeholder="Select Branch" [selected]="value" (selectedChange)="setSelection($event)">
-    <nb-option *ngFor="let branch of branches" [value]="branch">
+  <nz-select placeholder="Select Branch" [ngModel]="value" (ngModelChange)="setSelection($event)">
+    <nz-option *ngFor="let branch of branches" nzCustomContent [nzLabel]="branch.name"  [nzValue]="branch">
       <div class="option_container">
         <span>{{ branch.name }}</span>
-        <nb-icon nbSuffix (click)="toEditBranch($event, branch)" icon="edit-2-outline"></nb-icon>
+        <i nz-icon nzType="edit" nzTheme="outline" (click)="toEditBranch($event, branch)"></i>
       </div>
-    </nb-option>
-  </nb-select>
-  <button class="add_btn" nbButton ghost (click)="toAddBranch()">
-    <nb-icon icon="plus-circle-outline"></nb-icon>
+    </nz-option>
+  </nz-select>
+  <button class="add_btn" nz-button nzType="link" (click)="toAddBranch()">
+    <i nz-icon nzType="plus-circle" nzTheme="outline"></i>
   </button>
 </div>

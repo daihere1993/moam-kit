@@ -1,16 +1,1 @@
-<div class="field_item">
-  <input
-    nz-input
-    fullWidth
-    [placeholder]="placeholder"
-    [ngModel]="value"
-    (ngModelChange)="setValue($event)"
-  />
-  <i
-    nz-icon
-    nzType="folder"
-    nzTheme="twotone"
-    style="cursor: pointer;"
-    (click)="toSelectPath($event)"
-  ></i>
-</div>
+<i nz-icon style="cursor: pointer;" nzType="folder" nzTheme="outline" (click)="toSelectPath($event)"></i>

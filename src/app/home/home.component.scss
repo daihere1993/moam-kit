@@ -63,6 +63,19 @@ $progress_font-size: 24px;
       width: 16px;
       height: 16px;
       margin-left: 6px;
+      font-size: 16px;
+    }
+    .loading {
+      color: #8f9bb3;
+    }
+    .failed {
+      color: red;
+    }
+    .success {
+      color: green;
+    }
+    .timeout {
+      color: orange;
     }
   }
 }

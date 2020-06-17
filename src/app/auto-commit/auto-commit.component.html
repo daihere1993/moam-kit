@@ -1,66 +1,84 @@
 <div class="container">
-  <div class="field_wrap">
-    <branch-selector
-      class="field_item"
-      [(value)]="branch"
-      [branches]="branches$ | async"
-    ></branch-selector>
+  <form nz-form [formGroup]="validateForm">
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Branch</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <branch-selector
+          class="field_item"
+          [(value)]="branch"
+          [branches]="branches$ | async"
+        ></branch-selector>
+      </nz-form-control>
+    </nz-form-item>
 
-    <nb-form-field class="field_item">
-      <input
-        #fPRTitle="ngModel"
-        required
-        nbInput
-        fullWidth
-        placeholder="Pronto Title"
-        [(ngModel)]="prontoTitle"
-      />
-    </nb-form-field>
-    <nb-form-field class="field_item">
-      <input
-        #fDesc="ngModel"
-        required
-        nbInput
-        fullWidth
-        placeholder="Correction Description"
-        [(ngModel)]="description"
-      />
-    </nb-form-field>
-    <nb-form-field class="field_item">
-      <input
-        #fRBId="ngModel"
-        required
-        nbInput
-        fullWidth
-        placeholder="Review Board ID"
-        [(ngModel)]="reviewBoardID"
-      />
-    </nb-form-field>
-
-    <path-field
-      class="field_item"
-      placeholder="Specific Diff"
-      [(value)]="specificDiff"
-      type="file"
-    ></path-field>
-
-    <div class="action_container">
-      <button
-        nbButton
-        [disabled]="fPRTitle.invalid || fDesc.invalid || fRBId.invalid"
-        [status]="isOnGoing ? 'basic' : 'primary'"
-        (click)="toAutoCommit()"
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="prontoTitle"
+        >Pronto Title</nz-form-label
       >
-        {{ isOnGoing ? 'Stop' : 'DO IT' }}
-      </button>
-      <div class="progress_container" *ngIf="commitStatus">
-        <div class="spinner" [nbSpinner]="isOnGoing" nbSpinnerStatus="success">
-          <nb-icon *ngIf="isSuccess" icon="checkmark-outline" status="success"></nb-icon>
-          <nb-icon *ngIf="isFailed" icon="close-outline" status="danger"></nb-icon>
-        </div>
-      </div>
-    </div>
-  </div>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <input nz-input formControlName="prontoTitle" [(ngModel)]="prontoTitle" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="description"
+        >Correction Description</nz-form-label
+      >
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <input nz-input formControlName="description" [(ngModel)]="description" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="reviewBoardID"
+        >Review Board ID</nz-form-label
+      >
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <input nz-input formControlName="reviewBoardID" [(ngModel)]="reviewBoardID" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="specificDiff"
+        >Specific Diff</nz-form-label
+      >
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <nz-input-group [nzSuffix]="folderSelector">
+          <input nz-input formControlName="specificDiff" [(ngModel)]="specificDiff" />
+        </nz-input-group>
+        <ng-template #folderSelector>
+          <path-field [(value)]="specificDiff"></path-field>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-control [nzSpan]="14" [nzOffset]="6">
+        <button
+          nz-button
+          [disabled]="validateForm.invalid"
+          nzType="primary"
+          [nzLoading]="isOnGoing"
+          (click)="toAutoCommit()"
+        >
+          {{ isOnGoing ? 'On Going' : 'DO IT' }}
+        </button>
+        <button
+          nz-button
+          nzDanger
+          style="margin-left: 20px;"
+          *ngIf="isOnGoing"
+          nzType="primary"
+          (click)="toAutoCommit()"
+        >
+          Cancel
+        </button>
+        <i nz-icon *ngIf="isFailed" class="icon_flag failed" nzType="close"></i>
+        <i nz-icon *ngIf="isSuccess" class="icon_flag success" nzType="check"></i>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+
   <div class="log_wrap">
     <div
       class="commit_status"

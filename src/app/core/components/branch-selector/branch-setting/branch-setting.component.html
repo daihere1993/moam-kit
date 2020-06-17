@@ -1,43 +1,45 @@
 <div class="container">
-  <form nz-from>
+  <form nz-from [formGroup]="validateForm">
     <nz-form-item>
-      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="branch_name">Branch Name</nz-form-label>
-      <nz-form-control [nzSm]="14" [nzXs]="24">
-        <input nz-input name="branch_name" [(ngModel)]="branch.name" />
+      <nz-form-label [nzSm]="8" nzRequired nzFor="branchName">Branch Name</nz-form-label>
+      <nz-form-control [nzSm]="13">
+        <input nz-input formControlName="branchName" [(ngModel)]="branch.name" />
       </nz-form-control>
     </nz-form-item>
 
     <nz-form-item>
-      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="server_dir">MOAM DIR of server</nz-form-label>
-      <nz-form-control [nzSm]="14" [nzXs]="24">
-        <input nz-input name="server_dir" [(ngModel)]="branch.serverDir" />
+      <nz-form-label [nzSm]="8" nzRequired nzFor="serverDir">MOAM DIR of server</nz-form-label>
+      <nz-form-control [nzSm]="13">
+        <input nz-input formControlName="serverDir" [(ngModel)]="branch.serverDir" />
       </nz-form-control>
     </nz-form-item>
 
     <nz-form-item>
-      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="server_dir">MOAM DIR of PC</nz-form-label>
-      <nz-form-control [nzSm]="14" [nzXs]="24">
-        <nz-input-group nzSuffixIcon="folder">
-          <input nz-input name="server_dir" [(ngModel)]="branch.pcDir" />
+      <nz-form-label [nzSm]="8" nzRequired nzFor="pcDir">MOAM DIR of PC</nz-form-label>
+      <nz-form-control [nzSm]="13">
+        <nz-input-group [nzSuffix]="folderSelector">
+          <input nz-input formControlName="pcDir" [(ngModel)]="branch.pcDir" />
         </nz-input-group>
+        <ng-template #folderSelector>
+          <path-field [(value)]="branch.pcDir"></path-field>
+        </ng-template>
       </nz-form-control>
     </nz-form-item>
   </form>
-
   
-
   <div *nzModalFooter>
     <button
-        nz-button
-        class="dialog_btn"
-        nzType="primary"
-        (click)="toSave()"
-      >
-        Save
-      </button>
-      <button nz-button class="dialog_btn" *ngIf="isEdit" nzType="danger" (click)="toDelete()">
-        Delete
-      </button>
-      <button nz-button class="dialog_btn" (click)="toClose()">Close</button>
+      nz-button
+      class="dialog_btn"
+      [disabled]="validateForm.invalid"
+      nzType="primary"
+      (click)="toSave()"
+    >
+      Save
+    </button>
+    <button nz-button class="dialog_btn" *ngIf="isEdit" nzType="danger" (click)="toDelete()">
+      Delete
+    </button>
+    <button nz-button class="dialog_btn" (click)="toClose()">Close</button>
   </div>
 </div>

@@ -11,6 +11,7 @@ import {
 } from '../../common/types';
 import { IpcService } from '../core/services/electron/ipc.service';
 import { StoreService } from '../core/services/electron/store.service';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 enum CommitStatus {
   ON_GOING = 'on going',
@@ -25,6 +26,8 @@ enum CommitStatus {
   providers: [IpcService],
 })
 export class AutoCommitComponent implements OnInit, OnDestroy {
+  public validateForm: FormGroup;
+
   public branches$: Observable<BranchInfo[]>;
 
   /** Form fields */
@@ -66,10 +69,18 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
   constructor(
     private ipcService: IpcService,
     private store: StoreService,
+    private fb: FormBuilder,
     private changeDetectorRef: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
+    this.validateForm = this.fb.group({
+      prontoTitle: [null, [Validators.required]],
+      description: [null, [Validators.required]],
+      reviewBoardID: [null, [Validators.required]],
+      specificDiff: [null, [Validators.required]],
+    });
+
     this.branches$ = this.store.getData().pipe(
       tap(({ branches, lastAutoCommitInfo }) => {
         if (!this.branch && branches && branches.length > 0) {

@@ -1,17 +1,15 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzModalModule } from 'ng-zorro-antd/modal';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzInputModule } from 'ng-zorro-antd/input';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
-  NbSelectModule,
-  NbDialogModule,
-  NbButtonModule,
-  NbIconModule,
-  NbCardModule,
-} from '@nebular/theme';
+  NzButtonModule,
+  NzModalModule,
+  NzFormModule,
+  NzInputModule,
+  NzIconModule,
+  NzSelectModule,
+  NzNotificationServiceModule,
+} from 'ng-zorro-antd';
 import { BranchSelectorComponent } from './branch-selector.component';
 import { BranchSettingPage } from './branch-setting/branch-setting.component';
 import { PathInputModule } from '../path-field/path-field.module';
@@ -22,16 +20,15 @@ import { IpcService } from '../../services/electron/ipc.service';
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     PathInputModule,
+    NzIconModule,
     NzButtonModule,
     NzModalModule,
     NzFormModule,
     NzInputModule,
-    NbButtonModule,
-    NbIconModule,
-    NbSelectModule,
-    NbCardModule,
-    NbDialogModule.forChild({ closeOnBackdropClick: false }),
+    NzSelectModule,
+    NzNotificationServiceModule,
   ],
   providers: [IpcService],
   exports: [BranchSelectorComponent],

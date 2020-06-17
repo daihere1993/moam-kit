@@ -1,16 +1,3 @@
-.container {
-  width: 500px;
-}
-
-.field_item {
-  margin-bottom: 10px;
-}
-
-.dialog_btn:last-child,
-.field_item:last-child {
+.container .ant-form-item:last-child {
   margin: 0;
-}
-
-.dialog_btn {
-  margin-right: 10px;
 }

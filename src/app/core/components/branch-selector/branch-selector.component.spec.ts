@@ -1,14 +1,5 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-  NbDialogService,
-  NbInputModule,
-  NbFormFieldModule,
-  NbButtonModule,
-  NbIconModule,
-  NbSelectModule,
-  NbCardModule,
-  NbDialogModule,
-} from '@nebular/theme';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -33,33 +24,21 @@ describe('BranchSelectorComponent', () => {
 
   beforeEach(() => {
     const spiedIpcService = createSpyObject('IpcService', ['send']);
-    const spiedDialogService = createSpyObject('NbDialogService', ['open']);
 
     TestBed.configureTestingModule({
       imports: [
         CommonModule,
         FormsModule,
         PathInputModule,
-        NbInputModule,
-        NbFormFieldModule,
-        NbButtonModule,
-        NbIconModule,
-        NbSelectModule,
-        NbCardModule,
-        NbDialogModule.forChild({ closeOnBackdropClick: false }),
       ],
       declarations: [BranchSelectorComponent],
       providers: [
-        { provide: NbDialogService, useValue: spiedDialogService },
         { provide: IpcService, useValue: spiedIpcService },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(BranchSelectorComponent);
     component = fixture.componentInstance;
-
-    TestBed.inject(NbDialogService);
-    TestBed.inject(IpcService);
 
     fixture.detectChanges();
   });

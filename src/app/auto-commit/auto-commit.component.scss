@@ -12,24 +12,23 @@
   display: flex;
 }
 
-.progress_container {
-  display: flex;
-  align-items: center;
-  margin-left: 10px;
 
-  ::ng-deep .spinner {
-    nb-spinner {
-      background: none;
-    }
-  }
+.icon_flag {
+  font-size: 16px;
+  margin-left: 10px;
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.loading {
+  color: #8f9bb3;
+}
+.failed {
+  color: red;
+}
+.success {
+  color: green;
+}
+.timeout {
+  color: orange;
 }
 
 .log_wrap {
