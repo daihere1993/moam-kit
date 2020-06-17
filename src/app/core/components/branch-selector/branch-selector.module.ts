@@ -8,6 +8,7 @@ import {
   NzInputModule,
   NzIconModule,
   NzSelectModule,
+  NzDividerModule,
   NzNotificationServiceModule,
 } from 'ng-zorro-antd';
 import { BranchSelectorComponent } from './branch-selector.component';
@@ -28,6 +29,7 @@ import { IpcService } from '../../services/electron/ipc.service';
     NzFormModule,
     NzInputModule,
     NzSelectModule,
+    NzDividerModule,
     NzNotificationServiceModule,
   ],
   providers: [IpcService],
