@@ -49,7 +49,7 @@ export class BranchSettingPage implements OnInit {
       action: DialogAction.SAVE,
       content: this.branch,
     });
-    this.notification.create('success', 'Success', '');
+    this.notification.create('success', 'Success', '', { nzPlacement: 'bottomRight' });
   }
 
   public toDelete(): void {

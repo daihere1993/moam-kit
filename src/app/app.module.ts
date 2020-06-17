@@ -1,8 +1,8 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { NbThemeModule, NbLayoutModule, NbMenuModule, NbToastrModule } from '@nebular/theme';
-import { NbEvaIconsModule } from '@nebular/eva-icons';
+
+import { NzLayoutModule, NzMenuModule, NzIconModule } from 'ng-zorro-antd';
 
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -22,9 +22,6 @@ registerLocaleData(en);
 @NgModule({
   declarations: [AppComponent],
   imports: [
-    NbThemeModule.forRoot(),
-    NbMenuModule.forRoot(),
-    NbToastrModule.forRoot(),
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
@@ -32,8 +29,9 @@ registerLocaleData(en);
     HomeModule,
     SettingModule,
     AutoCommitModule,
-    NbLayoutModule,
-    NbEvaIconsModule,
+    NzLayoutModule,
+    NzMenuModule,
+    NzIconModule,
     FormsModule,
     HttpClientModule,
   ],
