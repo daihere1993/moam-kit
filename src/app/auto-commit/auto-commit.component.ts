@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import moment from 'moment';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import {
@@ -11,7 +12,6 @@ import {
 } from '../../common/types';
 import { IpcService } from '../core/services/electron/ipc.service';
 import { StoreService } from '../core/services/electron/store.service';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 enum CommitStatus {
   ON_GOING = 'on going',

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { NzNotificationService } from 'ng-zorro-antd';
@@ -140,14 +140,17 @@ export class HomeComponent implements OnInit, OnDestroy {
     private store: StoreService,
     private notification: NzNotificationService,
     private changeDetectorRef: ChangeDetectorRef,
+    private zone: NgZone,
   ) {}
 
   ngOnInit(): void {
     this.branches$ = this.store.getData().pipe(
       tap(({ branches }) => {
         if (!this.branch && branches && branches.length > 0) {
-          [this.branch] = branches;
-          this.changeDetectorRef.detectChanges();
+          this.zone.run(() => {
+            [this.branch] = branches;
+            this.changeDetectorRef.detectChanges();
+          });
         }
       }),
       map((data) => {
