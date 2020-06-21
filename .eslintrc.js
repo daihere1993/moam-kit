@@ -60,5 +60,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/camelcase': 'off',
     'unicorn/no-null': 'off',
+    '@typescript-eslint/no-use-before-define': 'off',
+    'no-use-before-define': 'off',
   },
 };

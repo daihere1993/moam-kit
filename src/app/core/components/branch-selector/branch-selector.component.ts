@@ -16,6 +16,8 @@ import { IpcService } from '../../services/electron/ipc.service';
 export class BranchSelectorComponent {
   @Output() valueChange = new EventEmitter();
 
+  @Input() disabled = false;
+
   @Input() value: BranchInfo;
 
   @Input() branches: BranchInfo[] = [];
@@ -46,7 +48,10 @@ export class BranchSelectorComponent {
   public toEditBranch(e: Event, branch: BranchInfo): void {
     const _branch = { ...branch };
     this.modalService
-      .create({ nzContent: BranchSettingPage, nzComponentParams: { branch: _branch, isEdit: true } })
+      .create({
+        nzContent: BranchSettingPage,
+        nzComponentParams: { branch: _branch, isEdit: true },
+      })
       .afterClose.subscribe((res: DialogRes) => {
         if (res && res.action === DialogAction.SAVE) {
           Object.assign(branch, res.content);

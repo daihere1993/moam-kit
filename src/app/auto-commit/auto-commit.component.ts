@@ -114,6 +114,7 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
     this.ipcService.on(IPCMessage.REPLY_STOP_AUTO_COMMIT, (event, res: IPCResponse) => {
       if (res.isSuccessed) {
         this.commitStatus = undefined;
+        this.changeDetectorRef.detectChanges();
       }
     });
 
