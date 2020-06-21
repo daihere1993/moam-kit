@@ -1,16 +1,13 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 
 import {
-  NbButtonModule,
-  NbInputModule,
-  NbFormFieldModule,
-  NbIconModule,
-  NbSpinnerModule,
-  NbCardModule,
-  NbAlertModule,
-} from '@nebular/theme';
+  NzButtonModule,
+  NzIconModule,
+  NzCardModule,
+  NzSpinModule,
+  NzNotificationServiceModule,
+} from 'ng-zorro-antd';
 
 import { BranchSelectorModule } from '../core/components/branch-selector';
 
@@ -21,16 +18,13 @@ import { HomeRoutingModule } from './home-routing.module';
   declarations: [HomeComponent],
   imports: [
     CommonModule,
-    FormsModule,
     HomeRoutingModule,
-    NbButtonModule,
-    NbInputModule,
-    NbFormFieldModule,
-    NbIconModule,
-    NbSpinnerModule,
-    NbCardModule,
-    NbAlertModule,
     BranchSelectorModule,
+    NzButtonModule,
+    NzIconModule,
+    NzCardModule,
+    NzSpinModule,
+    NzNotificationServiceModule,
   ],
 })
 export class HomeModule {}

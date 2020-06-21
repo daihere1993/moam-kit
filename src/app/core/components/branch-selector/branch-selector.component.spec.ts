@@ -1,20 +1,21 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-  NbDialogService,
-  NbInputModule,
-  NbFormFieldModule,
-  NbButtonModule,
-  NbIconModule,
-  NbSelectModule,
-  NbCardModule,
-  NbDialogModule,
-} from '@nebular/theme';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Component } from '@angular/core';
+import { BranchInfo } from 'src/common/types';
+
+import {
+  NzModalService,
+  NzSelectModule,
+  NzIconModule,
+  NzDividerModule,
+  NzButtonModule,
+} from 'ng-zorro-antd';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { BranchSelectorComponent } from './branch-selector.component';
 import { IpcService } from '../../services/electron/ipc.service';
-import { PathInputModule } from '../path-field/path-field.module';
 
 function createSpyObject(
   basename: string,
@@ -28,38 +29,32 @@ function createSpyObject(
 }
 
 describe('BranchSelectorComponent', () => {
-  let component: BranchSelectorComponent;
-  let fixture: ComponentFixture<BranchSelectorComponent>;
+  let component: TestBranchSelectorComponent;
+  let fixture: ComponentFixture<TestBranchSelectorComponent>;
 
   beforeEach(() => {
     const spiedIpcService = createSpyObject('IpcService', ['send']);
-    const spiedDialogService = createSpyObject('NbDialogService', ['open']);
+    const spiedModalService = createSpyObject('NzModalService', ['create']);
 
     TestBed.configureTestingModule({
       imports: [
         CommonModule,
+        BrowserAnimationsModule,
         FormsModule,
-        PathInputModule,
-        NbInputModule,
-        NbFormFieldModule,
-        NbButtonModule,
-        NbIconModule,
-        NbSelectModule,
-        NbCardModule,
-        NbDialogModule.forChild({ closeOnBackdropClick: false }),
+        NzButtonModule,
+        NzSelectModule,
+        NzIconModule,
+        NzDividerModule,
       ],
-      declarations: [BranchSelectorComponent],
+      declarations: [BranchSelectorComponent, TestBranchSelectorComponent],
       providers: [
-        { provide: NbDialogService, useValue: spiedDialogService },
         { provide: IpcService, useValue: spiedIpcService },
+        { provide: NzModalService, useValue: spiedModalService },
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(BranchSelectorComponent);
+    fixture = TestBed.createComponent(TestBranchSelectorComponent);
     component = fixture.componentInstance;
-
-    TestBed.inject(NbDialogService);
-    TestBed.inject(IpcService);
 
     fixture.detectChanges();
   });
@@ -68,3 +63,24 @@ describe('BranchSelectorComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+
+@Component({
+  template: `
+    <branch-selector
+      [branches]="branches"
+      ([value])="(value)"
+      [disabled]="disabled"
+    ></branch-selector>
+  `,
+})
+class TestBranchSelectorComponent {
+  branches: BranchInfo[] = [
+    {
+      name: 'name',
+      pcDir: 'pcDir',
+      serverDir: 'serverDir',
+    },
+  ];
+  value: BranchInfo;
+  disabled: true;
+}

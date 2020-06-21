@@ -1,44 +1,45 @@
 <div class="container">
-  <nb-card>
-    <nb-card-body>
-      <nb-form-field class="field_item">
-        <input
-          #name="ngModel"
-          nbInput
-          fullWidth
-          required
-          placeholder="Branch Name"
-          [(ngModel)]="branch.name"
-        />
-      </nb-form-field>
+  <form nz-from [formGroup]="validateForm">
+    <nz-form-item>
+      <nz-form-label [nzSm]="8" nzRequired nzFor="branchName">Branch Name</nz-form-label>
+      <nz-form-control [nzSm]="13">
+        <input nz-input formControlName="branchName" [(ngModel)]="branch.name" />
+      </nz-form-control>
+    </nz-form-item>
 
-      <nb-form-field class="field_item">
-        <input
-          #serverDir="ngModel"
-          nbInput
-          fullWidth
-          required
-          placeholder="MOAM DIR of server"
-          [(ngModel)]="branch.serverDir"
-        />
-      </nb-form-field>
+    <nz-form-item>
+      <nz-form-label [nzSm]="8" nzRequired nzFor="serverDir">MOAM DIR of server</nz-form-label>
+      <nz-form-control [nzSm]="13">
+        <input nz-input formControlName="serverDir" [(ngModel)]="branch.serverDir" />
+      </nz-form-control>
+    </nz-form-item>
 
-      <path-field placeholder="MOAM DIR of PC" [(value)]="branch.pcDir"></path-field>
-    </nb-card-body>
-    <nb-card-footer>
-      <button
-        nbButton
-        class="dialog_btn"
-        [disabled]="name.invalid || serverDir.invalid"
-        status="primary"
-        (click)="toSave()"
-      >
-        Save
-      </button>
-      <button nbButton class="dialog_btn" *ngIf="isEdit" status="danger" (click)="toDelete()">
-        Delete
-      </button>
-      <button nbButton class="dialog_btn" (click)="toClose()">Close</button>
-    </nb-card-footer>
-  </nb-card>
+    <nz-form-item>
+      <nz-form-label [nzSm]="8" nzRequired nzFor="pcDir">MOAM DIR of PC</nz-form-label>
+      <nz-form-control [nzSm]="13">
+        <nz-input-group [nzSuffix]="folderSelector">
+          <input nz-input formControlName="pcDir" [(ngModel)]="branch.pcDir" />
+        </nz-input-group>
+        <ng-template #folderSelector>
+          <path-field [(value)]="branch.pcDir"></path-field>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+  
+  <div *nzModalFooter>
+    <button
+      nz-button
+      class="dialog_btn"
+      [disabled]="validateForm.invalid"
+      nzType="primary"
+      (click)="toSave()"
+    >
+      Save
+    </button>
+    <button nz-button class="dialog_btn" *ngIf="isEdit" nzType="danger" (click)="toDelete()">
+      Delete
+    </button>
+    <button nz-button class="dialog_btn" (click)="toClose()">Close</button>
+  </div>
 </div>

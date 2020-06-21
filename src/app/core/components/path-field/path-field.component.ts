@@ -16,8 +16,6 @@ enum Type {
 export class PathInputComponent implements OnInit, OnDestroy {
   @Output() valueChange: EventEmitter<string> = new EventEmitter();
 
-  @Input() placeholder: string;
-
   @Input('value') value: string;
 
   @Input() type: Type = Type.DIR;

@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { NbMenuItem } from '@nebular/theme';
 
 @Component({
   selector: 'app-navbar',
@@ -7,7 +6,7 @@ import { NbMenuItem } from '@nebular/theme';
   styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent {
-  public items: NbMenuItem[] = [
+  public items = [
     {
       title: 'Home',
       link: '/home',

@@ -1,7 +1,38 @@
-<nb-layout>
+<nz-layout class="container">
+  <nz-sider nzTheme="light">
+    <ul nz-menu nzTheme="light">
+      <li nz-menu-item nzMatchRouter>
+        <a routerLink="/home">
+          <i nz-icon nzType="sync" nzTheme="outline"></i>
+          <span>Sync Code</span>
+        </a>
+      </li>
+      <li nz-menu-item nzMatchRouter>
+        <a routerLink="/auto-commit">
+          <i nz-icon nzType="field-time" nzTheme="outline"></i>
+          <span>Auto Commit</span>
+        </a>
+      </li>
+      <li nz-menu-item nzMatchRouter>
+        <a routerLink="/setting">
+          <i nz-icon nzType="setting" nzTheme="outline"></i>
+          <span>Setting</span>
+        </a>
+      </li>
+    </ul>
+  </nz-sider>
+  <nz-layout>
+    <nz-content>
+      <div class="content_container">
+        <router-outlet></router-outlet>
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>
+
+<!-- <nb-layout>
   <nb-layout-header fixed>
     <app-navbar class="navbar"></app-navbar>
-    <!-- Insert header here -->
   </nb-layout-header>
 
   <nb-layout-column>
@@ -10,6 +41,4 @@
     </div>
   </nb-layout-column>
 
-  <!-- <nb-layout-footer fixed>
-  </nb-layout-footer> -->
-</nb-layout>
+</nb-layout> -->

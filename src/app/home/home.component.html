@@ -3,90 +3,87 @@
     <branch-selector [(value)]="branch" [branches]="branches$ | async"></branch-selector>
 
     <div class="sync_containner">
-      <button class="sync_button" nbButton status="primary" (click)="toSyncCode()">
-        Sync Code
+      <button
+        class="sync_button"
+        nz-button
+        nzType="primary"
+        [nzLoading]="isSyncOnGoing"
+        (click)="toSyncCode()"
+      >
+        {{ isSyncOnGoing ? 'On Going' : 'Sync Code' }}
       </button>
       <div class="progress_container" *ngIf="syncStatus">
-        <div class="spinner" [nbSpinner]="isSyncOnGoing" nbSpinnerStatus="success">
-          <nb-icon *ngIf="isSyncDone" icon="checkmark-outline" status="success"></nb-icon>
-          <nb-icon *ngIf="isSyncFailed" icon="close-outline" status="danger"></nb-icon>
-        </div>
+        <i
+          *ngIf="isSyncDone"
+          nz-icon
+          nzType="check"
+          nzTheme="outline"
+          style="font-size: 24px; color: green;"
+        ></i>
+        <i
+          *ngIf="isSyncFailed"
+          nz-icon
+          nzType="close"
+          nzTheme="outline"
+          style="font-size: 24px; color: red;"
+        ></i>
       </div>
     </div>
   </div>
 
-  <nb-card class="log_containner" *ngIf="syncStatus">
-    <nb-card-body>
-      <ul>
-        <li class="log_item">
-          Connect to server:
-          <div
-            class="spinner item__status"
-            *ngIf="connecToServerStatus"
-            [nbSpinner]="isConnectionOnGoing"
-            nbSpinnerSize="tiny"
-          >
-            <nb-icon *ngIf="isConnectionDone" icon="checkmark-outline" status="success"></nb-icon>
-            <nb-icon *ngIf="isConnectionFailed" icon="close-outline" status="danger"></nb-icon>
-            <nb-icon
-              *ngIf="isConnectionTimeout"
-              icon="minus-circle-outline"
-              status="warning"
-            ></nb-icon>
-          </div>
-        </li>
-        <li class="log_item">
-          Create patch:
-          <div
-            class="spinner item__status"
-            *ngIf="createPatchStatus"
-            [nbSpinner]="isCreatePatchOnGoing"
-            nbSpinnerSize="tiny"
-          >
-            <nb-icon *ngIf="isCreatePatchDone" icon="checkmark-outline" status="success"></nb-icon>
-            <nb-icon *ngIf="isCreatePatchFailed" icon="close-outline" status="danger"></nb-icon>
-            <nb-icon
-              *ngIf="isCreatePatchTimeout"
-              icon="minus-circle-outline"
-              status="warning"
-            ></nb-icon>
-          </div>
-        </li>
-        <li class="log_item">
-          Upload patch:
-          <div
-            class="spinner item__status"
-            *ngIf="uploadPatchStatus"
-            [nbSpinner]="isUploadPatchOnGoing"
-            nbSpinnerSize="tiny"
-          >
-            <nb-icon *ngIf="isUploadPatchDone" icon="checkmark-outline" status="success"></nb-icon>
-            <nb-icon *ngIf="isUploadPatchFailed" icon="close-outline" status="danger"></nb-icon>
-            <nb-icon
-              *ngIf="isUploadPatchTimeout"
-              icon="minus-circle-outline"
-              status="warning"
-            ></nb-icon>
-          </div>
-        </li>
-        <li class="log_item">
-          Apply patch:
-          <div
-            class="spinner item__status"
-            *ngIf="applyPatchStatus"
-            [nbSpinner]="isApplyPatchOnGoing"
-            nbSpinnerSize="tiny"
-          >
-            <nb-icon *ngIf="isApplyPatchDone" icon="checkmark-outline" status="success"></nb-icon>
-            <nb-icon *ngIf="isApplyPatchFailed" icon="close-outline" status="danger"></nb-icon>
-            <nb-icon
-              *ngIf="isApplyPatchTimeout"
-              icon="minus-circle-outline"
-              status="warning"
-            ></nb-icon>
-          </div>
-        </li>
-      </ul>
-    </nb-card-body>
-  </nb-card>
+  <nz-card class="log_containner" *ngIf="syncStatus">
+    <ul>
+      <li class="log_item">
+        Connect to server:
+        <i
+          nz-icon
+          *ngIf="isConnectionOnGoing"
+          class="item__status loading"
+          [nzType]="'sync'"
+          [nzSpin]="true"
+        ></i>
+        <i nz-icon *ngIf="isConnectionFailed" class="item__status failed" nzType="close"></i>
+        <i nz-icon *ngIf="isConnectionDone" class="item__status success" nzType="check"></i>
+      </li>
+      <li class="log_item">
+        Create patch:
+        <i
+          nz-icon
+          *ngIf="isCreatePatchOnGoing"
+          class="item__status loading"
+          [nzType]="'sync'"
+          [nzSpin]="true"
+        ></i>
+        <i nz-icon *ngIf="isCreatePatchFailed" class="item__status failed" nzType="close"></i>
+        <i nz-icon *ngIf="isCreatePatchDone" class="item__status success" nzType="check"></i>
+        <i nz-icon *ngIf="isCreatePatchTimeout" class="item__status timeout" nzType="minus-circle"></i>
+      </li>
+      <li class="log_item">
+        Upload patch:
+        <i
+          nz-icon
+          *ngIf="isUploadPatchOnGoing"
+          class="item__status loading"
+          [nzType]="'sync'"
+          [nzSpin]="true"
+        ></i>
+        <i nz-icon *ngIf="isUploadPatchFailed" class="item__status failed" nzType="close"></i>
+        <i nz-icon *ngIf="isUploadPatchDone" class="item__status success" nzType="check"></i>
+        <i nz-icon *ngIf="isUploadPatchTimeout" class="item__status timeout" nzType="minus-circle"></i>
+      </li>
+      <li class="log_item">
+        Apply patch:
+        <i
+          nz-icon
+          *ngIf="isApplyPatchOnGoing"
+          class="item__status loading"
+          [nzType]="'sync'"
+          [nzSpin]="true"
+        ></i>
+        <i nz-icon *ngIf="isApplyPatchFailed" class="item__status failed" nzType="close"></i>
+        <i nz-icon *ngIf="isApplyPatchDone" class="item__status success" nzType="check"></i>
+        <i nz-icon *ngIf="isApplyPatchTimeout" class="item__status timeout" nzType="minus-circle"></i>
+      </li>
+    </ul>
+  </nz-card>
 </div>

@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { BranchInfo } from 'src/common/types';
-import { NbDialogRef, NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
+import { NzModalRef, NzNotificationService } from 'ng-zorro-antd';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 export enum DialogAction {
   CANCEL = 'cancel',
@@ -18,7 +19,9 @@ export interface DialogRes {
   templateUrl: 'branch-setting.component.html',
   styleUrls: ['branch-setting.component.scss'],
 })
-export class BranchSettingPage {
+export class BranchSettingPage implements OnInit {
+  public validateForm: FormGroup;
+
   public branch: BranchInfo = {
     name: '',
     pcDir: '',
@@ -28,30 +31,36 @@ export class BranchSettingPage {
   public isEdit: boolean;
 
   constructor(
-    private dialogRef: NbDialogRef<BranchSettingPage>,
-    private toastrService: NbToastrService,
+    private modal: NzModalRef,
+    private fb: FormBuilder,
+    private notification: NzNotificationService,
   ) {}
 
-  public toSave(): void {
-    this.dialogRef.close({
-      action: DialogAction.SAVE,
-      content: this.branch,
-    });
-    this.toastrService.show('Success', 'Save', {
-      position: NbGlobalPhysicalPosition.BOTTOM_RIGHT,
-      duration: 8000,
+  ngOnInit(): void {
+    this.validateForm = this.fb.group({
+      branchName: [null, [Validators.required]],
+      serverDir: [null, [Validators.required]],
+      pcDir: [null, [Validators.required]],
     });
   }
 
+  public toSave(): void {
+    this.modal.close({
+      action: DialogAction.SAVE,
+      content: this.branch,
+    });
+    this.notification.create('success', 'Success', '', { nzPlacement: 'bottomRight' });
+  }
+
   public toDelete(): void {
-    this.dialogRef.close({
+    this.modal.close({
       action: DialogAction.DELETE,
       content: this.branch,
     });
   }
 
   public toClose(): void {
-    this.dialogRef.close({
+    this.modal.close({
       action: DialogAction.CANCEL,
     });
   }

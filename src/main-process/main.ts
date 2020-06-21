@@ -121,7 +121,8 @@ try {
 
     setTimeout(() => {
       createWindow();
-      createMenu();
+      win.setMenu(null);
+      // createMenu();
     }, 400);
   });
 

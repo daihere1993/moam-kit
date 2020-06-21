@@ -1,61 +1,38 @@
 <div class="container">
-  <nb-form-field class="field_item">
-    <input
-      #fHost="ngModel"
-      required
-      nbInput
-      fullWidth
-      placeholder="Server host"
-      [(ngModel)]="host"
-    />
-  </nb-form-field>
-  <nb-alert
-    *ngIf="fHost.invalid && (fHost.dirty || fHost.touched)"
-    status="danger"
-  >
-    Host couldn't be empty.
-  </nb-alert>
-  <nb-form-field class="field_item">
-    <input
-      #fUsername="ngModel"
-      required
-      nbInput
-      fullWidth
-      placeholder="Username"
-      [(ngModel)]="username"
-    />
-  </nb-form-field>
-  <nb-alert
-    *ngIf="fUsername.invalid && (fUsername.dirty || fUsername.touched)"
-    status="danger"
-  >
-    Username couldn't be empty.
-  </nb-alert>
-  <nb-form-field class="field_item">
-    <input
-      #fPassword="ngModel"
-      type="password"
-      required
-      nbInput
-      fullWidth
-      placeholder="Password"
-      [(ngModel)]="password"
-    />
-  </nb-form-field>
-  <nb-alert
-    *ngIf="fPassword.invalid && (fPassword.dirty || fPassword.touched)"
-    status="danger"
-  >
-    Password couldn't be empty.
-  </nb-alert>
+  <form nz-form [formGroup]="validateForm">
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="host">Server host</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <input nz-input formControlName="host" [(ngModel)]="host" />
+      </nz-form-control>
+    </nz-form-item>
 
-  <button
-    class="button__save"
-    [disabled]="fHost.invalid || fUsername.invalid || fPassword.invalid"
-    nbButton
-    status="primary"
-    (click)="toSave()"
-  >
-    Save
-  </button>
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="username">Username</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <input nz-input formControlName="username" [(ngModel)]="username" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="password">Password</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <input nz-input type="password" formControlName="password" [(ngModel)]="password" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-control [nzSpan]="14" [nzOffset]="6">
+        <button
+          nz-button
+          class="button__save"
+          [disabled]="validateForm.invalid"
+          nzType="primary"
+          (click)="toSave()"
+        >
+          Save
+        </button>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
 </div>

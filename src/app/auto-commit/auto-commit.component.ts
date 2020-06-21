@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import moment from 'moment';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import {
@@ -25,6 +26,8 @@ enum CommitStatus {
   providers: [IpcService],
 })
 export class AutoCommitComponent implements OnInit, OnDestroy {
+  public validateForm: FormGroup;
+
   public branches$: Observable<BranchInfo[]>;
 
   /** Form fields */
@@ -66,10 +69,18 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
   constructor(
     private ipcService: IpcService,
     private store: StoreService,
+    private fb: FormBuilder,
     private changeDetectorRef: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
+    this.validateForm = this.fb.group({
+      prontoTitle: [null, [Validators.required]],
+      description: [null, [Validators.required]],
+      reviewBoardID: [null, [Validators.required]],
+      specificDiff: [null, [Validators.required]],
+    });
+
     this.branches$ = this.store.getData().pipe(
       tap(({ branches, lastAutoCommitInfo }) => {
         if (!this.branch && branches && branches.length > 0) {
@@ -103,6 +114,7 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
     this.ipcService.on(IPCMessage.REPLY_STOP_AUTO_COMMIT, (event, res: IPCResponse) => {
       if (res.isSuccessed) {
         this.commitStatus = undefined;
+        this.changeDetectorRef.detectChanges();
       }
     });
 
