@@ -78,7 +78,7 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
       prontoTitle: [null, [Validators.required]],
       description: [null, [Validators.required]],
       reviewBoardID: [null, [Validators.required]],
-      specificDiff: [null, [Validators.required]],
+      specificDiff: [null, []],
     });
 
     this.branches$ = this.store.getData().pipe(

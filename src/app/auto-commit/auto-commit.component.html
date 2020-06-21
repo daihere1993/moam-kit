@@ -13,6 +13,15 @@
     </nz-form-item>
 
     <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="reviewBoardID"
+        >Review Board ID</nz-form-label
+      >
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <input nz-input formControlName="reviewBoardID" [disabled]="isOnGoing" [(ngModel)]="reviewBoardID" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
       <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="prontoTitle"
         >Pronto Title</nz-form-label
       >
@@ -26,21 +35,12 @@
         >Correction Description</nz-form-label
       >
       <nz-form-control [nzSm]="14" [nzXs]="24">
-        <input nz-input formControlName="description" [disabled]="isOnGoing" [(ngModel)]="description" />
+        <textarea nz-input formControlName="description" [nzAutosize]="{ minRows: 2, maxRows: 4 }" [disabled]="isOnGoing" [(ngModel)]="description"></textarea>
       </nz-form-control>
     </nz-form-item>
 
     <nz-form-item>
-      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="reviewBoardID"
-        >Review Board ID</nz-form-label
-      >
-      <nz-form-control [nzSm]="14" [nzXs]="24">
-        <input nz-input formControlName="reviewBoardID" [disabled]="isOnGoing" [(ngModel)]="reviewBoardID" />
-      </nz-form-control>
-    </nz-form-item>
-
-    <nz-form-item>
-      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="specificDiff"
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="specificDiff"
         >Specific Diff</nz-form-label
       >
       <nz-form-control [nzSm]="14" [nzXs]="24">
