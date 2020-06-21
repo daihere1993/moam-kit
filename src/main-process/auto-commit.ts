@@ -29,6 +29,10 @@ export enum ProcessCollection {
   COMMIT_CODE_BY_SVN_COMMANDS = 'commit code by SVN commands',
 }
 
+export interface IPCError extends Error {
+  res?: IPCResponse;
+}
+
 export class AutoCommit {
   public processExecInfo: ProcessExecInfo[] = [];
 
@@ -68,8 +72,12 @@ export class AutoCommit {
               cancelInterval = undefined;
             }
           },
-          (err) => {
-            console.log(err);
+          (err: IPCError) => {
+            if (err.res) {
+              event.reply(IPCMessage.REPLY_AUTO_COMMIT_REQ, err.res);
+            } else {
+              throw new Error('There is no prepared res for target error.');
+            }
           },
         );
     });
@@ -88,48 +96,94 @@ export class AutoCommit {
     });
   }
 
+  private getSourceURL(branchName: string): string {
+    switch (branchName) {
+      case 'trunk':
+        return `http://maddash.nsn-net.net/api/1/jenkins/lte_trunk/jobs/MOAM+${branchName}.STATUS`;
+      case 'SBTS20B':
+        return `http://maddash.nsn-net.net/api/1/jenkins/sbts20b/jobs/MOAM+${branchName}.STATUS`;
+      default:
+        return `${_config.SVN_STATUS_BASED_URL}${branchName}svn.html?_=${new Date().getTime()}`;
+    }
+  }
+
+  private isSpecificBranch(branchName: string): boolean {
+    return branchName === 'trunk' || branchName === 'SBTS20B';
+  }
+
   private toCheckMOAMStatus$(event?: Electron.IpcMainEvent): Observable<boolean> {
+    const url = this.getSourceURL(this.branchName);
+    const requestConfig: any = {};
     const pInfo: ProcessExecInfo = {
       name: ProcessCollection.CHECK_SVN_STATUS,
       status: ProcessStatus.ONGOING,
     };
     this.processExecInfo.push(pInfo);
-    const url = `${_config.SVN_STATUS_BASED_URL}${
-      this.branchName
-    }svn.html?_=${new Date().getTime()}`;
-    return from(
-      axios.get(url, {
-        headers: { Authorization: _config.REQUEST_AUTHORIZATION },
-      }),
-    ).pipe(
-      catchError((err) => {
-        pInfo.status = ProcessStatus.FAILED;
-        pInfo.errorMsg = err.message;
-        throw err;
-      }),
-      map((res: AxiosResponse<string>) => {
-        const $ = cheerio.load(res.data);
-        const tdEls = $('tr > td:nth-child(1)');
-        const compNode = Array.from(tdEls).find((el) => {
-          return $(el).text().includes(this.componentName);
-        });
 
-        if (!compNode) {
-          pInfo.status = ProcessStatus.FAILED;
-          pInfo.errorMsg = `Couldn't find corresponding component status: ${this.componentName}`;
-          throw new Error(pInfo.errorMsg);
+    if (!this.isSpecificBranch(this.branchName)) {
+      requestConfig.headers = { Authorization: _config.REQUEST_AUTHORIZATION };
+    }
+
+    return from(axios.get(url, requestConfig)).pipe(
+      catchError((err) => {
+        const ipcError: IPCError = new Error(err.message);
+        let errorMsg = err.message;
+        if (err.response.status === 404) {
+          errorMsg = `Couldn't find corresponding branch info for "${this.branchName}"`;
+        }
+        const res: IPCResponse = {
+          isSuccessed: false,
+          error: {
+            name: ProcessCollection.CHECK_SVN_STATUS,
+            message: errorMsg,
+          },
+        };
+        ipcError.res = res;
+        pInfo.status = ProcessStatus.FAILED;
+        pInfo.errorMsg = errorMsg;
+        throw ipcError;
+      }),
+      map((res: AxiosResponse<any>) => {
+        let isUnlocked: boolean;
+
+        if (this.isSpecificBranch(this.branchName)) {
+          isUnlocked = !res.data.data.lock.locked;
+        } else {
+          const $ = cheerio.load(res.data);
+          const tdEls = $('tr > td:nth-child(1)');
+          const compNode = Array.from(tdEls).find((el) => {
+            return $(el).text().includes(this.componentName);
+          });
+
+          if (!compNode) {
+            const errorMsg = `Couldn't find corresponding component status for "${this.componentName}"`;
+            const ipcError: IPCError = new Error();
+            ipcError.res = {
+              isSuccessed: false,
+              error: {
+                name: ProcessCollection.CHECK_SVN_STATUS,
+                message: errorMsg,
+              },
+            };
+            pInfo.status = ProcessStatus.FAILED;
+            pInfo.errorMsg = errorMsg;
+            throw ipcError;
+          }
+
+          const compEl = $(compNode);
+          const statusEl = compEl && $(compEl.next());
+          isUnlocked = statusEl.text().includes('unlocked');
         }
 
-        const compEl = $(compNode);
-        const statusEl = compEl && $(compEl.next());
-        const isUnlocked = statusEl.text().includes('unlocked');
         pInfo.status = ProcessStatus.DONE;
         pInfo.additionalData = { isLocked: isUnlocked };
+
         if (!isUnlocked && event) {
           event.reply(IPCMessage.AUTO_COMMIT_HEARTBEAT, {
             data: `[${moment().format()}] ${this.componentName}.${this.branchName} is locked`,
           });
         }
+
         return isUnlocked;
       }),
     );

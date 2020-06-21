@@ -62,5 +62,6 @@ module.exports = {
     'unicorn/no-null': 'off',
     '@typescript-eslint/no-use-before-define': 'off',
     'no-use-before-define': 'off',
+    'no-param-reassign': 'off',
   },
 };
