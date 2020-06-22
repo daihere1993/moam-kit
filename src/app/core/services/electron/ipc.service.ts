@@ -34,11 +34,7 @@ export class IpcService {
       }
       this.ipcRenderer.send(message, req || { seed: this.seed });
     } else {
-      this.httpService.post('/sendFakeIPCMessage', req, {
-        headers: new HttpHeaders({
-          'Content-Type': 'application/json'
-        })
-      }).subscribe((data) => {
+      this.httpService.post(`/sendFakeIPCMessage/${message}`, req).subscribe((data) => {
         console.log(data);
       });
     }

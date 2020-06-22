@@ -1,5 +1,5 @@
 import { Selector, RequestMock } from 'testcafe';
-import { APPData } from '@root/common/types';
+import { APPData } from '../../src/common/types';
 
 const fakeData = {
   branches: [
@@ -8,13 +8,6 @@ const fakeData = {
     { name: '34', pcDir: '22224444', serverDir: '4' },
     { name: '4', pcDir: '4', serverDir: '4' },
   ],
-  lastAutoCommitInfo: {
-    prontoTitle: '1',
-    description: '1',
-    reviewBoardID: '1',
-    branch: { name: '34', pcDir: '22224444', serverDir: '4' },
-  },
-  ssh: { host: '1', username: '1', password: '1' },
 };
 
 const host = 'http://localhost:3200';
@@ -32,12 +25,16 @@ fixture('Home Page')
 
 test('should display first branch by default', async (t) => {
   const data: APPData = t.fixtureCtx.data as APPData;
-  t.expect(Selector('branch-selector .select-button').withText(data.branches[0].name)).ok;
+  await t.expect(Selector('branch-selector .select-button').withText(data.branches[0].name)).ok();
 });
 
 test('should be successful when change branch', async (t) => {
   const data: APPData = t.fixtureCtx.data as APPData;
   const selectorBtn = Selector('branch-selector');
   const secondItem = Selector('nz-option-item').nth(2);
-  t.click(selectorBtn).click(secondItem).expect(selectorBtn.withText(data.branches[1].name)).ok;
+  await t
+    .click(selectorBtn)
+    .click(secondItem)
+    .expect(selectorBtn.withText(data.branches[1].name))
+    .ok();
 });

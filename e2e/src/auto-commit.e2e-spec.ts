@@ -1,7 +1,6 @@
 import { RequestMock, Selector, RequestLogger } from 'testcafe';
-import { AutoCommitInfo, APPData } from '@root/common/types';
-
 import { isEqual } from 'lodash';
+import { AutoCommitInfo, APPData, IPCMessage } from '../../src/common/types';
 
 const fakeData = {
   branches: [
@@ -30,14 +29,14 @@ const fakeData = {
       pcDir: 'C:\\N-5CG8300N4C-Data\\zowu\\Development\\oam\\moam\\5G20A_B1',
       serverDir: '/var/fpwork/zowu/moam/5G20A_B1/moam',
     },
-  ]
+  ],
 };
 
 const host = 'http://localhost:3200';
 
 const logger = RequestLogger(
   {
-    url: `${host}/sendFakeIPCMessage`,
+    url: `${host}/sendFakeIPCMessage/${IPCMessage.AUTO_COMMIT_REQ}`,
     method: 'post',
   },
   {
@@ -56,7 +55,7 @@ fixture('Auto Commit Page')
     ctx.data = fakeData;
   });
 
-test('should ', async (t) => {
+test('should use right data when click auto-commit button', async (t) => {
   const data: APPData = t.fixtureCtx.data as APPData;
 
   const expectedBranch = data.branches[1];
@@ -86,11 +85,12 @@ test('should ', async (t) => {
     .expect(
       logger.contains((r) => {
         const value: AutoCommitInfo = JSON.parse(r.request.body.toString()).data;
-        console.debug(value);
-        return isEqual(value.branch, expectedBranch)
-          && isEqual(value.reviewBoardID, expectedReviewBoardID.toString())
-          && isEqual(value.prontoTitle, expectedProntoTitle)
-          && isEqual(value.description, expectedDescription);
+        return (
+          isEqual(value.branch, expectedBranch) &&
+          isEqual(value.reviewBoardID, expectedReviewBoardID.toString()) &&
+          isEqual(value.prontoTitle, expectedProntoTitle) &&
+          isEqual(value.description, expectedDescription)
+        );
       }),
     )
     .ok();
