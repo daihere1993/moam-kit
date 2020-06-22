@@ -37,7 +37,7 @@ test('should display first branch by default', async (t) => {
 
 test('should be successful when change branch', async (t) => {
   const data: APPData = t.fixtureCtx.data as APPData;
-  const selectBtn = Selector('branch-selector .select-button');
-  const secondItem = Selector('branch-selector .option-list').child(1);
-  t.click(selectBtn).click(secondItem).expect(selectBtn.withText(data.branches[1].name)).ok;
+  const selectorBtn = Selector('branch-selector');
+  const secondItem = Selector('nz-option-item').nth(2);
+  t.click(selectorBtn).click(secondItem).expect(selectorBtn.withText(data.branches[1].name)).ok;
 });

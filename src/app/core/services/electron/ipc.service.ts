@@ -1,4 +1,5 @@
 import { Injectable, NgZone } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { IPCMessage, IPCRequest, IPCResponse } from 'src/common/types';
 import { ipcRenderer } from 'electron';
 import { ElectronService } from './electron.service';
@@ -15,7 +16,11 @@ export class IpcService {
 
   ipcRenderer: typeof ipcRenderer;
 
-  constructor(private electronService: ElectronService, private zone: NgZone) {
+  constructor(
+    private electronService: ElectronService,
+    private zone: NgZone,
+    private httpService: HttpClient,
+  ) {
     if (this.electronService.isElectron) {
       this.ipcRenderer = this.electronService.ipcRenderer;
       this.seed = this.electronService.seedrandom.int32();
@@ -27,8 +32,16 @@ export class IpcService {
       if (req) {
         req.seed = this.seed;
       }
+      this.ipcRenderer.send(message, req || { seed: this.seed });
+    } else {
+      this.httpService.post('/sendFakeIPCMessage', req, {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json'
+        })
+      }).subscribe((data) => {
+        console.log(data);
+      });
     }
-    this.ipcRenderer.send(message, req || { seed: this.seed });
   }
 
   public on(message: IPCMessage, cb: (event: any, res: IPCResponse) => void): void {
@@ -39,7 +52,7 @@ export class IpcService {
             cb(event, res);
           });
         }
-      }
+      };
       this.messages.push({ name: message, listener });
       this.ipcRenderer.on(message, listener);
     }
