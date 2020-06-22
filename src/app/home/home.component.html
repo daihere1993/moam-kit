@@ -12,22 +12,6 @@
       >
         {{ isSyncOnGoing ? 'On Going' : 'Sync Code' }}
       </button>
-      <div class="progress_container" *ngIf="syncStatus">
-        <i
-          *ngIf="isSyncDone"
-          nz-icon
-          nzType="check"
-          nzTheme="outline"
-          style="font-size: 24px; color: green;"
-        ></i>
-        <i
-          *ngIf="isSyncFailed"
-          nz-icon
-          nzType="close"
-          nzTheme="outline"
-          style="font-size: 24px; color: red;"
-        ></i>
-      </div>
     </div>
   </div>
 
@@ -40,75 +24,4 @@
       [nzDescription]="step.description"
     ></nz-step>
   </nz-steps>
-
-  <!-- <nz-card class="log_containner" *ngIf="syncStatus">
-    <ul>
-      <li class="log_item">
-        Connect to server:
-        <i
-          nz-icon
-          *ngIf="isConnectionOnGoing"
-          class="item__status loading"
-          [nzType]="'sync'"
-          [nzSpin]="true"
-        ></i>
-        <i nz-icon *ngIf="isConnectionFailed" class="item__status failed" nzType="close"></i>
-        <i nz-icon *ngIf="isConnectionDone" class="item__status success" nzType="check"></i>
-      </li>
-      <li class="log_item">
-        Create patch:
-        <i
-          nz-icon
-          *ngIf="isCreatePatchOnGoing"
-          class="item__status loading"
-          [nzType]="'sync'"
-          [nzSpin]="true"
-        ></i>
-        <i nz-icon *ngIf="isCreatePatchFailed" class="item__status failed" nzType="close"></i>
-        <i nz-icon *ngIf="isCreatePatchDone" class="item__status success" nzType="check"></i>
-        <i
-          nz-icon
-          *ngIf="isCreatePatchTimeout"
-          class="item__status timeout"
-          nzType="minus-circle"
-        ></i>
-      </li>
-      <li class="log_item">
-        Upload patch:
-        <i
-          nz-icon
-          *ngIf="isUploadPatchOnGoing"
-          class="item__status loading"
-          [nzType]="'sync'"
-          [nzSpin]="true"
-        ></i>
-        <i nz-icon *ngIf="isUploadPatchFailed" class="item__status failed" nzType="close"></i>
-        <i nz-icon *ngIf="isUploadPatchDone" class="item__status success" nzType="check"></i>
-        <i
-          nz-icon
-          *ngIf="isUploadPatchTimeout"
-          class="item__status timeout"
-          nzType="minus-circle"
-        ></i>
-      </li>
-      <li class="log_item">
-        Apply patch:
-        <i
-          nz-icon
-          *ngIf="isApplyPatchOnGoing"
-          class="item__status loading"
-          [nzType]="'sync'"
-          [nzSpin]="true"
-        ></i>
-        <i nz-icon *ngIf="isApplyPatchFailed" class="item__status failed" nzType="close"></i>
-        <i nz-icon *ngIf="isApplyPatchDone" class="item__status success" nzType="check"></i>
-        <i
-          nz-icon
-          *ngIf="isApplyPatchTimeout"
-          class="item__status timeout"
-          nzType="minus-circle"
-        ></i>
-      </li>
-    </ul>
-  </nz-card> -->
 </div>

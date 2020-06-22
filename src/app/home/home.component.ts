@@ -54,44 +54,12 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   public connecToServerFailedMsg: string;
 
-  // public get isConnectionOnGoing(): boolean {
-  //   return this.connecToServerStatus === Status.ON_GOING;
-  // }
-
-  // public get isConnectionDone(): boolean {
-  //   return this.connecToServerStatus === Status.DONE;
-  // }
-
-  // public get isConnectionFailed(): boolean {
-  //   return this.connecToServerStatus === Status.FAILED;
-  // }
-
-  // public get isConnectionTimeout(): boolean {
-  //   return this.connecToServerStatus === Status.TIMEOUT;
-  // }
-
   /** Create patch status */
   public set createPatchStatus(value: string) {
     this.steps[1].status = value;
   }
 
   public createPatchFailedMsg: string;
-
-  // public get isCreatePatchOnGoing(): boolean {
-  //   return this.createPatchStatus === Status.ON_GOING;
-  // }
-
-  // public get isCreatePatchDone(): boolean {
-  //   return this.createPatchStatus === Status.DONE;
-  // }
-
-  // public get isCreatePatchFailed(): boolean {
-  //   return this.createPatchStatus === Status.FAILED;
-  // }
-
-  // public get isCreatePatchTimeout(): boolean {
-  //   return this.createPatchStatus === Status.TIMEOUT;
-  // }
 
   /** Upload patch status */
   public set uploadPatchStatus(value: string) {
@@ -100,44 +68,12 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   public uploadPatchFailedMsg: string;
 
-  // public get isUploadPatchOnGoing(): boolean {
-  //   return this.uploadPatchStatus === Status.ON_GOING;
-  // }
-
-  // public get isUploadPatchDone(): boolean {
-  //   return this.uploadPatchStatus === Status.DONE;
-  // }
-
-  // public get isUploadPatchFailed(): boolean {
-  //   return this.uploadPatchStatus === Status.FAILED;
-  // }
-
-  // public get isUploadPatchTimeout(): boolean {
-  //   return this.uploadPatchStatus === Status.TIMEOUT;
-  // }
-
   /** Apply patch status */
   public set applyPatchStatus(value: string) {
     this.steps[3].status = value;
   }
 
   public applyPatchFailedMsg: string;
-
-  // public get isApplyPatchOnGoing(): boolean {
-  //   return this.applyPatchStatus === Status.ON_GOING;
-  // }
-
-  // public get isApplyPatchDone(): boolean {
-  //   return this.applyPatchStatus === Status.DONE;
-  // }
-
-  // public get isApplyPatchFailed(): boolean {
-  //   return this.applyPatchStatus === Status.FAILED;
-  // }
-
-  // public get isApplyPatchTimeout(): boolean {
-  //   return this.applyPatchStatus === Status.TIMEOUT;
-  // }
 
   public set alertMessage(message: string) {
     if (message) {
@@ -220,7 +156,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.ipcService.on(IPCMessage.CONNECT_TO_SERVER_DONE, (event, ret: IPCResponse) => {
       if (ret.isSuccessed) {
         this.connecToServerStatus = Status.DONE;
-        this.connecToServerStatus = Status.ON_GOING;
+        this.createPatchStatus = Status.ON_GOING;
       } else {
         this.alertMessage = `Unexpected response: ${IPCMessage.CONNECT_TO_SERVER_DONE}`;
       }
