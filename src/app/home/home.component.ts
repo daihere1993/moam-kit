@@ -7,10 +7,10 @@ import { IpcService } from '../core/services/electron/ipc.service';
 import { StoreService } from '../core/services/electron/store.service';
 
 enum Status {
-  ON_GOING = 'on going',
-  DONE = 'done',
-  FAILED = 'failed',
-  TIMEOUT = 'timeout',
+  ON_GOING = 'process',
+  DONE = 'finish',
+  FAILED = 'error',
+  TIMEOUT = 'wait',
 }
 
 @Component({
@@ -23,6 +23,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   public branches$: Observable<BranchInfo[]>;
 
   public branch: BranchInfo;
+
+  public steps = [];
 
   /** Sync status */
   public syncStatus: Status;
@@ -46,88 +48,96 @@ export class HomeComponent implements OnInit, OnDestroy {
   public snycErrorMsg: string;
 
   /** Server connection status */
-  public connecToServerStatus: Status;
+  public set connecToServerStatus(value: string) {
+    this.steps[0].status = value;
+  }
 
   public connecToServerFailedMsg: string;
 
-  public get isConnectionOnGoing(): boolean {
-    return this.connecToServerStatus === Status.ON_GOING;
-  }
+  // public get isConnectionOnGoing(): boolean {
+  //   return this.connecToServerStatus === Status.ON_GOING;
+  // }
 
-  public get isConnectionDone(): boolean {
-    return this.connecToServerStatus === Status.DONE;
-  }
+  // public get isConnectionDone(): boolean {
+  //   return this.connecToServerStatus === Status.DONE;
+  // }
 
-  public get isConnectionFailed(): boolean {
-    return this.connecToServerStatus === Status.FAILED;
-  }
+  // public get isConnectionFailed(): boolean {
+  //   return this.connecToServerStatus === Status.FAILED;
+  // }
 
-  public get isConnectionTimeout(): boolean {
-    return this.connecToServerStatus === Status.TIMEOUT;
-  }
+  // public get isConnectionTimeout(): boolean {
+  //   return this.connecToServerStatus === Status.TIMEOUT;
+  // }
 
   /** Create patch status */
-  public createPatchStatus: Status;
+  public set createPatchStatus(value: string) {
+    this.steps[1].status = value;
+  }
 
   public createPatchFailedMsg: string;
 
-  public get isCreatePatchOnGoing(): boolean {
-    return this.createPatchStatus === Status.ON_GOING;
-  }
+  // public get isCreatePatchOnGoing(): boolean {
+  //   return this.createPatchStatus === Status.ON_GOING;
+  // }
 
-  public get isCreatePatchDone(): boolean {
-    return this.createPatchStatus === Status.DONE;
-  }
+  // public get isCreatePatchDone(): boolean {
+  //   return this.createPatchStatus === Status.DONE;
+  // }
 
-  public get isCreatePatchFailed(): boolean {
-    return this.createPatchStatus === Status.FAILED;
-  }
+  // public get isCreatePatchFailed(): boolean {
+  //   return this.createPatchStatus === Status.FAILED;
+  // }
 
-  public get isCreatePatchTimeout(): boolean {
-    return this.createPatchStatus === Status.TIMEOUT;
-  }
+  // public get isCreatePatchTimeout(): boolean {
+  //   return this.createPatchStatus === Status.TIMEOUT;
+  // }
 
   /** Upload patch status */
-  public uploadPatchStatus: Status;
+  public set uploadPatchStatus(value: string) {
+    this.steps[2].status = value;
+  }
 
   public uploadPatchFailedMsg: string;
 
-  public get isUploadPatchOnGoing(): boolean {
-    return this.uploadPatchStatus === Status.ON_GOING;
-  }
+  // public get isUploadPatchOnGoing(): boolean {
+  //   return this.uploadPatchStatus === Status.ON_GOING;
+  // }
 
-  public get isUploadPatchDone(): boolean {
-    return this.uploadPatchStatus === Status.DONE;
-  }
+  // public get isUploadPatchDone(): boolean {
+  //   return this.uploadPatchStatus === Status.DONE;
+  // }
 
-  public get isUploadPatchFailed(): boolean {
-    return this.uploadPatchStatus === Status.FAILED;
-  }
+  // public get isUploadPatchFailed(): boolean {
+  //   return this.uploadPatchStatus === Status.FAILED;
+  // }
 
-  public get isUploadPatchTimeout(): boolean {
-    return this.uploadPatchStatus === Status.TIMEOUT;
-  }
+  // public get isUploadPatchTimeout(): boolean {
+  //   return this.uploadPatchStatus === Status.TIMEOUT;
+  // }
 
   /** Apply patch status */
-  public applyPatchStatus: Status;
+  public set applyPatchStatus(value: string) {
+    this.steps[3].status = value;
+  }
 
   public applyPatchFailedMsg: string;
 
-  public get isApplyPatchOnGoing(): boolean {
-    return this.applyPatchStatus === Status.ON_GOING;
-  }
+  // public get isApplyPatchOnGoing(): boolean {
+  //   return this.applyPatchStatus === Status.ON_GOING;
+  // }
 
-  public get isApplyPatchDone(): boolean {
-    return this.applyPatchStatus === Status.DONE;
-  }
+  // public get isApplyPatchDone(): boolean {
+  //   return this.applyPatchStatus === Status.DONE;
+  // }
 
-  public get isApplyPatchFailed(): boolean {
-    return this.applyPatchStatus === Status.FAILED;
-  }
+  // public get isApplyPatchFailed(): boolean {
+  //   return this.applyPatchStatus === Status.FAILED;
+  // }
 
-  public get isApplyPatchTimeout(): boolean {
-    return this.applyPatchStatus === Status.TIMEOUT;
-  }
+  // public get isApplyPatchTimeout(): boolean {
+  //   return this.applyPatchStatus === Status.TIMEOUT;
+  // }
 
   public set alertMessage(message: string) {
     if (message) {
@@ -144,6 +154,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.steps = [
+      { title: 'Step 1', description: 'Connect to remote.', status: 'wait' },
+      { title: 'Step 2', description: 'Create diff based on local project.', status: 'wait' },
+      { title: 'Step 3', description: 'Upload diff into remote.', status: 'wait' },
+      { title: 'Step 4', description: 'Apply diff to remote project.', status: 'wait' },
+    ];
+
     this.branches$ = this.store.getData().pipe(
       tap(({ branches }) => {
         if (!this.branch && branches && branches.length > 0) {
@@ -203,6 +220,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.ipcService.on(IPCMessage.CONNECT_TO_SERVER_DONE, (event, ret: IPCResponse) => {
       if (ret.isSuccessed) {
         this.connecToServerStatus = Status.DONE;
+        this.connecToServerStatus = Status.ON_GOING;
       } else {
         this.alertMessage = `Unexpected response: ${IPCMessage.CONNECT_TO_SERVER_DONE}`;
       }
@@ -211,6 +229,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.ipcService.on(IPCMessage.CREATE_PATCH_DONE, (event, ret: IPCResponse) => {
       if (ret.isSuccessed) {
         this.createPatchStatus = Status.DONE;
+        this.uploadPatchStatus = Status.ON_GOING;
       } else {
         this.alertMessage = `Unexpected response: ${IPCMessage.CREATE_PATCH_DONE}`;
       }
@@ -219,6 +238,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.ipcService.on(IPCMessage.UPLOAD_PATCH_TO_SERVER_DONE, (event, ret: IPCResponse) => {
       if (ret.isSuccessed) {
         this.uploadPatchStatus = Status.DONE;
+        this.applyPatchStatus = Status.ON_GOING;
       } else {
         this.alertMessage = `Unexpected response: ${IPCMessage.UPLOAD_PATCH_TO_SERVER_DONE}`;
       }
@@ -246,9 +266,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     ) {
       this.syncStatus = Status.ON_GOING;
       this.connecToServerStatus = Status.ON_GOING;
-      this.createPatchStatus = Status.ON_GOING;
-      this.uploadPatchStatus = Status.ON_GOING;
-      this.applyPatchStatus = Status.ON_GOING;
+      // this.createPatchStatus = Status.ON_GOING;
+      // this.uploadPatchStatus = Status.ON_GOING;
+      // this.applyPatchStatus = Status.ON_GOING;
 
       this.connecToServerFailedMsg = '';
       this.createPatchFailedMsg = '';

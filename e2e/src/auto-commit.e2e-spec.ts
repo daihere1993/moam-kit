@@ -50,12 +50,12 @@ const mock = RequestMock()
 
 fixture('Auto Commit Page')
   .page(`${host}/auto-commit`)
-  .requestHooks([mock, logger])
+  .requestHooks(mock)
   .before(async (ctx) => {
     ctx.data = fakeData;
   });
 
-test('should use right data when click auto-commit button', async (t) => {
+test.requestHooks(logger)('should use right data when click auto-commit button', async (t) => {
   const data: APPData = t.fixtureCtx.data as APPData;
 
   const expectedBranch = data.branches[1];

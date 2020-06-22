@@ -31,7 +31,17 @@
     </div>
   </div>
 
-  <nz-card class="log_containner" *ngIf="syncStatus">
+  <nz-steps nzDirection="vertical" style="margin-top: 30px;" nzSize="small">
+    <nz-step
+      *ngFor="let step of steps"
+      [nzTitle]="step.title"
+      [nzStatus]="step.status"
+      [nzIcon]="step.status === 'process' ? 'loading' : null"
+      [nzDescription]="step.description"
+    ></nz-step>
+  </nz-steps>
+
+  <!-- <nz-card class="log_containner" *ngIf="syncStatus">
     <ul>
       <li class="log_item">
         Connect to server:
@@ -56,7 +66,12 @@
         ></i>
         <i nz-icon *ngIf="isCreatePatchFailed" class="item__status failed" nzType="close"></i>
         <i nz-icon *ngIf="isCreatePatchDone" class="item__status success" nzType="check"></i>
-        <i nz-icon *ngIf="isCreatePatchTimeout" class="item__status timeout" nzType="minus-circle"></i>
+        <i
+          nz-icon
+          *ngIf="isCreatePatchTimeout"
+          class="item__status timeout"
+          nzType="minus-circle"
+        ></i>
       </li>
       <li class="log_item">
         Upload patch:
@@ -69,7 +84,12 @@
         ></i>
         <i nz-icon *ngIf="isUploadPatchFailed" class="item__status failed" nzType="close"></i>
         <i nz-icon *ngIf="isUploadPatchDone" class="item__status success" nzType="check"></i>
-        <i nz-icon *ngIf="isUploadPatchTimeout" class="item__status timeout" nzType="minus-circle"></i>
+        <i
+          nz-icon
+          *ngIf="isUploadPatchTimeout"
+          class="item__status timeout"
+          nzType="minus-circle"
+        ></i>
       </li>
       <li class="log_item">
         Apply patch:
@@ -82,8 +102,13 @@
         ></i>
         <i nz-icon *ngIf="isApplyPatchFailed" class="item__status failed" nzType="close"></i>
         <i nz-icon *ngIf="isApplyPatchDone" class="item__status success" nzType="check"></i>
-        <i nz-icon *ngIf="isApplyPatchTimeout" class="item__status timeout" nzType="minus-circle"></i>
+        <i
+          nz-icon
+          *ngIf="isApplyPatchTimeout"
+          class="item__status timeout"
+          nzType="minus-circle"
+        ></i>
       </li>
     </ul>
-  </nz-card>
+  </nz-card> -->
 </div>

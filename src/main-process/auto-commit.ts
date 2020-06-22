@@ -128,7 +128,7 @@ export class AutoCommit {
       catchError((err) => {
         const ipcError: IPCError = new Error(err.message);
         let errorMsg = err.message;
-        if (err.response.status === 404) {
+        if (err.code === 'ETIMEDOUT' || err.response && err.response.status === 404) {
           errorMsg = `Couldn't find corresponding branch info for "${this.branchName}"`;
         }
         const res: IPCResponse = {

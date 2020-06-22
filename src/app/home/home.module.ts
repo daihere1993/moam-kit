@@ -7,6 +7,7 @@ import {
   NzCardModule,
   NzSpinModule,
   NzNotificationServiceModule,
+  NzStepsModule,
 } from 'ng-zorro-antd';
 
 import { BranchSelectorModule } from '../core/components/branch-selector';
@@ -25,6 +26,7 @@ import { HomeRoutingModule } from './home-routing.module';
     NzCardModule,
     NzSpinModule,
     NzNotificationServiceModule,
+    NzStepsModule,
   ],
 })
 export class HomeModule {}
