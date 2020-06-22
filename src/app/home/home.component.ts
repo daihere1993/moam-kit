@@ -26,6 +26,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   public steps = [];
 
+  public lastSyncDate: Date;
+
   /** Sync status */
   public syncStatus: Status;
 
@@ -116,6 +118,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
 
     this.ipcService.on(IPCMessage.SYNC_CODE_RES, (event, res: IPCResponse) => {
+      this.lastSyncDate = new Date();
+
       if (res.isSuccessed) {
         this.syncStatus = Status.DONE;
       } else {
@@ -202,9 +206,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     ) {
       this.syncStatus = Status.ON_GOING;
       this.connecToServerStatus = Status.ON_GOING;
-      // this.createPatchStatus = Status.ON_GOING;
-      // this.uploadPatchStatus = Status.ON_GOING;
-      // this.applyPatchStatus = Status.ON_GOING;
 
       this.connecToServerFailedMsg = '';
       this.createPatchFailedMsg = '';

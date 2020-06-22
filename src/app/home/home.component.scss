@@ -12,6 +12,12 @@ $progress_font-size: 24px;
   }
 }
 
+.last_sync_date {
+  margin-top: 20px;
+  font-size: 12px;
+  color: rgba(0,0,0,.45);
+}
+
 .sync_form {
   display: flex;
   margin-bottom: 20px;
@@ -49,33 +55,5 @@ $progress_font-size: 24px;
     display: flex;
     align-items: center;
     margin-left: 10px;
-  }
-}
-
-.log_containner {
-  ul {
-    padding: 0;
-  }
-  .log_item {
-    display: flex;
-    align-items: center;
-    .item__status {
-      width: 16px;
-      height: 16px;
-      margin-left: 6px;
-      font-size: 16px;
-    }
-    .loading {
-      color: #8f9bb3;
-    }
-    .failed {
-      color: red;
-    }
-    .success {
-      color: green;
-    }
-    .timeout {
-      color: orange;
-    }
   }
 }

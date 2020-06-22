@@ -24,4 +24,6 @@
       [nzDescription]="step.description"
     ></nz-step>
   </nz-steps>
+
+  <p *ngIf="lastSyncDate" class="last_sync_date">Last sync: {{ lastSyncDate | date:'short' }}</p>
 </div>
