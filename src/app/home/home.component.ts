@@ -206,6 +206,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     ) {
       this.syncStatus = Status.ON_GOING;
       this.connecToServerStatus = Status.ON_GOING;
+      this.createPatchStatus = Status.TIMEOUT;
+      this.uploadPatchStatus = Status.TIMEOUT;
+      this.applyPatchStatus = Status.TIMEOUT;
 
       this.connecToServerFailedMsg = '';
       this.createPatchFailedMsg = '';
