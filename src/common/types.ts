@@ -19,6 +19,10 @@ export enum IPCMessage {
   UPLOAD_PATCH_TO_SERVER_DONE = 'updatePatchToServer-done',
   APPLY_PATCH_TO_SERVER_DONE = 'applyPatchToServer-done',
   AUTO_COMMIT_REQ = 'autoCommitReq',
+  PREPARE_DIFF_REQ = 'prepare_diff_req',
+  PREPARE_DIFF_RES = 'prepare_diff_res',
+  PREPARE_COMMIT_MSG_REQ = 'prepare_commit_msg_req',
+  PREPARE_COMMIT_MSG_RES = 'prepare_commit_msg_res',
   STOP_AUTO_COMMIT = 'stopAutoCommit',
   AUTO_COMMIT_HEARTBEAT = 'autoCommitHeartbeat',
   REPLY_STOP_AUTO_COMMIT = 'stopAutoCommit',
@@ -72,4 +76,9 @@ export interface BranchInfo {
   name: string;
   pcDir: string;
   serverDir: string;
+}
+
+export interface DiffInfo {
+  path: string;
+  changedAmount: number;
 }

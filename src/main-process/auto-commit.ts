@@ -17,6 +17,7 @@ import {
   ProcessExecInfo,
   IPCMessage,
   IPCRequest,
+  DiffInfo,
 } from '../common/types';
 
 const _config = config.AutoCommit;
@@ -47,7 +48,14 @@ export class AutoCommit {
   }
 
   private subscribeIPCEvent(): void {
-    let cancelInterval = new Subject<void>();
+    ipcMain.on(IPCMessage.PREPARE_DIFF_REQ, (event, { data }: IPCRequest<AutoCommitInfo>) => {
+      this.getPreparedDiff$(data).subscribe((diffInfo) => {
+        const res: IPCResponse = { isSuccessed: true, data: diffInfo }
+        event.reply(IPCMessage.PREPARE_COMMIT_MSG_RES, res);
+      });
+    });
+
+    let cancelStatusCheckInterval = new Subject<void>();
     ipcMain.on(IPCMessage.AUTO_COMMIT_REQ, (event, { data }: IPCRequest<AutoCommitInfo>) => {
       this.branchName = data.branch.name;
       this.componentName = data.component ? data.component.name : 'MOAM';
@@ -57,19 +65,19 @@ export class AutoCommit {
             if (isUnlocked) {
               return this.onMOAMUnlocked$(data);
             }
-            if (!cancelInterval) {
-              cancelInterval = new Subject<void>();
+            if (!cancelStatusCheckInterval) {
+              cancelStatusCheckInterval = new Subject<void>();
             }
-            return this.looping(event, data, cancelInterval);
+            return this.looping(event, data, cancelStatusCheckInterval);
           }),
         )
         .subscribe(
           (res) => {
             if (res) {
               event.reply(IPCMessage.REPLY_AUTO_COMMIT_REQ, res);
-              cancelInterval.next();
-              cancelInterval.complete();
-              cancelInterval = undefined;
+              cancelStatusCheckInterval.next();
+              cancelStatusCheckInterval.complete();
+              cancelStatusCheckInterval = undefined;
             }
           },
           (err: IPCError) => {
@@ -83,10 +91,10 @@ export class AutoCommit {
     });
 
     ipcMain.on(IPCMessage.STOP_AUTO_COMMIT, (event) => {
-      if (cancelInterval) {
-        cancelInterval.next();
-        cancelInterval.complete();
-        cancelInterval = undefined;
+      if (cancelStatusCheckInterval) {
+        cancelStatusCheckInterval.next();
+        cancelStatusCheckInterval.complete();
+        cancelStatusCheckInterval = undefined;
       }
       if (this.shellProcess) {
         this.shellProcess.kill();
@@ -128,7 +136,7 @@ export class AutoCommit {
       catchError((err) => {
         const ipcError: IPCError = new Error(err.message);
         let errorMsg = err.message;
-        if (err.code === 'ETIMEDOUT' || err.response && err.response.status === 404) {
+        if (err.code === 'ETIMEDOUT' || (err.response && err.response.status === 404)) {
           errorMsg = `Couldn't find corresponding branch info for "${this.branchName}"`;
         }
         const res: IPCResponse = {
@@ -208,14 +216,27 @@ export class AutoCommit {
   }
 
   private onMOAMUnlocked$(data: AutoCommitInfo): Observable<IPCResponse> {
-    return forkJoin([this.toGetPreparedDiff$(data), this.formCommitMsg$(data)]).pipe(
+    return forkJoin([this.getPreparedDiff$(data), this.formCommitMsg$(data)]).pipe(
       mergeMap(([diffPath, commitMsgPath]) => this.toCommitCode$(data, diffPath, commitMsgPath)),
     );
   }
 
-  private toGetPreparedDiff$(data: AutoCommitInfo): Observable<string> {
-    const downloadDiffUrl = utils.getReviewBoardDiffURL(data.reviewBoardID);
-    return data.specificDiff ? of(data.specificDiff) : this.downLoadDiff$(downloadDiffUrl);
+  private getPreparedDiff$(data: AutoCommitInfo): Observable<DiffInfo> {
+    const urlToDLDiff = utils.getReviewBoardDiffURL(data.reviewBoardID);
+    const diffPath$ = data.specificDiff ? of(data.specificDiff) : this.downLoadDiff$(urlToDLDiff);
+    return diffPath$.pipe(
+      map((diffPath) => {
+        const amount = this.getChangedFiledAmount(fs.readFileSync(diffPath).toString());
+        return {
+          path: diffPath,
+          changedAmount: amount,
+        };
+      }),
+    );
+  }
+
+  private getChangedFiledAmount(diffContent: string): number {
+    return diffContent.split('(working copy)').length - 1;
   }
 
   private downLoadDiff$(url: string): Observable<string> {

@@ -1,0 +1,289 @@
+Index: test/sct/testcases/Rumag/FhsSetDataTime.ttcn3
+===================================================================
+--- test/sct/testcases/Rumag/FhsSetDataTime.ttcn3	(nonexistent)
++++ test/sct/testcases/Rumag/FhsSetDataTime.ttcn3	(working copy)
+@@ -0,0 +1,70 @@
++/**
++ *  FHS module removal test
++ *
++ * @author Luke Wu
++ * @reviewer
++ * @since 2020-06-13
++ * @tags [MOAM] [SCT] [REL4] [WMP] [RUMAG] [FHS] [RUMAGRP1]
++ * @feature LTE3338
++ * @use_case RMgmtRP1_UtcTimeDeliverytoRMthroughRP1msg
++ * @acceptance_criteria N/A
++ * @pronto PR521655
++ *
++ * Copyright 2020 Nokia Solutions and Networks. All rights reserved.
++ */
++
++module FhsSetDataTime
++{
++    import from MEnvironment                 all;
++    import from BTS_ASIA_MDEA                all;
++    import from MBtsomMtc                    all;
++    import from MBtsomMtcFunctions           all;
++    import from MBtsomTestSystemRel4         all;
++    import from MBm                          all;
++    import from MLogger                      all;
++    import from RumagCommon                  all;
++    import from FhsTestsCommon               all;
++    import from DistnamesModule              all;
++    import from protoObjects                 all;
++    import from MBmImExpectations            all;
++    import from RumagCommonFunctions         all;
++
++    function sendSetDateTime() runs on CBm {
++        MBm.init();
++
++        log(PRINT_INFO, "TC flow: sending oper_setDateTime()");
++
++        var Object fhsuObject := MBm.getObject(FHSU_L);
++        fhsuObject.object.fhsu_l.oper_setDateTime:= {};
++
++        triggerInternalObjectExecute(fhsuObject);
++        log(PRINT_DEBUG, "TC flow: FHSU_L::oper_setDateTime executed.");
++
++        executeAndServerResult(fhsuObject);
++
++        log(PRINT_DEBUG, "TC flow: sendSetDateTime completed");
++
++        setverdict(pass);
++
++        atBmStop();
++    }
++
++    testcase testOperSetDateTime() runs on CBtsomMtc system CBtsomTestSystemRel4
++    {
++        startTest(BTS_ASIA_MDEA.createConfiguration(), EL3Protocol_CPRI_RP1);
++
++        bm.start(sendSetDateTime());
++        bm.done;
++
++        MBtsomMtcFunctions.tearDownDefaultTestcase();
++        setverdict(pass);
++    }
++
++    control
++    {
++        log(PRINT_DEBUG, "TC flow 1: FHSU_L MO has been created.");
++        log(PRINT_DEBUG, "TC flow 2: FHSU_L MO has been enabled.");
++        log(PRINT_DEBUG, "TC flow 3: FHSU_L::oper_setDateTime executed.");
++        execute (testOperSetDateTime(), TC_TIME * getTcMultiplier());
++    }
++}
+Index: SC_MONOLITH/DM_RUMAG/src/static/Rp1Agent/RadioAgent.cpp
+===================================================================
+--- SC_MONOLITH/DM_RUMAG/src/static/Rp1Agent/RadioAgent.cpp	(revision 180639)
++++ SC_MONOLITH/DM_RUMAG/src/static/Rp1Agent/RadioAgent.cpp	(working copy)
+@@ -2940,7 +2940,9 @@
+ {
+     logger_ << info << __FUNCTION__;
+ 
+-    if ( agentContext_->isRadioCpri and agentContext_->radioStartup and not agentContext_->radioStartup->getIsStartupUndergoing() )
++    if (  agentContext_->radioStartup
++          and not agentContext_->radioStartup->getIsStartupUndergoing()
++          and (agentContext_->isRadioCpri or agentContext_->isFhs) )
+     {
+         agentContext_->radioStartup->collectDateTime();
+     }
+Index: SC_MONOLITH/DM_RUMAG/src/static/LimModule/Executors/FhsuExecutor.cpp
+===================================================================
+--- SC_MONOLITH/DM_RUMAG/src/static/LimModule/Executors/FhsuExecutor.cpp	(revision 180639)
++++ SC_MONOLITH/DM_RUMAG/src/static/LimModule/Executors/FhsuExecutor.cpp	(working copy)
+@@ -1,30 +1,31 @@
+-/**
+- * Copyright 2018 Nokia. All rights reserved.
+- **/
+-
+-#include "LimModule/Executors/FhsuExecutor.hpp"
+-
+-#include "RadioEquipment/RadioEquipmentController.h"
+-#include "Rp1Agent/RadioAgent.hpp"
+-#include "DBFacade/Functors.hpp"
+-
+-namespace rum
+-{
+-namespace lm
+-{
+-
+-FhsuExecutor::FhsuExecutor(boost::shared_ptr<RadioEquipment::MultiradioAgentContext> agentContext)
+-    : agentContext_(agentContext)
+-    , lim_(agentContext->lim_)
+-    , logger_(agentContext->logger + " FhsuExecutor")
+-{
+-    logger_ << debug << __FUNCTION__ << "(): Register executor of "
+-        << agentContext_->moduleDistName.getString();
+-}
+-
+-lim::EExecutionStatus FhsuExecutor::execute(
+-    lim::MoFhsu_lPtr object, const lim::FHSU_L::DeleteObject& operation)
++/**
++ * Copyright 2018 Nokia. All rights reserved.
++ **/
++
++#include "LimModule/Executors/FhsuExecutor.hpp"
++
++#include "Rp1Agent/RadioStartup.hpp"
++#include "RadioEquipment/RadioEquipmentController.h"
++#include "Rp1Agent/RadioAgent.hpp"
++#include "DBFacade/Functors.hpp"
++
++namespace rum
+ {
++namespace lm
++{
++
++FhsuExecutor::FhsuExecutor(boost::shared_ptr<RadioEquipment::MultiradioAgentContext> agentContext)
++    : agentContext_(agentContext)
++    , lim_(agentContext->lim_)
++    , logger_(agentContext->logger + " FhsuExecutor")
++{
++    logger_ << debug << __FUNCTION__ << "(): Register executor of "
++        << agentContext_->moduleDistName.getString();
++}
++
++lim::EExecutionStatus FhsuExecutor::execute(
++    lim::MoFhsu_lPtr object, const lim::FHSU_L::DeleteObject& operation)
++{
+     if (agentContext_->radioEquipmentController->isAgentActive(agentContext_->moduleDistName))
+     {
+         if ( auto radioAgent = agentContext_->radioAgent.lock() )
+@@ -34,44 +35,61 @@
+     }
+     else
+     {
+-        deleteFhsuHwLinks();
+-        lim_->remove(object->getDistName());
+-    }
+-
+-    logger_ << info << __FUNCTION__ << "(DeleteObject): delete FHSU_L Executed";
+-    return lim::EExecutionStatus_Executed;
+-}
+-
+-void FhsuExecutor::deleteFhsuHwLinks()
+-{
+-    auto hwLinks = lim_->fetchAll<lim::MoHwlink_l>(
+-        [&](const lim::MoHwlink_l& mo) -> bool
+-        {
+-            const auto& moduleDn = agentContext_->moduleDistName;
+-            return mo.getDistName().getParent() == moduleDn
+-                and (mo->destinationDistName.find(moduleDn.getString()) != std::string::npos
+-                or mo->sourceDistName.find(moduleDn.getString()) != std::string::npos);
+-        });
+-
+-    for (const auto& hwLink : hwLinks)
+-    {
+-        lim_->remove(hwLink->getDistName());
+-    }
+-}
+-
+-lim::EExecutionStatus FhsuExecutor::execute(
+-    lim::MoFhsu_lPtr object, const lim::FHSU_L::SetReasoningStatus& operation)
+-{
+-    lim::MoFhsu_l& fhsu = *(agentContext_->fhsu);
+-    RadioEquipment::addReasoningStatusIfNotPresent(fhsu,
+-        lim::FHSU_L::StateInfo::EReasoningStatus_UnitUnauthorized);
+-    fhsu->stateInfo.availabilityStatus = lim::FHSU_L::StateInfo::EAvailabilityStatus_Failed;
+-    fhsu->stateInfo.hardwareStatus = lim::FHSU_L::StateInfo::EHardwareStatus_Detected;
+-
+-    lim_->update(agentContext_->fhsu);
+-    logger_ << info << __FUNCTION__ << "(SetReasoningStatus): Executed";
+-    return lim::EExecutionStatus_Executed;
+-}
+-
+-}  // namespace lm
+-}  // namespace rum
+\ No newline at end of file
++        deleteFhsuHwLinks();
++        lim_->remove(object->getDistName());
++    }
++
++    logger_ << info << __FUNCTION__ << "(DeleteObject): delete FHSU_L Executed";
++    return lim::EExecutionStatus_Executed;
++}
++
++void FhsuExecutor::deleteFhsuHwLinks()
++{
++    auto hwLinks = lim_->fetchAll<lim::MoHwlink_l>(
++        [&](const lim::MoHwlink_l& mo) -> bool
++        {
++            const auto& moduleDn = agentContext_->moduleDistName;
++            return mo.getDistName().getParent() == moduleDn
++                and (mo->destinationDistName.find(moduleDn.getString()) != std::string::npos
++                or mo->sourceDistName.find(moduleDn.getString()) != std::string::npos);
++        });
++
++    for (const auto& hwLink : hwLinks)
++    {
++        lim_->remove(hwLink->getDistName());
++    }
++}
++
++lim::EExecutionStatus FhsuExecutor::execute(
++    lim::MoFhsu_lPtr object, const lim::FHSU_L::SetReasoningStatus& operation)
++{
++    lim::MoFhsu_l& fhsu = *(agentContext_->fhsu);
++    RadioEquipment::addReasoningStatusIfNotPresent(fhsu,
++        lim::FHSU_L::StateInfo::EReasoningStatus_UnitUnauthorized);
++    fhsu->stateInfo.availabilityStatus = lim::FHSU_L::StateInfo::EAvailabilityStatus_Failed;
++    fhsu->stateInfo.hardwareStatus = lim::FHSU_L::StateInfo::EHardwareStatus_Detected;
++
++    lim_->update(agentContext_->fhsu);
++    logger_ << info << __FUNCTION__ << "(SetReasoningStatus): Executed";
++    return lim::EExecutionStatus_Executed;
++}
++
++lim::EExecutionStatus FhsuExecutor::execute(
++    lim::MoFhsu_lPtr object, const lim::FHSU_L::SetDateTime& operation)
++{
++    if (agentContext_->radioEquipmentController->isAgentActive(agentContext_->moduleDistName))
++    {
++        if ( auto radioAgent = agentContext_->radioAgent.lock() )
++        {
++            radioAgent->setDateTime();
++        }
++    } else {
++        logger_ << error << __FUNCTION__ << " Agent is not active";
++    }
++
++    logger_ << info << __FUNCTION__ << "(SetDateTime): Executed";
++    return lim::EExecutionStatus_Executed;
++}
++
++}  // namespace lm
++}  // namespace rum
+Index: SC_MONOLITH/DM_RUMAG/src/include/Rp1Agent/RadioAgent.hpp
+===================================================================
+--- SC_MONOLITH/DM_RUMAG/src/include/Rp1Agent/RadioAgent.hpp	(revision 180639)
++++ SC_MONOLITH/DM_RUMAG/src/include/Rp1Agent/RadioAgent.hpp	(working copy)
+@@ -106,6 +106,7 @@
+     void opSendCablnkCapacity( std::string const & portNumber, std::string const & capacity, bool createVolatileNeeded );
+ 
+     void deleteObject(std::string const & serviceDnString = std::string{});
++    void setDateTime();
+     void configureFhsEth(std::string const & reqDn);
+     void processFhsConfigureEth();
+     void teardown( ETermination terminationReason );
+@@ -207,7 +208,6 @@
+     void handleSfpTestTaskCreation( const lim::DistName& dn );
+     void handleSfpTestTask( const lim::DistName& dn );
+     void handleSfpTestCreation( const lim::DistName& dn );
+-    void setDateTime();
+     void configurePowerMeterMeasurement();
+     void subscribePowerMeterMeasurementUserConf();
+     void handlePowerMeterMeasurementUserConf( const lim::DistName& distName );
+Index: SC_MONOLITH/DM_RUMAG/src/include/LimModule/Executors/FhsuExecutor.hpp
+===================================================================
+--- SC_MONOLITH/DM_RUMAG/src/include/LimModule/Executors/FhsuExecutor.hpp	(revision 180639)
++++ SC_MONOLITH/DM_RUMAG/src/include/LimModule/Executors/FhsuExecutor.hpp	(working copy)
+@@ -25,6 +25,8 @@
+         const lim::FHSU_L::DeleteObject& operation);
+     lim::EExecutionStatus execute(lim::MoFhsu_lPtr object,
+         const lim::FHSU_L::SetReasoningStatus& operation);
++    lim::EExecutionStatus execute(lim::MoFhsu_lPtr object,
++        const lim::FHSU_L::SetDateTime& operation);
+ 
+ private:
+     void deleteFhsuHwLinks();

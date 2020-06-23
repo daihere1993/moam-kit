@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import * as fs from 'fs';
+import * as path from 'path';
 import Axios from 'axios';
 import { mocked } from 'ts-jest/utils';
 import { IPCResponse } from 'src/common/types';
@@ -135,8 +136,8 @@ describe('formCommitMsg$()', () => {
           description,
           reviewBoardID,
         })
-        .subscribe((path) => {
-          const commitMsg = fs.readFileSync(path).toString();
+        .subscribe((_path) => {
+          const commitMsg = fs.readFileSync(_path).toString();
           expect(commitMsg).toBe(
             [
               `REFERENCE : PR ${prontoTitle}`,
@@ -163,10 +164,17 @@ describe('toGetPreparedDiff$()', () => {
           reviewBoardID,
           specificDiff,
         })
-        .subscribe((path) => {
-          expect(path).toBe(specificDiff);
+        .subscribe((_path) => {
+          expect(_path).toBe(specificDiff);
           done();
         })
     );
+  });
+
+  it('should get right changed filed amount', () => {
+    console.debug(path.join(__dirname , 'test/test.diff'));
+    const content = fs.readFileSync(path.join(__dirname , 'test/test.diff')).toString();
+    // @ts-ignore
+    expect(autoCommit.getChangedFiledAmount(content)).toBe(5);
   });
 });
