@@ -48,7 +48,7 @@
           <input nz-input formControlName="specificDiff" [disabled]="isOnGoing" [(ngModel)]="specificDiff" />
         </nz-input-group>
         <ng-template #folderSelector>
-          <path-field [(value)]="specificDiff"></path-field>
+          <path-field [(value)]="specificDiff" type="file"></path-field>
         </ng-template>
       </nz-form-control>
     </nz-form-item>
@@ -70,7 +70,7 @@
           style="margin-left: 20px;"
           *ngIf="isOnGoing"
           nzType="primary"
-          (click)="toAutoCommit()"
+          (click)="cancel()"
         >
           Cancel
         </button>
@@ -79,6 +79,13 @@
       </nz-form-control>
     </nz-form-item>
   </form>
+
+  <nz-steps nzSize="small">
+    <nz-step nzTitle="Step 1" nzDescription="Prepare svn diff."></nz-step>
+    <nz-step nzTitle="Step 2" nzDescription="Prepare commit message."></nz-step>
+    <nz-step nzTitle="Step 3" nzDescription="Check svn status."></nz-step>
+    <nz-step nzTitle="Step 4" nzDescription="Commit on going."></nz-step>
+  </nz-steps>
 
   <div class="log_wrap">
     <div

@@ -2,14 +2,14 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import { NzFormModule, NzButtonModule, NzInputModule, NzIconModule } from 'ng-zorro-antd';
+import { NzFormModule, NzButtonModule, NzInputModule, NzIconModule, NzStepsModule, NzModalModule } from 'ng-zorro-antd';
 import { AutoCommitRoutingModule } from './auto-commit-routing.module';
-import { AutoCommitComponent } from './auto-commit.component';
+import { AutoCommitComponent, SvnDiffConfirmModal } from './auto-commit.component';
 import { BranchSelectorModule } from '../core/components/branch-selector';
 import { PathInputModule } from '../core/components/path-field/path-field.module';
 
 @NgModule({
-  declarations: [AutoCommitComponent],
+  declarations: [AutoCommitComponent, SvnDiffConfirmModal],
   imports: [
     CommonModule,
     FormsModule,
@@ -20,6 +20,8 @@ import { PathInputModule } from '../core/components/path-field/path-field.module
     NzInputModule,
     NzButtonModule,
     NzIconModule,
+    NzStepsModule,
+    NzModalModule,
     BranchSelectorModule,
   ],
 })

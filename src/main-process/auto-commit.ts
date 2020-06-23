@@ -51,7 +51,13 @@ export class AutoCommit {
     ipcMain.on(IPCMessage.PREPARE_DIFF_REQ, (event, { data }: IPCRequest<AutoCommitInfo>) => {
       this.getPreparedDiff$(data).subscribe((diffInfo) => {
         const res: IPCResponse = { isSuccessed: true, data: diffInfo }
-        event.reply(IPCMessage.PREPARE_COMMIT_MSG_RES, res);
+        event.reply(IPCMessage.PREPARE_DIFF_RES, res);
+      }, (err: IPCError) => {
+        if (err.res) {
+          event.reply(IPCMessage.PREPARE_DIFF_RES, err.res);
+        } else {
+          throw new Error(`There is no right error handle in ${IPCMessage.PREPARE_DIFF_RES}: ${err.message}`);
+        }
       });
     });
 

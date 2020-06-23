@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, Input } from '@angular/core';
 import moment from 'moment';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
+import { NzModalRef, NzModalService } from 'ng-zorro-antd';
 import {
   BranchInfo,
   AutoCommitInfo,
@@ -12,11 +13,13 @@ import {
 } from '../../common/types';
 import { IpcService } from '../core/services/electron/ipc.service';
 import { StoreService } from '../core/services/electron/store.service';
+import { ElectronService } from '../core/services';
 
 enum CommitStatus {
   ON_GOING = 'on going',
   SUCCESS = 'success',
   FAILED = 'failed',
+  CANCELED = 'canceled'
 }
 
 @Component({
@@ -71,6 +74,7 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
     private store: StoreService,
     private fb: FormBuilder,
     private changeDetectorRef: ChangeDetectorRef,
+    private modal: NzModalService,
   ) {}
 
   ngOnInit(): void {
@@ -113,7 +117,7 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
 
     this.ipcService.on(IPCMessage.REPLY_STOP_AUTO_COMMIT, (event, res: IPCResponse) => {
       if (res.isSuccessed) {
-        this.commitStatus = undefined;
+        this.commitStatus = CommitStatus.CANCELED;
         this.changeDetectorRef.detectChanges();
       }
     });
@@ -121,26 +125,50 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
     this.ipcService.on(IPCMessage.AUTO_COMMIT_HEARTBEAT, (event, res: IPCResponse) => {
       this.logs.unshift(res.data);
     });
+
+    this.ipcService.on(IPCMessage.PREPARE_DIFF_RES, (event, res: IPCResponse) => {
+      if (res.isSuccessed) {
+        this.modal.confirm({
+          nzTitle: `<i>Please confirm your diff</i>`,
+          nzContent: SvnDiffConfirmModal,
+          nzComponentParams: {
+            diffPath: res.data.path,
+            changedAmount: res.data.changedAmount,
+          },
+          nzOnCancel: () => {
+            this.commitStatus = CommitStatus.CANCELED;
+          }
+        });
+      } else {
+        throw new Error(`${IPCMessage.PREPARE_DIFF_RES}: failed`);
+      }
+    });
   }
 
   ngOnDestroy(): void {
     this.ipcService.destroy();
   }
 
+  private storeLatestCommitInfo(): void {
+    if (!this.lastAutoCommitInfo || this.hasInfoChanged()) {
+      this.ipcService.send(IPCMessage.STORE_DATA_REQ, {
+        data: { key: 'lastAutoCommitInfo', value: this.autoCommitInfo },
+      });
+    }
+  }
+
   public toAutoCommit(): void {
-    if (this.isOnGoing) {
-      this.logs.unshift(`[${moment().format()}] Stopped`);
-      this.ipcService.send(IPCMessage.STOP_AUTO_COMMIT);
-    } else {
-      if (!this.lastAutoCommitInfo || this.hasInfoChanged()) {
-        this.ipcService.send(IPCMessage.STORE_DATA_REQ, {
-          data: { key: 'lastAutoCommitInfo', value: this.autoCommitInfo },
-        });
-      }
+    if (this.commitStatus !== CommitStatus.ON_GOING) {
+      this.storeLatestCommitInfo();
       this.commitStatus = CommitStatus.ON_GOING;
       const req: IPCRequest<AutoCommitInfo> = { data: this.autoCommitInfo };
-      this.ipcService.send(IPCMessage.AUTO_COMMIT_REQ, req);
+      this.ipcService.send(IPCMessage.PREPARE_DIFF_REQ, req);
     }
+  }
+
+  public cancel(): void {
+    this.logs.unshift(`[${moment().format()}] Stopped`);
+    this.ipcService.send(IPCMessage.STOP_AUTO_COMMIT);
   }
 
   private hasInfoChanged(): boolean {
@@ -152,5 +180,28 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
     });
 
     return hasChanged;
+  }
+}
+
+@Component({
+  selector: 'SvnDiffConfirmModal',
+  template: `
+    <div style="color: rgba(0,0,0,.45);">
+      <a (click)="openFile()">{{ diffPath }}</a>
+      <div style="margin-top: 10px;">{{ changedAmount }} changes</div>
+    </div>
+  `,
+})
+export class SvnDiffConfirmModal implements OnInit {
+  @Input() diffPath: string;
+
+  @Input() changedAmount: number;
+
+  constructor(private electronService: ElectronService) {}
+
+  ngOnInit() {}
+
+  public openFile(): void {
+    this.electronService.shell.openItem(this.diffPath);
   }
 }
