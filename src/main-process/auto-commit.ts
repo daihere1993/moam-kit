@@ -22,6 +22,7 @@ import {
 
 const _config = config.AutoCommit;
 const DATA_PATH = utils.getUserDataPath();
+const COMMIT_MSG_PATH = path.join(DATA_PATH, _config.COMMIT_MESSAGE_FILE_NAME);
 
 export enum ProcessCollection {
   CHECK_SVN_STATUS = 'check SVN status for target component',
@@ -49,16 +50,39 @@ export class AutoCommit {
 
   private subscribeIPCEvent(): void {
     ipcMain.on(IPCMessage.PREPARE_DIFF_REQ, (event, { data }: IPCRequest<AutoCommitInfo>) => {
-      this.getPreparedDiff$(data).subscribe((diffInfo) => {
-        const res: IPCResponse = { isSuccessed: true, data: diffInfo }
-        event.reply(IPCMessage.PREPARE_DIFF_RES, res);
-      }, (err: IPCError) => {
-        if (err.res) {
-          event.reply(IPCMessage.PREPARE_DIFF_RES, err.res);
-        } else {
-          throw new Error(`There is no right error handle in ${IPCMessage.PREPARE_DIFF_RES}: ${err.message}`);
-        }
-      });
+      this.getPreparedDiff$(data).subscribe(
+        (diffInfo) => {
+          const res: IPCResponse = { isSuccessed: true, data: diffInfo };
+          event.reply(IPCMessage.PREPARE_DIFF_RES, res);
+        },
+        (err: IPCError) => {
+          if (err.res) {
+            event.reply(IPCMessage.PREPARE_DIFF_RES, err.res);
+          } else {
+            throw new Error(
+              `There is no right error handle in ${IPCMessage.PREPARE_DIFF_RES}: ${err.message}`,
+            );
+          }
+        },
+      );
+    });
+
+    ipcMain.on(IPCMessage.PREPARE_COMMIT_MSG_REQ, (event, { data }: IPCRequest<AutoCommitInfo>) => {
+      this.prepareCommitMsg$(data).subscribe(
+        (commitMsg) => {
+          const res: IPCResponse = { isSuccessed: false, data: commitMsg };
+          event.reply(IPCMessage.PREPARE_COMMIT_MSG_RES, res);
+        },
+        (err: IPCError) => {
+          if (err.res) {
+            event.reply(IPCMessage.PREPARE_COMMIT_MSG_RES, err.res);
+          } else {
+            throw new Error(
+              `There is no right error handle in ${IPCMessage.PREPARE_COMMIT_MSG_RES}: ${err.message}`,
+            );
+          }
+        },
+      );
     });
 
     let cancelStatusCheckInterval = new Subject<void>();
@@ -222,8 +246,8 @@ export class AutoCommit {
   }
 
   private onMOAMUnlocked$(data: AutoCommitInfo): Observable<IPCResponse> {
-    return forkJoin([this.getPreparedDiff$(data), this.formCommitMsg$(data)]).pipe(
-      mergeMap(([diffPath, commitMsgPath]) => this.toCommitCode$(data, diffPath, commitMsgPath)),
+    return forkJoin([this.getPreparedDiff$(data), this.prepareCommitMsg$(data)]).pipe(
+      mergeMap(([diffPath]) => this.toCommitCode$(data, '')),
     );
   }
 
@@ -271,7 +295,7 @@ export class AutoCommit {
     });
   }
 
-  private formCommitMsg$(data: AutoCommitInfo): Observable<string> {
+  private prepareCommitMsg$(data: AutoCommitInfo): Observable<string> {
     const pInfo: ProcessExecInfo = {
       name: ProcessCollection.FORM_COMMIT_MESSAGE,
       status: ProcessStatus.ONGOING,
@@ -285,13 +309,12 @@ export class AutoCommit {
       `ACCEPTED_BY : RB ${data.reviewBoardID}`,
     ].join('\n');
 
-    const filePath = path.join(DATA_PATH, _config.COMMIT_MESSAGE_FILE_NAME);
-    const stream = fs.createWriteStream(filePath);
+    const stream = fs.createWriteStream(COMMIT_MSG_PATH);
     return new Observable<string>((subscriber) => {
       stream.on('close', () => {
         pInfo.status = ProcessStatus.DONE;
         pInfo.additionalData = msg;
-        subscriber.next(filePath);
+        subscriber.next(msg);
         subscriber.complete();
       });
       stream.write(msg);
@@ -299,11 +322,7 @@ export class AutoCommit {
     });
   }
 
-  private toCommitCode$(
-    data: AutoCommitInfo,
-    diffPath: string,
-    commitMsgPath: string,
-  ): Observable<IPCResponse> {
+  private toCommitCode$(data: AutoCommitInfo, diffPath: string): Observable<IPCResponse> {
     const pInfo: ProcessExecInfo = {
       name: ProcessCollection.COMMIT_CODE_BY_SVN_COMMANDS,
       status: ProcessStatus.ONGOING,
@@ -313,7 +332,7 @@ export class AutoCommit {
       this.shellProcess = shell
         .cd(data.branch.pcDir)
         .exec(
-          `svn cleanup && svn revert -R . && svn up . && svn patch ${diffPath} && svn ci -F ${commitMsgPath}`,
+          `svn cleanup && svn revert -R . && svn up . && svn patch ${diffPath} && svn ci -F ${COMMIT_MSG_PATH}`,
           { async: true },
           (code, stdout, stderr) => {
             const res: IPCResponse = {};

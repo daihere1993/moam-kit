@@ -1,4 +1,11 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, Input } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ChangeDetectorRef,
+  Input,
+  ViewEncapsulation,
+} from '@angular/core';
 import moment from 'moment';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
@@ -19,7 +26,7 @@ enum CommitStatus {
   ON_GOING = 'on going',
   SUCCESS = 'success',
   FAILED = 'failed',
-  CANCELED = 'canceled'
+  CANCELED = 'canceled',
 }
 
 @Component({
@@ -27,6 +34,7 @@ enum CommitStatus {
   templateUrl: './auto-commit.component.html',
   styleUrls: ['./auto-commit.component.scss'],
   providers: [IpcService],
+  encapsulation: ViewEncapsulation.None,
 })
 export class AutoCommitComponent implements OnInit, OnDestroy {
   public validateForm: FormGroup;
@@ -135,13 +143,27 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
             diffPath: res.data.path,
             changedAmount: res.data.changedAmount,
           },
+          nzOnOk: () => {
+            this.ipcService.send(IPCMessage.PREPARE_COMMIT_MSG_REQ, { data: this.autoCommitInfo });
+          },
           nzOnCancel: () => {
             this.commitStatus = CommitStatus.CANCELED;
-          }
+          },
         });
       } else {
         throw new Error(`${IPCMessage.PREPARE_DIFF_RES}: failed`);
       }
+    });
+
+    this.ipcService.on(IPCMessage.PREPARE_COMMIT_MSG_RES, (event, res: IPCResponse) => {
+      let content = '';
+      res.data.split('\n').forEach((item) => {
+        content += `<div class="item">${item}</div>`;
+      });
+      this.modal.confirm({
+        nzTitle: `<i>Please confirm your commit message</i>`,
+        nzContent: content,
+      });
     });
   }
 
