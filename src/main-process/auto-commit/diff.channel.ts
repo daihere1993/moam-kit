@@ -14,7 +14,7 @@ export interface IPCError extends Error {
 }
 
 const _config = config.AutoCommit;
-const DATA_PATH = utils.getUserDataPath();
+const DATA_PATH = utils.getUserDataPath() || '';
 
 export default class DiffChannel implements IpcChannelInterface {
   name = IPCMessage.PREPARE_DIFF_REQ;
@@ -38,7 +38,9 @@ export default class DiffChannel implements IpcChannelInterface {
 
   private getPreparedDiff(data: AutoCommitInfo): Observable<IPCResponse> {
     const urlToDLDiff = utils.getReviewBoardDiffURL(data.reviewBoardID);
-    const diffPath = data.specificDiff ? of(data.specificDiff) : this.downLoadDiff(urlToDLDiff, path.join(DATA_PATH, _config.DIFF_NAME));
+    const diffPath = data.specificDiff
+      ? of(data.specificDiff)
+      : this.downLoadDiff(urlToDLDiff, path.join(DATA_PATH, _config.DIFF_NAME));
     return diffPath.pipe(
       map((value) => {
         const amount = this.getChangedFiledAmount(fs.readFileSync(value).toString());
@@ -60,7 +62,8 @@ export default class DiffChannel implements IpcChannelInterface {
 
   private downLoadDiff(url: string, target: string): Observable<string> {
     return new Observable<string>((subscriber) => {
-      axios.get(url, { responseType: 'stream' })
+      axios
+        .get(url, { responseType: 'stream' })
         .then((response) => {
           response.data.pipe(fs.createWriteStream(target)).on('close', () => {
             subscriber.next(target);

@@ -14,9 +14,8 @@ const TEST_DIFF_PATH = path.join(__dirname, '../test/test.diff')
 describe('DiffChannel()', () => {
   const channel = new DiffChannel();
 
-  beforeAll(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks()
+  afterEach(() => {
+    jest.restoreAllMocks()
   });
 
   it('should have right channel name', () => {
