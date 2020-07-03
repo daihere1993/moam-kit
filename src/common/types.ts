@@ -82,3 +82,7 @@ export interface DiffInfo {
   path: string;
   changedAmount: number;
 }
+
+export interface IPCError extends Error {
+  res?: IPCResponse;
+}

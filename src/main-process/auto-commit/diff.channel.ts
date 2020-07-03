@@ -6,12 +6,8 @@ import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import * as utils from '../utils';
 import config from '../config';
-import { AutoCommitInfo, IPCResponse, IPCMessage, IPCRequest } from '../../common/types';
+import { AutoCommitInfo, IPCResponse, IPCMessage, IPCRequest, IPCError } from '../../common/types';
 import IpcChannelInterface from '../ipc/ipc-channel.interface';
-
-export interface IPCError extends Error {
-  res?: IPCResponse;
-}
 
 const _config = config.AutoCommit;
 const DATA_PATH = utils.getUserDataPath() || '';
