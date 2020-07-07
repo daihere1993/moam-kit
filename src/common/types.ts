@@ -29,6 +29,13 @@ export enum IPCMessage {
   REPLY_AUTO_COMMIT_REQ = 'autoCommitReq-reply',
 }
 
+export enum ProcessCollection {
+  CHECK_SVN_STATUS = 'check SVN status for target component',
+  FORM_COMMIT_MESSAGE = 'form commit message',
+  DOWNLOAD_DIFF = 'download diff from review board',
+  COMMIT_CODE_BY_SVN_COMMANDS = 'commit code by SVN commands',
+}
+
 export interface ProcessExecInfo {
   name: string;
   status: ProcessStatus;
@@ -70,6 +77,7 @@ export interface AutoCommitInfo {
   branch?: BranchInfo;
   specificDiff?: string;
   component?: { name: string };
+  diffPath?: string;
 }
 
 export interface BranchInfo {

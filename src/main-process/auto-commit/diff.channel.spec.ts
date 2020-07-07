@@ -22,7 +22,7 @@ describe('DiffChannel()', () => {
     expect(channel.name).toBe(IPCMessage.PREPARE_DIFF_REQ);
   });
 
-  it('should response successfully when everything is fine', () => {
+  it('should be successful when everything is fine', () => {
     const fakeEvent = { reply: jest.fn() };
     const fakeRes: IPCResponse = {
       isSuccessed: true,
