@@ -2,7 +2,7 @@ import electron from 'electron';
 import axios from 'axios';
 import { of, Subject } from 'rxjs';
 import { mocked } from 'ts-jest/utils';
-import { IPCMessage, IPCError, ProcessCollection } from '@app/common/types';
+import { IPCMessage, IPCError, ProcessCollection, IPCResponse } from '@app/common/types';
 import AutoCommitChannel from './auto-commit.channel';
 import { SVN_STATUS_HTML } from '../test/mocked-data';
 
@@ -13,12 +13,20 @@ jest.mock('electron', () => ({
 }));
 
 jest.mock('axios');
+jest.mock('shelljs', () => ({
+  cd: jest.fn(() => ({
+    exec: jest.fn((command, options, cb) => {
+      cb(0, 'test', null);
+    }),
+  })),
+}));
 
 describe('AutoCommitChannel()', () => {
   const channel = new AutoCommitChannel();
 
   afterEach(() => {
     jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should have right channel name', () => {
@@ -26,6 +34,8 @@ describe('AutoCommitChannel()', () => {
   });
 
   it('should also listen STOP event', () => {
+    const _channel = new AutoCommitChannel();
+    expect(_channel).toBeDefined();
     expect(mocked(electron.ipcMain.on).mock.calls[0][0]).toBe(IPCMessage.STOP_AUTO_COMMIT);
   });
 
@@ -146,5 +156,19 @@ describe('AutoCommitChannel()', () => {
           done();
         });
     });
+  });
+
+  describe('private methods - commitCode()', () => {
+    it('should be successful when everything is fine', (done) => {
+      return (channel as any).commitCode(null, null).subscribe((res: IPCResponse) => {
+        expect(res).toEqual({
+          isSuccessed: true,
+          data: 'test',
+        });
+        done();
+      });
+    });
+
+    it('case handle: precommit failed', () => {});
   });
 });

@@ -1,7 +1,6 @@
 import * as path from 'path';
-import * as shell from 'shelljs';
 import * as cheerio from 'cheerio';
-import moment from 'moment';
+import * as shell from 'shelljs';
 import axios, { AxiosResponse } from 'axios';
 import {
   IPCMessage,
@@ -155,7 +154,7 @@ export default class AutoCommitChannel implements IpcChannelInterface {
       ),
       mergeMap((isUnlocked) => {
         if (isUnlocked) {
-          return this.commitCode(data);
+          return this.commitCode(data.branch.pcDir, data.diffPath);
         }
         return of();
       }),
@@ -163,16 +162,16 @@ export default class AutoCommitChannel implements IpcChannelInterface {
     );
   }
 
-  private commitCode(data: AutoCommitInfo): Observable<IPCResponse> {
+  private commitCode(pcDir: string, diffPath: string): Observable<IPCResponse> {
     return new Observable<IPCResponse>((subscriber) => {
       this.shellProcess = shell
-        .cd(data.branch.pcDir)
+        .cd(pcDir)
         .exec(
-          `svn cleanup && svn revert -R . && svn up . && svn patch ${data.diffPath} && svn ci -F ${COMMIT_MSG_PATH}`,
+          `svn cleanup && svn revert -R . && svn up . && svn patch ${diffPath} && svn ci -F ${COMMIT_MSG_PATH}`,
           { async: true },
           (code, stdout, stderr) => {
             const res: IPCResponse = {};
-            if (code === 0 && stdout.includes('Committed revision ')) {
+            if (code === 0) {
               res.isSuccessed = true;
               res.data = stdout;
             } else if (code === null) {
