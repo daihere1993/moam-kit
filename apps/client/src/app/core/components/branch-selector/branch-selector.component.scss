@@ -1,0 +1,32 @@
+:host(branch-selector) {
+  display: block;
+}
+
+.container {
+  display: flex;
+}
+
+.option_container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.add_branch_container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+nb-icon {
+  color: #8f9bb3;
+}
+
+nz-select {
+  width: 200px;
+}
+
+nz-divider {
+  margin: 4px 0;
+}

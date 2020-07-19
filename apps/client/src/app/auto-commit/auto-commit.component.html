@@ -1,0 +1,100 @@
+<div class="container">
+  <form nz-form [formGroup]="validateForm">
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Branch</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <branch-selector
+          class="field_item"
+          [(value)]="branch"
+          [disabled]="isOnGoing"
+          [branches]="branches$ | async"
+        ></branch-selector>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="reviewBoardID"
+        >Review Board ID</nz-form-label
+      >
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <input nz-input formControlName="reviewBoardID" [disabled]="isOnGoing" [(ngModel)]="reviewBoardID" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="prontoTitle"
+        >Pronto Title</nz-form-label
+      >
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <input nz-input formControlName="prontoTitle" [disabled]="isOnGoing" [(ngModel)]="prontoTitle" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="description"
+        >Correction Description</nz-form-label
+      >
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <textarea nz-input formControlName="description" [nzAutosize]="{ minRows: 2, maxRows: 4 }" [disabled]="isOnGoing" [(ngModel)]="description"></textarea>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="specificDiff"
+        >Specific Diff</nz-form-label
+      >
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <nz-input-group [nzSuffix]="folderSelector">
+          <input nz-input formControlName="specificDiff" [disabled]="isOnGoing" [(ngModel)]="specificDiff" />
+        </nz-input-group>
+        <ng-template #folderSelector>
+          <path-field [(value)]="specificDiff" type="file"></path-field>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-control [nzSpan]="14" [nzOffset]="6">
+        <button
+          nz-button
+          [disabled]="validateForm.invalid"
+          nzType="primary"
+          [nzLoading]="isOnGoing"
+          (click)="toAutoCommit()"
+        >
+          {{ isOnGoing ? 'On Going' : 'DO IT' }}
+        </button>
+        <button
+          nz-button
+          nzDanger
+          style="margin-left: 20px;"
+          *ngIf="isOnGoing"
+          nzType="primary"
+          (click)="cancel()"
+        >
+          Cancel
+        </button>
+        <i nz-icon *ngIf="isFailed" class="icon_flag failed" nzType="close"></i>
+        <i nz-icon *ngIf="isSuccess" class="icon_flag success" nzType="check"></i>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+
+  <nz-steps nzSize="small">
+    <nz-step nzTitle="Step 1" nzDescription="Prepare svn diff."></nz-step>
+    <nz-step nzTitle="Step 2" nzDescription="Prepare commit message."></nz-step>
+    <nz-step nzTitle="Step 3" nzDescription="Check svn status."></nz-step>
+    <nz-step nzTitle="Step 4" nzDescription="Commit on going."></nz-step>
+  </nz-steps>
+
+  <div class="log_wrap">
+    <div
+      class="commit_status"
+      *ngIf="isSuccess || isFailed"
+      [ngClass]="isSuccess ? 'success' : 'failed'"
+    >
+      {{ isSuccess ? 'success' : 'failed' }}
+    </div>
+    <p *ngFor="let log of logs">{{ log }}</p>
+  </div>
+</div>

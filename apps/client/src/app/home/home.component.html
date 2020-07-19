@@ -1,0 +1,29 @@
+<div class="container">
+  <div class="sync_form">
+    <branch-selector [(value)]="branch" [branches]="branches$ | async"></branch-selector>
+
+    <div class="sync_containner">
+      <button
+        class="sync_button"
+        nz-button
+        nzType="primary"
+        [nzLoading]="isSyncOnGoing"
+        (click)="toSyncCode()"
+      >
+        {{ isSyncOnGoing ? 'On Going' : 'Sync Code' }}
+      </button>
+    </div>
+  </div>
+
+  <nz-steps nzDirection="vertical" style="margin-top: 30px;" nzSize="small">
+    <nz-step
+      *ngFor="let step of steps"
+      [nzTitle]="step.title"
+      [nzStatus]="step.status"
+      [nzIcon]="step.status === 'process' ? 'loading' : null"
+      [nzDescription]="step.description"
+    ></nz-step>
+  </nz-steps>
+
+  <p *ngIf="lastSyncDate" class="last_sync_date">Last sync: {{ lastSyncDate | date:'short' }}</p>
+</div>
