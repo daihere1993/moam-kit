@@ -37,10 +37,10 @@ export class BranchSelectorComponent {
           setTimeout(() => {
             this.branches.push(res.content);
             this.setSelection(res.content);
+            this.ipcService.send<{ key: string; value: BranchInfo[] }>(IPCMessage.STORE_DATA_REQ, {
+              data: { key: 'branches', value: this.branches },
+            });
           }, 0);
-          this.ipcService.send<{ key: string; value: BranchInfo[] }>(IPCMessage.STORE_DATA_REQ, {
-            data: { key: 'branches', value: this.branches },
-          });
         }
       });
   }

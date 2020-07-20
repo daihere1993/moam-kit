@@ -7,6 +7,7 @@ import { IpcMainEvent } from 'electron';
 import { getUserDataPath } from '@electron/app/utils';
 import { M_CodeSync } from '@electron/app/constants';
 import { Store } from '@electron/app/store';
+import { SyncCodeStep } from '@moam-kit/steps';
 
 const userDataPath = getUserDataPath();
 const tmpDiffPath = path.join(userDataPath, M_CodeSync.diffName);
@@ -28,7 +29,7 @@ export class SyncCodeChannel implements IpcChannelInterface {
   handle(event: IpcMainEvent, request: IPCRequest<BranchInfo>): void {
     this.branch = request.data;
     this.connectServer(event)
-      .then(() => this.createPatch(event))
+      .then(() => this.createDiff(event))
       .then(() => this.uploadPatchToServer(event))
       .then(() => this.applyPatchToServer(event))
       .then(() => {
@@ -44,11 +45,14 @@ export class SyncCodeChannel implements IpcChannelInterface {
   }
 
   private async connectServer(event: IpcMainEvent): Promise<any> {
-    return this.sftpClient.cwd().catch(() => {
-      return this.connectServer_();
-    }).then(() => {
-      event.reply(IPCMessage.CONNECT_TO_SERVER_DONE, { isSuccessed: true });
-    });
+    return this.sftpClient
+      .cwd()
+      .catch(() => {
+        return this.connectServer_();
+      })
+      .then(() => {
+        event.reply(IPCMessage.SYNC_CODE_RES, { isSuccessed: true, data: SyncCodeStep.CONNECT_TO_SERVER });
+      });
   }
 
   private async connectServer_(): Promise<any> {
@@ -57,23 +61,23 @@ export class SyncCodeChannel implements IpcChannelInterface {
       .connect({
         host: sshInfo.host,
         username: sshInfo.username,
-        password: sshInfo.password,
+        password: sshInfo.password
       })
       .catch((err) => {
-        err.name = IPCMessage.CONNECT_TO_SERVER_DONE;
+        err.name = SyncCodeStep.CONNECT_TO_SERVER;
         throw err;
       });
   }
 
-  private async createPatch(event: IpcMainEvent): Promise<any> {
-    console.debug('createPatch: start.');
+  private async createDiff(event: IpcMainEvent): Promise<any> {
+    console.debug('createDiff: start.');
     return shell.cd(this.branch.pcDir).exec(`svn di > ${tmpDiffPath}`, (code, stdout, stderr) => {
       if (code === 0) {
-        console.debug('createPatch: done.');
-        event.reply(IPCMessage.CREATE_PATCH_DONE, { isSuccessed: true });
+        console.debug('createDiff: done.');
+        event.reply(IPCMessage.SYNC_CODE_RES, { isSuccessed: true, data: SyncCodeStep.CREATE_DIFF });
       } else {
         const err = new Error(`Create patch failed: ${stderr}, ${code}.`);
-        err.name = IPCMessage.CREATE_PATCH_DONE;
+        err.name = SyncCodeStep.CREATE_DIFF;
         throw err;
       }
     });
@@ -85,11 +89,11 @@ export class SyncCodeChannel implements IpcChannelInterface {
       .fastPut(path.join(tmpDiffPath), `${this.branch.serverDir}/${M_CodeSync.diffName}`)
       .then(() => {
         console.debug('uploadPatchToServer: done.');
-        event.reply(IPCMessage.UPLOAD_PATCH_TO_SERVER_DONE, { isSuccessed: true });
+        event.reply(IPCMessage.SYNC_CODE_RES, { isSuccessed: true, data: SyncCodeStep.UPLOAD_DIFF });
       })
       .catch((err) => {
         const error = new Error(`Upload patch to server failed: ${err.message}`);
-        error.name = IPCMessage.UPLOAD_PATCH_TO_SERVER_DONE;
+        error.name = SyncCodeStep.UPLOAD_DIFF;
         throw error;
       });
   }
@@ -104,14 +108,14 @@ export class SyncCodeChannel implements IpcChannelInterface {
         (err: any, stream: any) => {
           if (err) {
             const error = new Error(`Apply patch to server failed: ${err.message}`);
-            error.name = IPCMessage.APPLY_PATCH_TO_SERVER_DONE;
+            error.name = SyncCodeStep.APPLY_DIFF;
             throw error;
           }
 
           stream
             .on('close', () => {
               console.debug('applyPatchToServer: done.');
-              event.reply(IPCMessage.APPLY_PATCH_TO_SERVER_DONE, { isSuccessed: true });
+              event.reply(IPCMessage.SYNC_CODE_RES, { isSuccessed: true, data: SyncCodeStep.APPLY_DIFF });
               resolve();
             })
             .on('data', (data: any) => {
@@ -120,7 +124,7 @@ export class SyncCodeChannel implements IpcChannelInterface {
             })
             .stderr.on('data', (data: any) => {
               const error = new Error(`Apply patch to server failed: ${data}`);
-              error.name = IPCMessage.APPLY_PATCH_TO_SERVER_DONE;
+              error.name = SyncCodeStep.APPLY_DIFF;
               throw error;
             });
         },

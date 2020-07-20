@@ -5,6 +5,6 @@ import { SyncCodeChannel } from './sync-code.channel';
 export class SyncCode {
   public static startup(store: Store): void {
     const channel = new SyncCodeChannel(store);
-    ipcMain.on(channel.name, channel.handle);
+    ipcMain.on(channel.name, channel.handle.bind(channel));
   }
 }

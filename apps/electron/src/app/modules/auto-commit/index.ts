@@ -10,7 +10,7 @@ export class AutoCommit {
   static startup() {
     for (const Channel of channels) {
       const channel = new Channel();
-      ipcMain.on(channel.name, channel.handle);
+      ipcMain.on(channel.name, channel.handle.bind(channel));
     }
   }
 }

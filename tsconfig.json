@@ -18,7 +18,8 @@
     "baseUrl": ".",
     "paths": {
       "@electron/*": ["apps/electron/src/*"],
-      "@moam-kit/types": ["libs/types/src/index.ts"]
+      "@moam-kit/types": ["libs/types/src/index.ts"],
+      "@moam-kit/steps": ["libs/steps/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
