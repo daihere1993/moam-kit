@@ -8,7 +8,7 @@ import { ElectronService } from './electron.service';
 
 // Don't change the data reference
 const memorize = (() => {
-  let prevValue = {} as any;
+  const prevValue = {} as any;
   return (value: APPData): APPData => {
     merge(prevValue, value);
     return prevValue;
