@@ -60,6 +60,10 @@ export class Steps {
     this.steps = steps;
   }
 
+  start() {
+    this.steps[0].status = StepStatus.ONGOING;
+  }
+
   finish() {
     for (let i = 0; i < this.steps.length; i++) {
       this.steps[i].status = StepStatus.FINISHED;
@@ -68,6 +72,11 @@ export class Steps {
 
   setStatusForSingleStep(type: string, status: StepStatus) {
     const current = this.getStep(type);
+
+    if (!current) {
+      throw new Error(`Can find the step for "${type}"`);
+    }
+
     current.status = status;
     if (status === StepStatus.FAILED) {
       for (let i = current.index + 1; i < this.steps.length; i++) {

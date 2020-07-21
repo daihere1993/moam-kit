@@ -86,7 +86,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   public toSyncCode(): void {
     if (this.steps.status !== StepsStatus.ONGOING) {
-      this.steps.setStatusForSingleStep(SyncCodeStep.CONNECT_TO_SERVER, StepStatus.ONGOING);
+      this.steps.start();
 
       this.ipcService.send(IPCMessage.SYNC_CODE_REQ, {
         data: this.branch,
