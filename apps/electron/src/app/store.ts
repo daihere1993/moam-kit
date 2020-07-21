@@ -15,6 +15,7 @@ export class Store {
 
   constructor() {
     this.path = path.join(getUserDataPath(), storeName);
+    console.debug(this.path);
     this.data = fs.existsSync(this.path) ? parseDataFile(this.path) : {} as APPData;
   }
 

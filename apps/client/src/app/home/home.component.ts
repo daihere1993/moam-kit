@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angula
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { NzNotificationService } from 'ng-zorro-antd';
-import { IPCResponse, BranchInfo, IPCMessage } from '@moam-kit/types';
+import { IPCResponse, BranchInfo, IPCMessage, SSHData } from '@moam-kit/types';
 import { IpcService } from '../core/services/electron/ipc.service';
 import { StoreService } from '../core/services/electron/store.service';
 import { Steps, StepStatus, StepsStatus, SyncCodeStep } from '@moam-kit/steps';
@@ -33,6 +33,22 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
+  private ssh: SSHData;
+
+  private get isReady(): boolean {
+    if (!this.ssh) {
+      this.alertMessage = 'Please fill corresponding setting.';
+      return false;
+    } else if (!this.branch) {
+      this.alertMessage = 'Please add a branch first.'
+      return false;
+    } else if (this.isSyncOnGoing) {
+      this.alertMessage = 'Sync is on going.';
+      return false;
+    }
+    return true;
+  }
+
   constructor(
     private ipcService: IpcService,
     private store: StoreService,
@@ -44,13 +60,22 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.steps = new Steps([
       { title: 'Step 1', description: 'Connect to remote.', type: SyncCodeStep.CONNECT_TO_SERVER },
-      { title: 'Step 2', description: 'Create diff based on local project.', type: SyncCodeStep.CREATE_DIFF },
+      {
+        title: 'Step 2',
+        description: 'Create diff based on local project.',
+        type: SyncCodeStep.CREATE_DIFF,
+      },
       { title: 'Step 3', description: 'Upload diff into remote.', type: SyncCodeStep.UPLOAD_DIFF },
-      { title: 'Step 4', description: 'Apply diff to remote project.', type: SyncCodeStep.APPLY_DIFF },
+      {
+        title: 'Step 4',
+        description: 'Apply diff to remote project.',
+        type: SyncCodeStep.APPLY_DIFF,
+      },
     ]);
 
     this.branches$ = this.store.getData().pipe(
-      tap(({ branches }) => {
+      tap(({ ssh, branches }) => {
+        this.ssh = ssh;
         if (!this.branch && branches && branches.length > 0) {
           this.zone.run(() => {
             [this.branch] = branches;
@@ -85,7 +110,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public toSyncCode(): void {
-    if (this.steps.status !== StepsStatus.ONGOING) {
+    if (this.isReady) {
       this.steps.setStatusForSingleStep(SyncCodeStep.CONNECT_TO_SERVER, StepStatus.ONGOING);
 
       this.ipcService.send(IPCMessage.SYNC_CODE_REQ, {
