@@ -61,8 +61,8 @@ export interface SSHData {
 }
 
 export interface APPData {
-  branches: BranchInfo[];
   ssh: SSHData;
+  branches: BranchInfo[];
   lastAutoCommitInfo?: AutoCommitInfo;
 }
 

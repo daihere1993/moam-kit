@@ -133,8 +133,8 @@ export default class App {
     ipcMain.on(
       IPCMessage.STORE_DATA_REQ,
       (event, { data, seed }: IPCRequest<{ key: string; value: SSHData }>) => {
-        const res: IPCResponse = { isSuccessed: true, seed, data: store.data };
         store.set(data.key, data.value);
+        const res: IPCResponse = { isSuccessed: true, seed, data: store.data };
         event.reply(IPCMessage.STORE_DATA_RES, res);
         event.reply(IPCMessage.GET_APP_DATA_RES, res);
       },
