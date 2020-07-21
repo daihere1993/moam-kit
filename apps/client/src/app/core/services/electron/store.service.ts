@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { isMatch, merge } from 'lodash';
+import { isMatch, merge, isEmpty } from 'lodash';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { IPCMessage, APPData, IPCResponse } from '@moam-kit/types';
@@ -8,12 +8,9 @@ import { ElectronService } from './electron.service';
 
 // Don't change the data reference
 const memorize = (() => {
-  let prevValue: APPData;
+  let prevValue = {} as any;
   return (value: APPData): APPData => {
-    prevValue = prevValue || value;
-    if (!isMatch(value, prevValue)) {
-      merge(prevValue, value);
-    }
+    merge(prevValue, value);
     return prevValue;
   };
 })();

@@ -8,6 +8,15 @@ function parseDataFile(filePath: string): APPData {
   return JSON.parse(fs.readFileSync(filePath).toString());
 }
 
+const emptyData: APPData = {
+  ssh: {
+    host: null,
+    username: null,
+    password: null,
+  },
+  branches: []
+}
+
 export class Store {
   public data: APPData;
 
@@ -16,7 +25,7 @@ export class Store {
   constructor() {
     this.path = path.join(getUserDataPath(), storeName);
     console.debug(this.path);
-    this.data = fs.existsSync(this.path) ? parseDataFile(this.path) : {} as APPData;
+    this.data = fs.existsSync(this.path) ? parseDataFile(this.path) : emptyData;
   }
 
   public get(key: string): any {
