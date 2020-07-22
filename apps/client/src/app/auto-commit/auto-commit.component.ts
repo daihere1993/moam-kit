@@ -230,6 +230,6 @@ export class SvnDiffConfirmModal implements OnInit {
   ngOnInit() {}
 
   public openFile(): void {
-    this.electronService.shell.openItem(this.diffPath);
+    this.electronService.shell.openPath(this.diffPath);
   }
 }

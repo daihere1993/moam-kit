@@ -5,7 +5,7 @@ export const updateServerUrl = 'https://deployment-server-url.com'; // TODO: ins
 export const storeName = 'setting.json';
 
 /** Modules */
-export const M_CodeSync = { diffName: 'moamkit_codeSync.diff' };
+export const M_CodeSync = { diffName: 'moamkit.diff' };
 export const M_AutoCommit = {
   svnStatusBasedUrl: 'http://135.243.48.32/HZ/SVN_HTML/',
   requestAuthorization: 'Basic em93dTpmZW5neWFvWjYxMjg1MTk3',

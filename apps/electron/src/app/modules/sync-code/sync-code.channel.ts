@@ -105,8 +105,8 @@ export class SyncCodeChannel implements IpcChannelInterface {
     const { client } = this.sftpClient as any;
     return new Promise((resolve) => {
       client.exec(
-        // `cd ${this.branch.serverDir} && svn revert -R . && patch -p0 < ${M_CodeSync.diffName}`,
-        `cd ${this.branch.serverDir} && svn revert -R . && svn patch ${M_CodeSync.diffName}`,
+        `cd ${this.branch.serverDir} && svn revert -R . && patch -p0 < ${M_CodeSync.diffName}`,
+        // `cd ${this.branch.serverDir} && svn revert -R . && svn patch ${M_CodeSync.diffName}`,
         (err: any, stream: any) => {
           if (err) {
             const error = new Error(`Apply patch to server failed: ${err.message}`);
