@@ -1,6 +1,8 @@
 import * as path from 'path';
 import * as shell from 'shelljs';
-import SftpClient from 'ssh2-sftp-client';
+import * as fs from 'fs';
+import * as SftpClient from 'ssh2-sftp-client';
+import { promisify } from 'util';
 import { IpcChannelInterface } from '@electron/app/interfaces';
 import { IPCMessage, IPCRequest, BranchInfo } from '@moam-kit/types';
 import { IpcMainEvent } from 'electron';
@@ -21,6 +23,8 @@ export class SyncCodeChannel implements IpcChannelInterface {
 
   private store: Store;
 
+  private addedFiles: string[];
+
   constructor(store: Store) {
     this.store = store;
     this.sftpClient = new SftpClient();
@@ -30,6 +34,7 @@ export class SyncCodeChannel implements IpcChannelInterface {
     this.branch = request.data;
     this.connectServer(event)
       .then(() => this.createDiff(event))
+      .then(() => this.diffAnalysis())
       .then(() => this.uploadPatchToServer(event))
       .then(() => this.applyPatchToServer(event))
       .catch((err) => {
@@ -85,6 +90,34 @@ export class SyncCodeChannel implements IpcChannelInterface {
     })
   }
 
+  private async diffAnalysis(): Promise<any> {
+    console.debug('diffAnalysis: start.');
+    const diff = (await promisify(fs.readFile)(tmpDiffPath)).toString();
+    const originalFiles = this.getOriginalFilesInfo(diff);
+    this.addedFiles = this.getAddedFiles(originalFiles);
+    console.debug('diffAnalysis: done.');
+  }
+  
+  private getAddedFiles(origins: string[]): string[] {
+    const addedFiles = [];
+    for (const origin of origins) {
+      if (origin.includes('(nonexistent)')) {
+        addedFiles.push(origin.split('\t')[0]);
+      }
+    }
+    return addedFiles;
+  }
+
+  private getOriginalFilesInfo(diff: string): string[] {
+    const origins = [];
+    const sections = diff.split('--- ');
+    for (let i = 1; i < sections.length; i++) {
+      const sec = sections[i];
+      origins.push(sec.split('\r')[0]);
+    }
+    return origins;
+  }
+
   private async uploadPatchToServer(event: IpcMainEvent): Promise<any> {
     console.debug('uploadPatchToServer: start.');
     return this.sftpClient
@@ -104,9 +137,18 @@ export class SyncCodeChannel implements IpcChannelInterface {
     console.debug('applyPatchToServer: start.');
     const { client } = this.sftpClient as any;
     return new Promise((resolve) => {
+      let command = `cd ${this.branch.serverDir} && svn revert -R . && `;
+
+      if (this.addedFiles.length > 0) {
+        command += 'rm -rf ';
+        for (const file of this.addedFiles) {
+          command += `${file} `;
+        }
+      }
+      command += `&& svn patch ${M_CodeSync.diffName}`
+
       client.exec(
-        `cd ${this.branch.serverDir} && svn revert -R . && patch -p0 < ${M_CodeSync.diffName}`,
-        // `cd ${this.branch.serverDir} && svn revert -R . && svn patch ${M_CodeSync.diffName}`,
+        command,
         (err: any, stream: any) => {
           if (err) {
             const error = new Error(`Apply patch to server failed: ${err.message}`);

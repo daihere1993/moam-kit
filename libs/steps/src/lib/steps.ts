@@ -62,6 +62,9 @@ export class Steps {
 
   start() {
     this.steps[0].status = StepStatus.ONGOING;
+    for (let i = 1; i < this.steps.length; i++) {
+      this.steps[i].status = StepStatus.WAIT;
+    }
   }
 
   finish() {
