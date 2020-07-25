@@ -137,10 +137,10 @@ export class SyncCodeChannel implements IpcChannelInterface {
     console.debug('applyPatchToServer: start.');
     const { client } = this.sftpClient as any;
     return new Promise((resolve) => {
-      let command = `cd ${this.branch.serverDir} && svn revert -R . && `;
+      let command = `cd ${this.branch.serverDir} && svn revert -R .`;
 
       if (this.addedFiles.length > 0) {
-        command += 'rm -rf ';
+        command += ' && rm -rf ';
         for (const file of this.addedFiles) {
           command += `${file} `;
         }
