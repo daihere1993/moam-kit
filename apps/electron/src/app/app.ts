@@ -7,7 +7,7 @@ import { format } from 'url';
 import { Store } from './store';
 import { AutoCommit } from './modules/auto-commit';
 import { SyncCode } from './modules/sync-code';
-import { IPCMessage, IPCResponse, IPCRequest, SSHData } from '@moam-kit/types';
+import { IPCMessage, IPCResponse, IPCRequest, StoreAction } from '@moam-kit/types';
 
 export default class App {
   // Keep a global reference of the window object, if you don't, the window will
@@ -132,8 +132,23 @@ export default class App {
   
     ipcMain.on(
       IPCMessage.STORE_DATA_REQ,
-      (event, { data, seed }: IPCRequest<{ key: string; value: SSHData }>) => {
-        store.set(data.key, data.value);
+      (event, { data, seed }: IPCRequest<{ key: string; value: any, name?: string, action?: StoreAction }>) => {
+        const action = data.action || StoreAction.COVER;
+
+        switch (action) {
+          case StoreAction.ADD_ITEM:
+            store.addItem(data.key, data.value);
+            break;
+          case StoreAction.EDIT_ITEM:
+            store.editItem(data.key, data.name, data.value);
+            break;
+          case StoreAction.DELETE_ITEM:
+            store.deleteItem(data.key, data.name);
+            break;
+          default:
+            store.set(data.key, data.value);
+            break;
+        }
         const res: IPCResponse = { isSuccessed: true, seed, data: store.data };
         event.reply(IPCMessage.STORE_DATA_RES, res);
         event.reply(IPCMessage.GET_APP_DATA_RES, res);

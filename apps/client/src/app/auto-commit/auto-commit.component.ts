@@ -199,6 +199,10 @@ export class AutoCommitComponent implements OnInit, OnDestroy {
     this.ipcService.send(IPCMessage.STOP_AUTO_COMMIT);
   }
 
+  public onBranchChange(branch: BranchInfo) {
+    this.branch = branch;
+  } 
+
   private hasInfoChanged(): boolean {
     let hasChanged: boolean;
     Object.entries(this.lastAutoCommitInfo).forEach(([key, value]) => {

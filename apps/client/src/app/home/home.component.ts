@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { NzNotificationService } from 'ng-zorro-antd';
@@ -12,6 +12,7 @@ import { Steps, StepStatus, StepsStatus, SyncCodeStep } from '@moam-kit/steps';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
   providers: [IpcService],
+  // changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent implements OnInit, OnDestroy {
   public branches$: Observable<BranchInfo[]>;
@@ -117,5 +118,9 @@ export class HomeComponent implements OnInit, OnDestroy {
         data: this.branch,
       });
     }
+  }
+
+  public onBranchChange(branch: BranchInfo) {
+    this.branch = branch;
   }
 }

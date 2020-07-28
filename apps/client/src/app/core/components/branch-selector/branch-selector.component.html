@@ -1,12 +1,12 @@
 <div class="container">
   <nz-select
-    [ngModel]="value"
+    [ngModel]="selectedBranch"
     (ngModelChange)="setSelection($event)"
     [disabled]="disabled"
     [nzDropdownRender]="addBranchOption"
   >
     <nz-option
-      *ngFor="let branch of branches"
+      *ngFor="let branch of (branches$ | async)"
       nzCustomContent
       [nzLabel]="branch.name"
       [nzValue]="branch"

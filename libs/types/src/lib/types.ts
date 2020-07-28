@@ -49,6 +49,13 @@ export interface IPCResponse {
   };
 }
 
+export enum StoreAction {
+  COVER = 'cover',
+  ADD_ITEM = 'add_item',
+  EDIT_ITEM = 'edit_item',
+  DELETE_ITEM = 'delete_item',
+}
+
 export interface IPCRequest<T> {
   seed?: number;
   data?: T;

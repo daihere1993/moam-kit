@@ -5,9 +5,8 @@
       <nz-form-control [nzSm]="14" [nzXs]="24">
         <branch-selector
           class="field_item"
-          [(value)]="branch"
+          (change)="onBranchChange($event)"
           [disabled]="isOnGoing"
-          [branches]="branches$ | async"
         ></branch-selector>
       </nz-form-control>
     </nz-form-item>
