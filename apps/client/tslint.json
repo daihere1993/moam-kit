@@ -2,7 +2,8 @@
   "extends": "../../tslint.json",
   "rules": {
     "directive-selector": [true, "attribute", "moamKit", "camelCase"],
-    "component-selector": false
+    "component-selector": false,
+    "no-output-native": false
   },
   "linterOptions": {
     "exclude": ["!**/*"]

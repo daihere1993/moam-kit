@@ -1,3 +1,5 @@
+import { produce } from 'immer';
+
 export enum StepStatus {
   WAIT = 'wait',
   TIMEOUT = 'wait',
@@ -53,48 +55,59 @@ export class Steps {
   }
 
   constructor(steps: Step[]) {
-    for (let i = 0; i < steps.length; i++) {
-      steps[i].index = i;
-      steps[i].status = StepStatus.WAIT;
-    }
-    this.steps = steps;
+    this.steps = produce(steps, (draft) => {
+      for (let i = 0; i < steps.length; i++) {
+        draft[i].index = i;
+        draft[i].status = StepStatus.WAIT;
+      }
+    });
   }
 
   start() {
-    this.steps[0].status = StepStatus.ONGOING;
-    for (let i = 1; i < this.steps.length; i++) {
-      this.steps[i].status = StepStatus.WAIT;
-    }
+    this.steps = produce(this.steps, (draft) => {
+      draft[0].status = StepStatus.ONGOING;
+    });
+    this.steps = produce(this.steps, (draft) => {
+      for (let i = 1; i < this.steps.length; i++) {
+        draft[i].status = StepStatus.WAIT;
+      }
+    });
+    
   }
 
   finish() {
-    for (let i = 0; i < this.steps.length; i++) {
-      this.steps[i].status = StepStatus.FINISHED;
-    }
+    this.steps = produce(this.steps, (draft) => {
+      for (let i = 0; i < this.steps.length; i++) {
+        draft[i].status = StepStatus.FINISHED;
+      }
+    });
   }
 
   setStatusForSingleStep(type: string, status: StepStatus) {
-    const current = this.getStep(type);
-
-    if (!current) {
+    const index = this.steps.findIndex((step) => step.type === type);
+    
+    if (index === -1) {
       throw new Error(`Can find the step for "${type}"`);
     }
+    const current = this.steps[index];
 
-    current.status = status;
+    this.steps = produce(this.steps, (draft) => {
+      draft[index].status = status;
+    });
     if (status === StepStatus.FAILED) {
-      for (let i = current.index + 1; i < this.steps.length; i++) {
-        this.steps[i].status = StepStatus.TIMEOUT;
-      }
+      this.steps = produce(this.steps, (draft) => {
+        for (let i = current.index + 1; i < this.steps.length; i++) {
+          draft[i].status = StepStatus.TIMEOUT;
+        }
+      });
     } else if (status === StepStatus.FINISHED && !this.isLastStep(current)) {
-      this.steps[current.index + 1].status = StepStatus.ONGOING;
+      this.steps = produce(this.steps, (draft) => {
+        draft[current.index].status = StepStatus.ONGOING;
+      });
     }
   }
 
   private isLastStep(step: Step): boolean {
     return step.index === this.steps.length - 1;
-  }
-
-  private getStep(type: string): Step {
-    return this.steps.find((step) => step.type === type);
   }
 }

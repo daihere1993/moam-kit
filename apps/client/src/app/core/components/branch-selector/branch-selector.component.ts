@@ -26,6 +26,8 @@ import { tap } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BranchSelectorComponent implements OnInit {
+  private selectedBranchName: string;
+  
   @Output() change = new EventEmitter();
 
   @Input() disabled = false;
@@ -40,8 +42,6 @@ export class BranchSelectorComponent implements OnInit {
     this.change.emit(value);
   }
 
-  private selectedBranchName: string;
-
   constructor(
     private modalService: NzModalService,
     private ipcService: IpcService,
@@ -52,7 +52,7 @@ export class BranchSelectorComponent implements OnInit {
   ngOnInit() {
     this.branches$ = this.store.getBranches().pipe(
       tap((branches) => {
-        if (!this.selectedBranchName) {
+        if (!this.selectedBranchName && branches.length > 0) {
           this.setSelection(branches[0]);
         } else {
           this.selectedBranch = branches.find((item) => item.name === this.selectedBranchName);

@@ -1,6 +1,10 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone, ChangeDetectionStrategy } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { NzNotificationService } from 'ng-zorro-antd';
 import { IPCResponse, BranchInfo, IPCMessage, SSHData } from '@moam-kit/types';
 import { IpcService } from '../core/services/electron/ipc.service';
@@ -12,20 +16,22 @@ import { Steps, StepStatus, StepsStatus, SyncCodeStep } from '@moam-kit/steps';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
   providers: [IpcService],
-  // changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  public branches$: Observable<BranchInfo[]>;
-
   public branch: BranchInfo;
 
-  public steps: Steps;
+  get steps() {
+    return this._steps ? this._steps.steps : [];
+  }
+
+  private _steps: Steps;
 
   public lastSyncDate: Date;
 
   /** Sync status */
   public get isSyncOnGoing(): boolean {
-    return this.steps.status === StepsStatus.ONGOING;
+    return this._steps.status === StepsStatus.ONGOING;
   }
 
   public set alertMessage(message: string) {
@@ -41,7 +47,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.alertMessage = 'Please fill corresponding setting.';
       return false;
     } else if (!this.branch) {
-      this.alertMessage = 'Please add a branch first.'
+      this.alertMessage = 'Please add a branch first.';
       return false;
     } else if (this.isSyncOnGoing) {
       this.alertMessage = 'Sync is on going.';
@@ -54,12 +60,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     private ipcService: IpcService,
     private store: StoreService,
     private notification: NzNotificationService,
-    private changeDetectorRef: ChangeDetectorRef,
-    private zone: NgZone,
+    private cd: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
-    this.steps = new Steps([
+    this._steps = new Steps([
       { title: 'Step 1', description: 'Connect to remote.', type: SyncCodeStep.CONNECT_TO_SERVER },
       {
         title: 'Step 2',
@@ -74,20 +79,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       },
     ]);
 
-    this.branches$ = this.store.getData().pipe(
-      tap(({ ssh, branches }) => {
-        this.ssh = ssh;
-        if (!this.branch && branches && branches.length > 0) {
-          this.zone.run(() => {
-            [this.branch] = branches;
-            this.changeDetectorRef.detectChanges();
-          });
-        }
-      }),
-      map((data) => {
-        return data.branches || [];
-      }),
-    );
+    this.store.getData().subscribe((data) => {
+      this.ssh = data.ssh;
+    });
 
     this.ipcService.on(IPCMessage.SYNC_CODE_FROM_MAIN_REQ, () => {
       this.toSyncCode();
@@ -97,11 +91,11 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.lastSyncDate = new Date();
 
       if (res.isSuccessed) {
-        this.steps.setStatusForSingleStep(res.data, StepStatus.FINISHED);
+        this._steps.setStatusForSingleStep(res.data, StepStatus.FINISHED);
       } else {
         const { error } = res;
-        this.steps.errorInfo = error.message;
-        this.steps.setStatusForSingleStep(error.name, StepStatus.FAILED);
+        this._steps.errorInfo = error.message;
+        this._steps.setStatusForSingleStep(error.name, StepStatus.FAILED);
       }
     });
   }
@@ -112,7 +106,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   public toSyncCode(): void {
     if (this.isReady) {
-      this.steps.start();
+      this._steps.start();
 
       this.ipcService.send(IPCMessage.SYNC_CODE_REQ, {
         data: this.branch,

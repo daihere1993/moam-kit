@@ -15,11 +15,9 @@
     </div>
   </div>
 
-  <h2>{{ (branches$ | async)?.length }}</h2>
-
   <nz-steps nzDirection="vertical" style="margin-top: 30px;" nzSize="small">
     <nz-step
-      *ngFor="let step of steps.steps"
+      *ngFor="let step of steps"
       [nzTitle]="step.title"
       [nzStatus]="step.status"
       [nzIcon]="step.status === 'process' ? 'loading' : null"

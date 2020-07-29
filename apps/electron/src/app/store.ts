@@ -42,6 +42,7 @@ export class Store {
       throw new Error('[STORE]: Original data should be an Array.');
     }
     this.data[key].push(val);
+    this.setAll(this.data);
   }
 
   public editItem(key: string, name: string, val: any): void {
@@ -51,6 +52,7 @@ export class Store {
     
     const target = this.data[key].find((item: { name: string }) => item.name === name);
     Object.assign(target, val);
+    this.setAll(this.data);
   }
 
   public deleteItem(key: string, name: string): void {
@@ -60,6 +62,7 @@ export class Store {
 
     const index = this.data[key].findIndex((item: { name: string }) => item.name === name);
     this.data[key].splice(index);
+    this.setAll(this.data);
   }
 
   public setAll(data: APPData): void {
