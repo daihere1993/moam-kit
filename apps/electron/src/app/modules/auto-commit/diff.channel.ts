@@ -1,5 +1,4 @@
 import { IpcMainEvent } from 'electron';
-import axios from 'axios';
 import * as path from 'path';
 import * as fs from 'fs';
 import { Observable, of } from 'rxjs';
@@ -35,10 +34,10 @@ export default class DiffChannel implements IpcChannelInterface {
     const urlToDLDiff = utils.getReviewBoardDiffURL(data.reviewBoardID);
     const diffPath = data.specificDiff
       ? of(data.specificDiff)
-      : this.downLoadDiff(urlToDLDiff, path.join(DATA_PATH, M_AutoCommit.diffName));
+      : utils.downLoadDiff(urlToDLDiff, path.join(DATA_PATH, M_AutoCommit.diffName));
     return diffPath.pipe(
       map((value) => {
-        const amount = this.getChangedFiledAmount(fs.readFileSync(value).toString());
+        const amount = utils.getChangedFiledAmount(fs.readFileSync(value).toString());
         const res: IPCResponse = {
           isSuccessed: true,
           data: {
@@ -49,27 +48,5 @@ export default class DiffChannel implements IpcChannelInterface {
         return res;
       }),
     );
-  }
-
-  private getChangedFiledAmount(diffContent: string): number {
-    return diffContent.split('(working copy)').length - 1;
-  }
-
-  private downLoadDiff(url: string, target: string): Observable<string> {
-    return new Observable<string>((subscriber) => {
-      axios
-        .get(url, { responseType: 'stream' })
-        .then((response) => {
-          response.data.pipe(fs.createWriteStream(target)).on('close', () => {
-            subscriber.next(target);
-            subscriber.complete();
-          });
-          return 0;
-        })
-        .catch((err) => {
-          subscriber.complete();
-          throw err;
-        });
-    });
   }
 }

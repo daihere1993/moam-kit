@@ -23,6 +23,8 @@ export enum IPCMessage {
   AUTO_COMMIT_HEARTBEAT = 'autoCommitHeartbeat',
   REPLY_STOP_AUTO_COMMIT = 'stopAutoCommit',
   REPLY_AUTO_COMMIT_REQ = 'autoCommitReq-reply',
+  RCAEDA_ANALYZE_REQ = 'rcaeda_analyze_req',
+  RCAEDA_ANALYZE_RES = 'rcaeda_analyze_res',
 }
 
 export enum ProcessCollection {
@@ -30,6 +32,7 @@ export enum ProcessCollection {
   FORM_COMMIT_MESSAGE = 'form commit message',
   DOWNLOAD_DIFF = 'download diff from review board',
   COMMIT_CODE_BY_SVN_COMMANDS = 'commit code by SVN commands',
+  RCAEDA_ANALYZE = 'analyze RCAEDA',
 }
 
 export interface ProcessExecInfo {

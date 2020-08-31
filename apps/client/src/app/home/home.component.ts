@@ -19,7 +19,7 @@ import { Steps, StepStatus, StepsStatus, SyncCodeStep } from '@moam-kit/steps';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  public branch: BranchInfo;
+  private branch: BranchInfo;
 
   get steps() {
     return this._steps ? this._steps.steps : [];

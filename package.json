@@ -50,6 +50,7 @@
     "seedrandom": "^3.0.5",
     "shelljs": "^0.8.4",
     "ssh2-sftp-client": "^5.2.1",
+    "xlsx": "^0.16.6",
     "zone.js": "^0.10.2"
   },
   "devDependencies": {
@@ -69,6 +70,7 @@
     "@types/seedrandom": "^2.4.28",
     "@types/shelljs": "^0.8.8",
     "@types/ssh2-sftp-client": "^5.1.1",
+    "@types/xlsx": "^0.0.36",
     "@typescript-eslint/eslint-plugin": "2.19.2",
     "@typescript-eslint/parser": "2.19.2",
     "codelyzer": "~5.0.1",
