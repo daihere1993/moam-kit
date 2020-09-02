@@ -1,0 +1,22 @@
+<div class="container">
+  <nz-input-group [nzSuffix]="folderSelector">
+    <input nz-input placeholder="input search text" [(ngModel)]="excelPath" />
+  </nz-input-group>
+  <ng-template #folderSelector>
+    <path-field [(value)]="excelPath" type="file"></path-field>
+  </ng-template>
+
+  <div class="result" *ngIf="analysisPath" style="margin-top: 10px;">
+    <p>Analysis file path: {{ analysisPath }}</p>
+  </div>
+
+  <button
+    nz-button
+    nzType="primary"
+    style="margin-top: 10px;"
+    [nzLoading]="isSyncOnGoing"
+    (click)="analyze()"
+  >
+    {{ isSyncOnGoing ? 'On Going' : 'Analyze' }}
+  </button>
+</div>

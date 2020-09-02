@@ -14,6 +14,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { HomeModule } from './home/home.module';
+import { RcaedaModule } from './rcaeda/rcaeda.module';
 import { SettingModule } from './setting/setting.module';
 import { AutoCommitModule } from './auto-commit/auto-commit.module';
 
@@ -27,6 +28,7 @@ registerLocaleData(en);
     AppRoutingModule,
     CoreModule,
     HomeModule,
+    RcaedaModule,
     SettingModule,
     AutoCommitModule,
     NzLayoutModule,

@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+import * as utils from '@electron/app/utils';
 import { BrowserWindow, shell, screen, ipcMain, dialog } from 'electron';
 import { rendererAppName, rendererAppPort } from './constants';
 import { environment } from '../environments/environment';
@@ -7,6 +9,7 @@ import { format } from 'url';
 import { Store } from './store';
 import { AutoCommit } from './modules/auto-commit';
 import { SyncCode } from './modules/sync-code';
+import { RCAEDA } from './modules/rcaeda';
 import { IPCMessage, IPCResponse, IPCRequest, StoreAction } from '@moam-kit/types';
 
 export default class App {
@@ -15,12 +18,11 @@ export default class App {
   static store: Store;
   static mainWindow: Electron.BrowserWindow;
   static application: Electron.App;
-  static BrowserWindow: typeof Electron.BrowserWindow
+  static BrowserWindow: typeof Electron.BrowserWindow;
 
   public static isDevelopmentMode() {
     const isEnvironmentSet: boolean = 'ELECTRON_IS_DEV' in process.env;
-    const getFromEnvironment: boolean =
-      parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
+    const getFromEnvironment: boolean = parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
 
     return isEnvironmentSet ? getFromEnvironment : !environment.production;
   }
@@ -50,6 +52,7 @@ export default class App {
     // This method will be called when Electron has finished
     // initialization and is ready to create browser windows.
     // Some APIs can only be used after this event occurs.
+    App.initFolders();
     App.initMainWindow();
     App.loadMainWindow();
     App.loadModules();
@@ -61,6 +64,23 @@ export default class App {
     // dock icon is clicked and there are no other windows open.
     if (App.mainWindow === null) {
       App.onReady();
+    }
+  }
+
+  private static initFolders() {
+    const tmpDir = utils.getTmpDir();
+    if (!fs.existsSync(tmpDir)) {
+      fs.mkdirSync(tmpDir);
+    } else {
+      fs.readdir(tmpDir, (err, files) => {
+        if (err) throw err;
+
+        for (const file of files) {
+          fs.unlink(join(tmpDir, file), (err) => {
+            if (err) throw err;
+          });
+        }
+      });
     }
   }
 
@@ -113,12 +133,13 @@ export default class App {
           pathname: join(__dirname, '..', rendererAppName, 'index.html'),
           protocol: 'file:',
           slashes: true,
-        })
+        }),
       );
     }
   }
 
   private static loadModules() {
+    RCAEDA.startup();
     AutoCommit.startup();
     SyncCode.startup(App.store);
   }
@@ -129,10 +150,16 @@ export default class App {
       const res: IPCResponse = { isSuccessed: true, data: store.data };
       event.reply(IPCMessage.GET_APP_DATA_RES, res);
     });
-  
+
     ipcMain.on(
       IPCMessage.STORE_DATA_REQ,
-      (event, { data, seed }: IPCRequest<{ key: string; value: any, name?: string, action?: StoreAction }>) => {
+      (
+        event,
+        {
+          data,
+          seed,
+        }: IPCRequest<{ key: string; value: any; name?: string; action?: StoreAction }>,
+      ) => {
         const action = data.action || StoreAction.COVER;
 
         switch (action) {
@@ -154,7 +181,7 @@ export default class App {
         event.reply(IPCMessage.GET_APP_DATA_RES, res);
       },
     );
-  
+
     ipcMain.on(
       IPCMessage.SELECT_PATH_REQ,
       (event, { data, seed }: IPCRequest<{ isDirectory: boolean }>) => {

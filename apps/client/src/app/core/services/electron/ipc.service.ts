@@ -45,10 +45,10 @@ export class IpcService {
     if (this.electronService.isElectron) {
       const listener = (event: any, res: IPCResponse) => {
         if (!res || !res.seed || res.seed === this.seed) {
-          cb(event, res);
-          this.cd.detectChanges();
-          // this.zone.run(() => {
-          // });
+          // this.cd.detectChanges();
+          this.zone.run(() => {
+            cb(event, res);
+          });
         }
       };
       this.messages.push({ name: message, listener });

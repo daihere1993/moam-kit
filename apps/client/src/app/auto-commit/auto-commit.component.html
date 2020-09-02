@@ -16,7 +16,12 @@
         >Review Board ID</nz-form-label
       >
       <nz-form-control [nzSm]="14" [nzXs]="24">
-        <input nz-input formControlName="reviewBoardID" [disabled]="isOnGoing" [(ngModel)]="reviewBoardID" />
+        <input
+          nz-input
+          formControlName="reviewBoardID"
+          [disabled]="isOnGoing"
+          [(ngModel)]="reviewBoardID"
+        />
       </nz-form-control>
     </nz-form-item>
 
@@ -25,7 +30,12 @@
         >Pronto Title</nz-form-label
       >
       <nz-form-control [nzSm]="14" [nzXs]="24">
-        <input nz-input formControlName="prontoTitle" [disabled]="isOnGoing" [(ngModel)]="prontoTitle" />
+        <input
+          nz-input
+          formControlName="prontoTitle"
+          [disabled]="isOnGoing"
+          [(ngModel)]="prontoTitle"
+        />
       </nz-form-control>
     </nz-form-item>
 
@@ -34,17 +44,26 @@
         >Correction Description</nz-form-label
       >
       <nz-form-control [nzSm]="14" [nzXs]="24">
-        <textarea nz-input formControlName="description" [nzAutosize]="{ minRows: 2, maxRows: 4 }" [disabled]="isOnGoing" [(ngModel)]="description"></textarea>
+        <textarea
+          nz-input
+          formControlName="description"
+          [nzAutosize]="{ minRows: 2, maxRows: 4 }"
+          [disabled]="isOnGoing"
+          [(ngModel)]="description"
+        ></textarea>
       </nz-form-control>
     </nz-form-item>
 
     <nz-form-item>
-      <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="specificDiff"
-        >Specific Diff</nz-form-label
-      >
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="specificDiff">Specific Diff</nz-form-label>
       <nz-form-control [nzSm]="14" [nzXs]="24">
         <nz-input-group [nzSuffix]="folderSelector">
-          <input nz-input formControlName="specificDiff" [disabled]="isOnGoing" [(ngModel)]="specificDiff" />
+          <input
+            nz-input
+            formControlName="specificDiff"
+            [disabled]="isOnGoing"
+            [(ngModel)]="specificDiff"
+          />
         </nz-input-group>
         <ng-template #folderSelector>
           <path-field [(value)]="specificDiff" type="file"></path-field>

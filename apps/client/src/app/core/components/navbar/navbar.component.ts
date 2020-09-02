@@ -13,6 +13,11 @@ export class NavbarComponent {
       icon: 'home-outline',
     },
     {
+      title: 'Light RCAEDA analyze',
+      link: '/rcaeda',
+      icon: 'control'
+    },
+    {
       title: 'Auto Commit',
       link: '/auto-commit',
       icon: 'cloud-upload-outline',

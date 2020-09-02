@@ -1,14 +1,18 @@
 import * as path from 'path';
-import axios from 'axios';
 import { RCEDAChannel } from './rcaeda.channel';
 import { getTestDir } from '@electron/app/utils';
-import { RB_DIFF_HTML } from '@electron/__test__/mocked-data';
-import { mocked } from 'ts-jest/utils';
-
-jest.mock('axios');
+import { IPCMessage } from '@moam-kit/types';
 
 describe('RCEDAChannel()', () => {
   const channel = new RCEDAChannel();
+
+  it('should be successful when everything is fine.', () => {
+    const fakeEvent = { reply: jest.fn() };
+    
+    channel.handle(fakeEvent as any, { data: path.join(getTestDir(), 'RCAEDA.xlsx') });
+
+    expect(fakeEvent.reply.mock.calls[0][0]).toBe(IPCMessage.RCAEDA_ANALYZE_RES);
+  });
 
   describe('Private methods - getFormattedDate()', () => {
     it('should get correct data', () => {
@@ -33,19 +37,6 @@ describe('RCEDAChannel()', () => {
           },
         ],
       });
-    });
-  });
-
-  describe('Private methods - getChangedFilesByRBLink()', () => {
-    it('should get correct changed files', (done) => {
-      mocked(axios.get).mockResolvedValue({ data: RB_DIFF_HTML });
-      
-      return (channel as any)
-        .getChangedFilesByRBLink('')
-        .subscribe((changedFiles) => {
-          expect(1).toBe(1);
-          done();
-        })
     });
   });
 });

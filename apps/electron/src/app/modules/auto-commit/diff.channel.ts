@@ -31,7 +31,7 @@ export default class DiffChannel implements IpcChannelInterface {
   }
 
   private getPreparedDiff(data: AutoCommitInfo): Observable<IPCResponse> {
-    const urlToDLDiff = utils.getReviewBoardDiffURL(data.reviewBoardID);
+    const urlToDLDiff = utils.getReviewBoardDiffURLByRBId(data.reviewBoardID);
     const diffPath = data.specificDiff
       ? of(data.specificDiff)
       : utils.downLoadDiff(urlToDLDiff, path.join(DATA_PATH, M_AutoCommit.diffName));
