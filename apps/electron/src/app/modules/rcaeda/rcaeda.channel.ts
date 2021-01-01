@@ -2,6 +2,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as XLSX from 'xlsx';
 import * as utils from '@electron/app/utils';
+import * as Moment from 'moment';
+import { extendMoment } from 'moment-range';
 import { IpcChannelInterface } from '@electron/app/interfaces';
 import { IPCMessage, IPCRequest, IPCResponse } from '@moam-kit/types';
 import { IpcMainEvent } from 'electron';
@@ -41,7 +43,7 @@ export class RCEDAChannel implements IpcChannelInterface {
     }
 
     const data = this.getFormattedDate(request.data);
-    concat(
+    concat(     
       this.downloadAllDiff(data),
       this.analyzeEachDiff(data),
       this.analyzeChangedFiles(),
@@ -156,15 +158,26 @@ export class RCEDAChannel implements IpcChannelInterface {
     const originalRUMAG2 = workbook.Sheets.RUMAG2;
     const rowAmount = this.getRowAmount(originalRUMAG2);
     console.debug(rowAmount);
+    const moment = extendMoment(Moment);
+    const startDate = moment('2020-6-1');
+    const endDate = moment('2020-9-30');
 
     for (let i = 2; i <= rowAmount; i++) {
-      data.RUMAG2.push({
-        prId: originalRUMAG2[`A${i}`].v,
-        isLegacy: originalRUMAG2[`I${i}`] ? originalRUMAG2[`I${i}`].v === 'Legacy Code' : false,
-        feature: originalRUMAG2[`J${i}`] ? originalRUMAG2[`J${i}`].v : '',
-        rbLink: originalRUMAG2[`W${i}`] ? originalRUMAG2[`W${i}`].v : '',
-        changedFiles: [],
-      });
+      const reportDate = originalRUMAG2[`E${i}`] && moment(originalRUMAG2[`E${i}`].w);
+      console.debug(originalRUMAG2[`A${i}`].w + ' on going.');
+      if (reportDate) {
+        console.debug(originalRUMAG2[`A${i}`].w + ': ' + originalRUMAG2[`E${i}`].w);
+        if (moment.range(startDate, endDate).contains(reportDate)) {
+          data.RUMAG2.push({
+            prId: originalRUMAG2[`A${i}`].v,
+            isLegacy: originalRUMAG2[`I${i}`] ? originalRUMAG2[`I${i}`].v === 'Legacy Code' : false,
+            feature: originalRUMAG2[`J${i}`] ? originalRUMAG2[`J${i}`].v : '',
+            rbLink: originalRUMAG2[`W${i}`] ? originalRUMAG2[`W${i}`].v : '',
+            changedFiles: [],
+          });
+      }
+      
+      }
     }
 
     return data;
