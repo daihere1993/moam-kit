@@ -42,7 +42,7 @@
     "axios": "^0.19.2",
     "cheerio": "^1.0.0-rc.3",
     "lodash": "^4.17.15",
-    "moment": "^2.26.0",
+    "moment": "^2.29.4",
     "ng-zorro-antd": "^9.1.2",
     "rxjs": "~6.5.4",
     "seedrandom": "^3.0.5",
